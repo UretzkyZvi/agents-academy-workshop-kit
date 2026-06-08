@@ -178,9 +178,9 @@ function currentTitle() {
 }
 
 function starterPromptText() {
-  return `You are helping me test one small AI assistant idea.
+  return `You are helping me test one small AI task.
 
-The job: ${currentTitle()}
+The task: ${currentTitle()}
 
 Use the fake examples I paste below. For each example, ${value("assistantJob").toLowerCase()}
 
@@ -221,7 +221,7 @@ ${starterPrompt}
 No real attachment needed. Paste the fake examples under the starter prompt in the same chat.
 
 ## If this is useful
-Then open the workshop kit and turn this into a real workflow map and assistant spec. If it feels too broad, make the job smaller.`;
+Then use the next-step files to make this more detailed. If it feels too broad, make the task smaller.`;
 
   qs("#starter-prompt-output").textContent = starterPrompt;
   qs("#plan-output").textContent = plan;
