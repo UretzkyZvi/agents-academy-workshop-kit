@@ -16,10 +16,11 @@ http://localhost:8000
 
 Design intent:
 
-- The website is for people who do not know what agents, specs, repos, signal points, or APIs are.
-- The first job is not to teach every concept. It is to help someone create one plain-English assistant plan.
-- Technical details and scripts are still available, but hidden behind the workshop files / technical section.
-- The markdown repo remains the durable workshop library.
+- Start from the user's pain, not from repo structure or agent terminology.
+- Show a plain-English example before asking the user to design anything.
+- Generate a one-page AI assistant idea that can be tested manually.
+- Reassure beginners that they do not need coding, account connections, or automation on day one.
+- Keep GitHub files, templates, and scripts available as the deeper workshop layer.
 
 Suggested GitHub Pages setting:
 

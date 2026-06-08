@@ -22,7 +22,7 @@ This kit is written for different levels of AI-agent experience.
 
 Start here: [pick your path](start-here.md).
 
-Prefer a guided front door? Use the interactive website in [`docs/`](docs/README.md). It helps a beginner choose one small task, create a plain-English assistant plan, understand signal points, and only then open the deeper workshop files.
+Prefer a guided front door? Use the interactive website in [`docs/`](docs/README.md). It helps a beginner start from a recognizable pain, see a plain-English example, answer a few questions, and leave with a one-page AI assistant idea before opening the deeper workshop files.
 
 ## Explanation levels
 

@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AgentWorks Academy Workshop Kit</title>
+    <title>Find your first AI assistant idea</title>
     <meta
       name="description"
-      content="A simple guided website that helps beginners use the AgentWorks Academy Workshop Kit to plan one safe AI assistant workflow."
+      content="A beginner-friendly guided flow for finding one safe AI assistant idea before connecting tools or reading technical workshop files."
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -16,234 +16,237 @@
         <span class="brand-mark">AW</span>
         <span>
           <strong>AgentWorks Academy</strong>
-          <small>Beginner guide</small>
+          <small>AI assistant idea finder</small>
         </span>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#examples">Choose a problem</a>
-        <a href="#builder">Make your plan</a>
-        <a href="#connect">Connect tools safely</a>
-        <a href="#workshop">Workshop files</a>
+        <a href="#guided-flow">Start</a>
+        <a href="#examples">Examples</a>
+        <a href="#safe-testing">Safe testing</a>
+        <a href="#workshop-kit">Workshop kit</a>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Start here if AI agents feel confusing</p>
-          <h1>Turn one annoying repeat task into a simple AI assistant plan.</h1>
+          <p class="eyebrow">For people who are curious but not technical</p>
+          <h1>Find one safe AI assistant idea for your work.</h1>
           <p class="hero-text">
-            You do not need to code. You do not need to connect Gmail, Calendar, or a CRM today.
-            First, pick one small workflow and write down what the assistant should do, what it must
-            not do, and who approves the final result.
+            Answer a few simple questions. You will get a one-page plan for a small assistant you can test manually before connecting Gmail, Calendar, CRM, or anything private.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#examples">Help me choose a task</a>
-            <a class="button secondary" href="#builder">I already know my task</a>
+            <a class="button primary" href="#guided-flow">Start with my work</a>
+            <a class="button secondary" href="#examples">Show me examples first</a>
           </div>
         </div>
-        <aside class="plain-card hero-card">
-          <p class="mini-label">What you will leave with</p>
-          <h2>A one-page assistant plan</h2>
-          <ul class="check-list">
-            <li>The repeat task you want help with</li>
-            <li>Where the work shows up</li>
-            <li>What the AI drafts or checks</li>
-            <li>What a human must approve</li>
-            <li>A safe first test using samples</li>
+        <aside class="promise-card" aria-label="What happens here">
+          <p class="mini-label">What this does</p>
+          <h2>It helps you choose the first thing to try.</h2>
+          <ul>
+            <li>No coding today</li>
+            <li>No account connections today</li>
+            <li>No auto-sending or auto-updating</li>
+            <li>Just one clear assistant plan</li>
           </ul>
         </aside>
       </section>
 
-      <section class="section intro-strip" aria-label="Plain English explanation">
+      <section class="plain-explainer" aria-label="Plain English explanation">
         <div>
           <p class="mini-label">Plain English</p>
-          <h2>An AI agent is just an assistant with a job, inputs, rules, and a review step.</h2>
+          <h2>An AI agent is an assistant with a job, some information to read, rules to follow, and a human review step.</h2>
         </div>
-        <div class="definition-grid">
-          <article>
-            <strong>Job</strong>
-            <span>What should it help with?</span>
-          </article>
-          <article>
-            <strong>Inputs</strong>
-            <span>What emails, files, rows, or notes does it read?</span>
-          </article>
-          <article>
-            <strong>Rules</strong>
-            <span>What is it not allowed to do?</span>
-          </article>
-          <article>
-            <strong>Review</strong>
-            <span>Who checks the answer before anything happens?</span>
-          </article>
+        <div class="formula" aria-label="Assistant formula">
+          <span>Job</span>
+          <span>+</span>
+          <span>Inputs</span>
+          <span>+</span>
+          <span>Rules</span>
+          <span>+</span>
+          <span>Review</span>
+        </div>
+      </section>
+
+      <section class="guided-section" id="guided-flow">
+        <div class="section-heading narrow">
+          <p class="eyebrow">Guided flow</p>
+          <h2>Start from the pain, not the technology.</h2>
+          <p>Pick what feels closest. The guide will show a plain-English example, ask a few questions, and create your first assistant idea.</p>
+        </div>
+
+        <div class="wizard-shell" aria-live="polite">
+          <div class="progress-row" aria-label="Flow progress">
+            <span class="progress-pill active" data-progress="1">1. Pain</span>
+            <span class="progress-pill" data-progress="2">2. Example</span>
+            <span class="progress-pill" data-progress="3">3. Your version</span>
+            <span class="progress-pill" data-progress="4">4. Plan</span>
+          </div>
+
+          <section class="wizard-step active" data-step="1">
+            <p class="mini-label">Question 1</p>
+            <h3>What kind of work keeps coming back?</h3>
+            <p class="step-help">Do not overthink it. Choose the closest annoyance.</p>
+            <div class="choice-grid" id="pain-choices">
+              <button class="choice-card" type="button" data-pain="followups">
+                <span class="emoji">⏰</span>
+                <strong>Follow-ups get missed</strong>
+                <small>Leads, clients, renewals, or tasks need checking.</small>
+              </button>
+              <button class="choice-card" type="button" data-pain="intake">
+                <span class="emoji">📥</span>
+                <strong>New requests are messy</strong>
+                <small>Emails or forms arrive and someone has to sort them out.</small>
+              </button>
+              <button class="choice-card" type="button" data-pain="documents">
+                <span class="emoji">📄</span>
+                <strong>Documents pile up</strong>
+                <small>Someone has to summarize, classify, or check them.</small>
+              </button>
+              <button class="choice-card" type="button" data-pain="meetings">
+                <span class="emoji">🗓️</span>
+                <strong>Meetings create loose ends</strong>
+                <small>Notes, decisions, and next steps get scattered.</small>
+              </button>
+              <button class="choice-card" type="button" data-pain="research">
+                <span class="emoji">🔎</span>
+                <strong>Research repeats</strong>
+                <small>You keep looking up similar people, companies, or topics.</small>
+              </button>
+              <button class="choice-card" type="button" data-pain="unsure">
+                <span class="emoji">🤷</span>
+                <strong>I am not sure yet</strong>
+                <small>I want help finding a safe first idea.</small>
+              </button>
+            </div>
+          </section>
+
+          <section class="wizard-step" data-step="2">
+            <p class="mini-label">Plain-English example</p>
+            <div id="example-output" class="example-output"></div>
+            <div class="wizard-actions">
+              <button class="button secondary" type="button" data-back="1">Back</button>
+              <button class="button primary" type="button" data-next="3">Build my version</button>
+            </div>
+          </section>
+
+          <section class="wizard-step" data-step="3">
+            <p class="mini-label">Your version</p>
+            <h3>Answer these like you are explaining the job to a careful intern.</h3>
+            <form class="question-form" id="idea-form">
+              <label>
+                <span>Where does this work show up?</span>
+                <small>Example: Gmail label, calendar, CRM view, spreadsheet, folder, meeting notes.</small>
+                <input name="source" placeholder="Gmail label called New Intake" />
+              </label>
+              <label>
+                <span>What do you usually do manually?</span>
+                <small>Example: read the message, check what is missing, draft a reply.</small>
+                <textarea name="manual" placeholder="I read each request, figure out what is missing, and write a follow-up."></textarea>
+              </label>
+              <label>
+                <span>What should the assistant draft, check, or summarize?</span>
+                <small>Keep it to draft/check/summarize for the first version.</small>
+                <textarea name="assistantJob" placeholder="Summarize the request, list missing info, and draft a reply."></textarea>
+              </label>
+              <label>
+                <span>What should it never do by itself?</span>
+                <small>Good rule: do not send, delete, update, schedule, or give professional advice.</small>
+                <textarea name="limits" placeholder="Do not send messages or update records without approval."></textarea>
+              </label>
+              <label>
+                <span>Who reviews the work?</span>
+                <small>Name a person or role.</small>
+                <input name="reviewer" placeholder="Office manager" />
+              </label>
+              <label>
+                <span>What would make this worth using?</span>
+                <small>Example: fewer missed follow-ups, saves 30 minutes per week, catches missing info.</small>
+                <input name="success" placeholder="Save 30 minutes per week and miss fewer follow-ups" />
+              </label>
+            </form>
+            <div class="wizard-actions">
+              <button class="button secondary" type="button" data-back="2">Back</button>
+              <button class="button primary" type="button" id="make-plan">Create my plan</button>
+            </div>
+          </section>
+
+          <section class="wizard-step" data-step="4">
+            <p class="mini-label">Result</p>
+            <h3>Your first assistant idea</h3>
+            <p class="step-help">This is not a final build plan. It is the smallest safe idea to test manually.</p>
+            <div class="result-toolbar">
+              <button class="small-button" type="button" data-copy="plan-output">Copy plan</button>
+              <button class="small-button" type="button" id="download-plan">Download .md</button>
+              <button class="small-button quiet" type="button" id="start-over">Start over</button>
+            </div>
+            <pre id="plan-output">Create a plan to see the result.</pre>
+          </section>
         </div>
       </section>
 
       <section class="section" id="examples">
         <div class="section-heading">
-          <p class="eyebrow">Step 1</p>
-          <h2>Choose one small problem. Not your whole business.</h2>
-          <p>
-            Pick the closest example. It will prefill the plan builder below. You can edit everything.
-          </p>
+          <p class="eyebrow">Examples first</p>
+          <h2>What could an assistant actually do?</h2>
+          <p>It should not “run your business.” Start with a draft, checklist, summary, or flag that a human reviews.</p>
         </div>
-        <div class="problem-grid">
-          <button class="problem-card" data-example="intake" type="button">
-            <span class="emoji">📥</span>
-            <strong>New requests are messy</strong>
-            <small>Emails or forms come in and someone has to figure out what is missing.</small>
-          </button>
-          <button class="problem-card" data-example="followup" type="button">
-            <span class="emoji">⏰</span>
-            <strong>Follow-ups get missed</strong>
-            <small>Renewals, leads, clients, or tasks need a reminder and a draft response.</small>
-          </button>
-          <button class="problem-card" data-example="meeting" type="button">
-            <span class="emoji">🗓️</span>
-            <strong>Meetings create loose ends</strong>
-            <small>Notes, decisions, and next steps are scattered after calls.</small>
-          </button>
-          <button class="problem-card" data-example="docs" type="button">
-            <span class="emoji">📄</span>
-            <strong>Documents need review</strong>
-            <small>Someone has to summarize, classify, or check documents before work moves on.</small>
-          </button>
-        </div>
-        <div class="nudge-box">
-          <strong>Naive-user rule:</strong> if you cannot explain the task in one sentence, it is too big for the first workshop.
-        </div>
-      </section>
-
-      <section class="section builder-section" id="builder">
-        <div class="section-heading">
-          <p class="eyebrow">Step 2</p>
-          <h2>Make your first assistant plan.</h2>
-          <p>
-            Answer these like you are explaining the job to a careful intern. Skip anything you are not sure about.
-          </p>
-        </div>
-
-        <form class="builder" id="plan-form">
-          <label>
-            <span>1. What repeat task do you want help with?</span>
-            <small>Example: “Follow up with new client intake emails.”</small>
-            <input name="task" placeholder="Follow up with new client intake emails" required />
-          </label>
-          <label>
-            <span>2. Where does this work show up?</span>
-            <small>This is the signal point. Example: Gmail label, calendar, CRM view, spreadsheet, folder.</small>
-            <input name="source" placeholder="Gmail label called New Intake" />
-          </label>
-          <label>
-            <span>3. What should the assistant produce?</span>
-            <small>Keep it draft/check/summarize. Do not start with full automation.</small>
-            <textarea name="output" placeholder="Summarize the request, list missing information, and draft a reply for review."></textarea>
-          </label>
-          <label>
-            <span>4. What should it never do by itself?</span>
-            <small>Good first rule: do not send, delete, update, schedule, or give professional advice.</small>
-            <textarea name="limits" placeholder="Do not send messages. Do not update CRM. Do not give legal, medical, or financial advice."></textarea>
-          </label>
-          <label>
-            <span>5. Who checks the work?</span>
-            <small>Name a role, not a vague “team”.</small>
-            <input name="reviewer" placeholder="Office manager" />
-          </label>
-          <label>
-            <span>6. What would make this worth using?</span>
-            <small>Example: saves 30 minutes per week, catches missing info, fewer missed follow-ups.</small>
-            <textarea name="success" placeholder="Save 30 minutes per week and reduce missed follow-ups."></textarea>
-          </label>
-          <div class="form-actions">
-            <button class="button primary" type="submit">Create my plan</button>
-            <button class="button secondary" type="button" id="clear-plan">Clear</button>
-          </div>
-        </form>
-
-        <div class="output-panel">
-          <div class="output-header">
-            <div>
-              <p class="mini-label">Your draft</p>
-              <h3>First assistant plan</h3>
-            </div>
-            <button class="small-button" type="button" data-copy="plan-output">Copy</button>
-          </div>
-          <pre id="plan-output">Choose an example or fill out the form to create your first plan.</pre>
-        </div>
-      </section>
-
-      <section class="section" id="connect">
-        <div class="section-heading">
-          <p class="eyebrow">Step 3</p>
-          <h2>Do not connect Gmail or CRM first. Prove the workflow first.</h2>
-          <p>
-            Tool connections are where beginners get stuck. The safe version is: use a few sample rows,
-            see if the assistant output is useful, then move to read-only access later.
-          </p>
-        </div>
-        <div class="flow-diagram" aria-label="Safe connection flow">
-          <div><strong>1</strong><span>Copy or export 5 examples</span></div>
-          <div><strong>2</strong><span>Put them in a simple table</span></div>
-          <div><strong>3</strong><span>Ask the assistant to draft/check</span></div>
-          <div><strong>4</strong><span>Human reviews every output</span></div>
-          <div><strong>5</strong><span>Only then consider read-only integration</span></div>
-        </div>
-
-        <div class="connection-grid">
-          <article class="plain-card">
-            <h3>Gmail</h3>
-            <p><strong>Beginner test:</strong> copy 5 emails from one label into a spreadsheet.</p>
-            <p><strong>Do not start with:</strong> full inbox access or auto-send.</p>
+        <div class="example-grid">
+          <article>
+            <h3>Intake helper</h3>
+            <p><strong>Before:</strong> New requests arrive. Someone reads them and figures out what is missing.</p>
+            <p><strong>Assistant helps:</strong> summarize the request, list missing info, draft a reply.</p>
+            <p><strong>Human still does:</strong> approve and send.</p>
           </article>
-          <article class="plain-card">
-            <h3>Calendar</h3>
-            <p><strong>Beginner test:</strong> list next week’s meetings and what follow-up each needs.</p>
-            <p><strong>Do not start with:</strong> auto-scheduling or invite changes.</p>
+          <article>
+            <h3>Follow-up helper</h3>
+            <p><strong>Before:</strong> Leads or clients go stale because nobody checks every open item.</p>
+            <p><strong>Assistant helps:</strong> flag stale items and draft follow-ups.</p>
+            <p><strong>Human still does:</strong> decide priority and approve messages.</p>
           </article>
-          <article class="plain-card">
-            <h3>CRM</h3>
-            <p><strong>Beginner test:</strong> export one filtered view, like stale leads or renewals due.</p>
-            <p><strong>Do not start with:</strong> auto-updating records.</p>
+          <article>
+            <h3>Meeting cleanup helper</h3>
+            <p><strong>Before:</strong> Notes are messy and action items get lost.</p>
+            <p><strong>Assistant helps:</strong> summarize decisions, action items, and a follow-up note.</p>
+            <p><strong>Human still does:</strong> check accuracy.</p>
           </article>
         </div>
       </section>
 
-      <section class="section workshop-section" id="workshop">
+      <section class="safe-section" id="safe-testing">
         <div class="section-heading">
-          <p class="eyebrow">Step 4</p>
-          <h2>Then use the workshop kit files.</h2>
-          <p>
-            Once the plan makes sense, open the deeper files. These are for running a workshop, teaching a team,
-            or handing the plan to a builder.
-          </p>
+          <p class="eyebrow">Safe testing</p>
+          <h2>Before connecting tools, test with five examples.</h2>
+          <p>Most people get stuck when they start with Gmail, Calendar, CRM, OAuth, permissions, and APIs. Do this instead.</p>
+        </div>
+        <div class="safe-flow">
+          <div><span>1</span><strong>Copy/export 5 examples</strong><small>No private account connection needed.</small></div>
+          <div><span>2</span><strong>Put them in a simple table</strong><small>Date, person, title, notes, status.</small></div>
+          <div><span>3</span><strong>Ask for a draft/check</strong><small>No sending. No updating.</small></div>
+          <div><span>4</span><strong>Human reviews everything</strong><small>Keep control with the person who owns the work.</small></div>
+          <div><span>5</span><strong>Then consider read-only access</strong><small>Only if the manual test is useful.</small></div>
+        </div>
+      </section>
+
+      <section class="section kit-section" id="workshop-kit">
+        <div class="section-heading">
+          <p class="eyebrow">Workshop kit</p>
+          <h2>Use the deeper files after you have an idea.</h2>
+          <p>The website helps you get unstuck. The workshop kit helps you teach it, map it, and hand it to a builder.</p>
         </div>
         <div class="resource-list">
           <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/start-here.md">Start Here</a>
-          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/templates/workflow-map.md">Workflow map template</a>
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/templates/workflow-map.md">Workflow map</a>
           <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/templates/agent-spec.md">Agent spec template</a>
           <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/resources/signal-points-integration-guide.md">Signal points guide</a>
-          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/templates/signal-source-template.md">Signal source template</a>
-          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit">Full GitHub repo</a>
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/scripts/README.md">Technical scripts</a>
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit">GitHub repo</a>
         </div>
-        <details class="builder-only">
-          <summary>For technical users: run the sample scripts locally</summary>
-          <p>These commands use a sample CSV. They do not connect to Gmail, Calendar, CRM, or an AI model.</p>
-          <div class="command-box">
-            <div class="output-header">
-              <h3>Sample commands</h3>
-              <button class="small-button" type="button" data-copy="commands">Copy</button>
-            </div>
-            <pre id="commands">mkdir -p outputs
-python scripts/normalize_signal_csv.py examples/sample-signals.csv outputs/normalized.csv --source sample --id id --date date --person person --organization organization --title title --body body --status status --url url
-python scripts/make_signal_review_brief.py outputs/normalized.csv outputs/review-brief.md --workflow "Client intake follow-up"</pre>
-          </div>
-        </details>
       </section>
     </main>
 
     <footer class="site-footer">
-      <p>Start small. Keep a human in control. Connect tools only after the workflow proves useful.</p>
+      <p>Start with one pain. Test manually. Keep humans in control.</p>
       <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit">View source</a>
     </footer>
 
