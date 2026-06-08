@@ -177,7 +177,22 @@ function currentTitle() {
   return (painExamples[state.pain] || painExamples.unsure).title;
 }
 
+function starterPromptText() {
+  return `You are helping me test one small AI assistant idea.
+
+The job: ${currentTitle()}
+
+Use the fake examples I paste below. For each example, ${value("assistantJob").toLowerCase()}
+
+Rules:
+- Use only the fake examples in this chat.
+- ${value("limits", "Do not send, delete, update, schedule, or make final decisions without human approval.")}
+- Draft, check, summarize, or flag only.
+- Wait for my approval before anything else.`;
+}
+
 function makePlan() {
+  const starterPrompt = starterPromptText();
   const plan = `# Starter AI assistant idea: ${currentTitle()}
 
 ## 1. The tiny job
@@ -199,16 +214,18 @@ A human reviews every draft, flag, checklist, or summary before anything happens
 ## 5. Success check
 ${value("success")}
 
-## Copy/paste test prompt
-You are helping me test a small AI assistant idea. I will paste fake sample data. For each row, ${value("assistantJob").toLowerCase()} Follow this rule: ${value("limits").toLowerCase()} Use only the attached sample data. Wait for my approval before anything else.
+## Copy/paste starter prompt
+${starterPrompt}
 
 ## How to attach the data
-Paste the fake data below this prompt, or upload the downloaded fake-data.md file if your tool supports uploads. For the first test, "attach" just means the assistant can see the sample rows in the same chat.
+No real attachment needed. Paste the fake examples under the starter prompt in the same chat.
 
 ## If this is useful
 Then open the workshop kit and turn this into a real workflow map and assistant spec. If it feels too broad, make the job smaller.`;
 
+  qs("#starter-prompt-output").textContent = starterPrompt;
   qs("#plan-output").textContent = plan;
+  localStorage.setItem("aw-starter-prompt", starterPrompt);
   localStorage.setItem("aw-plan", plan);
   generateMockData();
   saveForm();
@@ -236,6 +253,8 @@ function restoreForm() {
     }
   }
   const plan = localStorage.getItem("aw-plan");
+  const starterPrompt = localStorage.getItem("aw-starter-prompt");
+  if (starterPrompt && qs("#starter-prompt-output")) qs("#starter-prompt-output").textContent = starterPrompt;
   if (plan) qs("#plan-output").textContent = plan;
   const mockData = localStorage.getItem("aw-mock-data");
   if (mockData && qs("#mock-data-output")) qs("#mock-data-output").textContent = mockData;
@@ -255,23 +274,30 @@ async function copyElementText(id, button) {
   }
 }
 
+function readableLabel(key) {
+  return key.replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase());
+}
+
 function mockDataMarkdown() {
   const rows = mockDataExamples[state.pain] || mockDataExamples.unsure;
   const title = currentTitle();
   const headers = Object.keys(rows[0]);
-  const table = [
-    `# Fake sample data for: ${title}`,
+  const lines = [
+    `Fake examples for: ${title}`,
     "",
-    "These rows are made up. Use them to test the assistant before using private or real data.",
+    "These are made up. Use them before using private or real data.",
     "",
-    `| ${headers.join(" | ")} |`,
-    `| ${headers.map(() => "---").join(" | ")} |`,
-    ...rows.map((row) => `| ${headers.map((key) => String(row[key]).replace(/\|/g, "-")).join(" | ")} |`),
-    "",
-    "## Attach this to the agent",
-    "Paste these fake rows under the starter plan. Tell the assistant: Use this fake data only. Draft/check/summarize only. Do not send, delete, update, schedule, or make final decisions.",
   ];
-  return table.join("\n");
+
+  rows.forEach((row, index) => {
+    lines.push(`Example ${index + 1}`);
+    headers.forEach((key) => lines.push(`- ${readableLabel(key)}: ${row[key]}`));
+    lines.push("");
+  });
+
+  lines.push("Paste this under the starter prompt.");
+  lines.push("Tell the assistant: Use this fake data only. Draft/check/summarize only. Do not send, delete, update, schedule, or make final decisions.");
+  return lines.join("\n");
 }
 
 function generateMockData() {
@@ -303,11 +329,12 @@ function downloadPlan() {
 }
 
 function startOver() {
-  ["aw-pain", "aw-form", "aw-plan", "aw-mock-data"].forEach((key) => localStorage.removeItem(key));
+  ["aw-pain", "aw-form", "aw-starter-prompt", "aw-plan", "aw-mock-data"].forEach((key) => localStorage.removeItem(key));
   state.pain = "";
   qs("#idea-form")?.reset();
+  qs("#starter-prompt-output").textContent = "Choose a task to create a starter prompt.";
   qs("#plan-output").textContent = "Create a plan to see the result.";
-  qs("#mock-data-output").textContent = "Choose a task to generate fake sample data.";
+  qs("#mock-data-output").textContent = "Choose a task to generate fake examples.";
   qsa(".choice-card").forEach((card) => card.classList.remove("selected"));
   showStep(1);
 }
@@ -320,7 +347,7 @@ function init() {
   qs("#make-plan")?.addEventListener("click", makePlan);
   qs("#quick-plan")?.addEventListener("click", makePlan);
   qs("#download-plan")?.addEventListener("click", downloadPlan);
-  qs("#generate-mock-data")?.addEventListener("click", generateMockData);
+  qs("#refresh-mock-data")?.addEventListener("click", generateMockData);
   qs("#download-mock-data")?.addEventListener("click", downloadMockData);
   qs("#start-over")?.addEventListener("click", startOver);
   qs("#idea-form")?.addEventListener("input", saveForm);
