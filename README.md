@@ -22,6 +22,8 @@ This kit is written for different levels of AI-agent experience.
 
 Start here: [pick your path](start-here.md).
 
+Prefer a guided front door? Use the interactive website in [`docs/`](docs/README.md). It includes a path picker, starter agent-spec builder, signal-source planner, and copyable local script commands.
+
 ## Explanation levels
 
 Different people need different language.

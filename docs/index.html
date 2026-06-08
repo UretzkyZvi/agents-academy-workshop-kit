@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AgentWorks Academy Workshop Kit</title>
+    <meta
+      name="description"
+      content="An interactive guide for using the AgentWorks Academy workshop kit to design a small, safe AI agent workflow."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="AgentWorks Academy home">
+        <span class="brand-mark">AW</span>
+        <span>
+          <strong>AgentWorks Academy</strong>
+          <small>Workshop Kit Guide</small>
+        </span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#paths">Pick a path</a>
+        <a href="#wizard">Build a starter spec</a>
+        <a href="#signals">Signal points</a>
+        <a href="#run">Run it</a>
+        <a class="nav-button" href="https://github.com/UretzkyZvi/agents-academy-workshop-kit">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero section-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Free workshop kit</p>
+          <h1>Build your first useful AI agent, without getting lost in tools.</h1>
+          <p class="hero-text">
+            This interactive guide turns the workshop repo into a simple path: pick one workflow,
+            write an agent spec, test with sample inputs, add human approval, and only then connect
+            Gmail, Calendar, CRM, or other signal sources.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#wizard">Start the 10-minute builder</a>
+            <a class="button secondary" href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/start-here.md">Read Start Here</a>
+          </div>
+        </div>
+        <aside class="hero-card" aria-label="Workshop pattern">
+          <h2>The safe pattern</h2>
+          <ol class="flow-list">
+            <li><span>1</span>Choose one real workflow</li>
+            <li><span>2</span>Describe the agent's job</li>
+            <li><span>3</span>Test with exports or samples</li>
+            <li><span>4</span>Require human approval</li>
+            <li><span>5</span>Evaluate before automating more</li>
+          </ol>
+        </aside>
+      </section>
+
+      <section class="section" id="why">
+        <div class="section-heading">
+          <p class="eyebrow">Why this exists</p>
+          <h2>The repo is useful. The first click was not obvious enough.</h2>
+          <p>
+            The website is the front door. The markdown repo is the workshop library. People should
+            not need to understand the whole repo before getting their first useful output.
+          </p>
+        </div>
+        <div class="cards three">
+          <article class="card">
+            <h3>For beginners</h3>
+            <p>Plain-English steps and examples. No platform choice required before they understand the workflow.</p>
+          </article>
+          <article class="card">
+            <h3>For operators</h3>
+            <p>A concrete workflow map, approval rule, and evaluation checklist before anyone touches automation.</p>
+          </article>
+          <article class="card">
+            <h3>For builders</h3>
+            <p>Normalized signal rows, agent spec fields, and a safer path toward Gmail, Calendar, and CRM integrations.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="paths">
+        <div class="section-heading">
+          <p class="eyebrow">Step 1</p>
+          <h2>Pick the path that sounds like you.</h2>
+          <p>Click a card to get the shortest next reading list.</p>
+        </div>
+        <div class="path-picker" role="list">
+          <button class="path-card" data-path="beginner" type="button">
+            <span>Curious beginner</span>
+            <small>I want to understand agents without jargon.</small>
+          </button>
+          <button class="path-card" data-path="owner" type="button">
+            <span>Business owner or team lead</span>
+            <small>I want a safe first pilot for my team.</small>
+          </button>
+          <button class="path-card" data-path="operator" type="button">
+            <span>Non-technical operator</span>
+            <small>I own the workflow but do not write code.</small>
+          </button>
+          <button class="path-card" data-path="builder" type="button">
+            <span>Technical builder</span>
+            <small>I need implementation notes and boundaries.</small>
+          </button>
+        </div>
+        <div class="recommendation" id="path-output" aria-live="polite">
+          <p>Select a path to see where to start.</p>
+        </div>
+      </section>
+
+      <section class="section dark" id="wizard">
+        <div class="section-heading">
+          <p class="eyebrow">Step 2</p>
+          <h2>Build a starter agent spec in 10 minutes.</h2>
+          <p>
+            Fill this out during a workshop. It generates a simple markdown draft you can paste into
+            <code>templates/agent-spec.md</code> or share with a builder.
+          </p>
+        </div>
+
+        <form class="wizard" id="spec-form">
+          <label>
+            Workflow name
+            <input name="workflow" placeholder="Client intake follow-up" required />
+          </label>
+          <label>
+            Who uses it?
+            <input name="owner" placeholder="Office manager, founder, paralegal, broker" />
+          </label>
+          <label>
+            What signal starts the work?
+            <input name="trigger" placeholder="New email, form submission, renewal date, CRM status change" />
+          </label>
+          <label>
+            What should the agent draft or decide?
+            <textarea name="job" placeholder="Summarize the request, identify missing documents, draft a reply for review"></textarea>
+          </label>
+          <label>
+            What is the agent not allowed to do?
+            <textarea name="limits" placeholder="Do not send messages. Do not update CRM. Do not give legal/medical advice."></textarea>
+          </label>
+          <label>
+            Who approves before anything is sent or changed?
+            <input name="approver" placeholder="Human reviewer name or role" />
+          </label>
+          <label>
+            How will you know it helped?
+            <textarea name="eval" placeholder="Saved 30 minutes/week, caught missing info, reduced follow-up mistakes"></textarea>
+          </label>
+          <div class="form-actions">
+            <button class="button primary" type="submit">Generate starter spec</button>
+            <button class="button ghost" type="button" id="clear-spec">Clear</button>
+          </div>
+        </form>
+
+        <div class="output-panel">
+          <div class="output-header">
+            <h3>Starter spec draft</h3>
+            <button class="small-button" type="button" data-copy="spec-output">Copy</button>
+          </div>
+          <pre id="spec-output">Fill out the form to generate a starter spec.</pre>
+        </div>
+      </section>
+
+      <section class="section" id="signals">
+        <div class="section-heading">
+          <p class="eyebrow">Step 3</p>
+          <h2>Plan signal points before connecting accounts.</h2>
+          <p>
+            Gmail, Calendar, and CRM are where people get stuck. Start with exported CSVs or sample
+            rows. Prove the workflow first. Connect APIs later.
+          </p>
+        </div>
+        <div class="signal-layout">
+          <div class="cards signal-cards">
+            <article class="card signal-card" data-source="gmail">
+              <h3>Gmail</h3>
+              <p>Best first test: export or copy a few emails from one label.</p>
+              <strong>Safe scope:</strong> read-only, one label, no sending.
+            </article>
+            <article class="card signal-card" data-source="calendar">
+              <h3>Calendar</h3>
+              <p>Best first test: export upcoming events or create a sample event list.</p>
+              <strong>Safe scope:</strong> read-only, next 7-14 days.
+            </article>
+            <article class="card signal-card" data-source="crm">
+              <h3>CRM</h3>
+              <p>Best first test: export a filtered list of deals, clients, or renewals.</p>
+              <strong>Safe scope:</strong> read-only filtered pipeline.
+            </article>
+            <article class="card signal-card" data-source="sheets">
+              <h3>Spreadsheet</h3>
+              <p>Best first test: use a sheet as the signal queue.</p>
+              <strong>Safe scope:</strong> manual import/export first.
+            </article>
+          </div>
+          <div class="recommendation sticky" id="signal-output" aria-live="polite">
+            <h3>Choose a signal source</h3>
+            <p>You will get a safe first test, data fields, and the matching repo resources.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section dark" id="run">
+        <div class="section-heading">
+          <p class="eyebrow">Step 4</p>
+          <h2>Run the local-first signal test.</h2>
+          <p>These commands use the sample CSV. No Gmail, Calendar, CRM, or model API required.</p>
+        </div>
+        <div class="command-box">
+          <div class="output-header">
+            <h3>Try the sample workflow</h3>
+            <button class="small-button" type="button" data-copy="commands">Copy commands</button>
+          </div>
+          <pre id="commands">mkdir -p outputs
+python scripts/normalize_signal_csv.py examples/sample-signals.csv outputs/normalized.csv --source sample --id id --date date --person person --organization organization --title title --body body --status status --url url
+python scripts/make_signal_review_brief.py outputs/normalized.csv outputs/review-brief.md --workflow "Client intake follow-up"</pre>
+        </div>
+        <div class="cards two">
+          <article class="card">
+            <h3>What you get</h3>
+            <p>A normalized CSV and a markdown review brief an agent can summarize, classify, or draft from.</p>
+          </article>
+          <article class="card">
+            <h3>What it will not do</h3>
+            <p>It will not send email, update CRM, or touch private accounts. That comes only after the workflow proves useful.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="resources">
+        <div class="section-heading">
+          <p class="eyebrow">Keep going</p>
+          <h2>Open the exact repo files when you need detail.</h2>
+        </div>
+        <div class="resource-list">
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/start-here.md">Start Here</a>
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/workshop/01-choose-a-workflow.md">01 - Choose a workflow</a>
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/workshop/02-write-an-agent-spec.md">02 - Write the agent spec</a>
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/workshop/03-run-the-first-agent.md">03 - Run the first agent loop</a>
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/resources/signal-points-integration-guide.md">Signal points integration guide</a>
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/templates/signal-source-template.md">Signal source template</a>
+          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/scripts/README.md">Helper scripts</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>AgentWorks Academy Workshop Kit. Start small. Keep humans in control. Evaluate before scaling.</p>
+      <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit">View on GitHub</a>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
