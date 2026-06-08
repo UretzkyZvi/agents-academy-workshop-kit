@@ -9,11 +9,31 @@ The goal is to find one workflow where an agent is actually worth using.
 
 ## Who this is for
 
+This kit is written for different levels of AI-agent experience.
+
+- curious beginners who want a plain-English explanation
+- parents, workers, and busy people exploring whether agents can reduce mental load
 - small law firms
 - insurance agencies and brokerages
 - founder-led service businesses
 - operators who own repetitive document, intake, follow-up, or internal-knowledge workflows
-- builders teaching teams how to use agents responsibly
+- technical builders turning a workflow into an implementation
+- trainers teaching teams how to use agents responsibly
+
+Start here: [pick your path](start-here.md).
+
+## Explanation levels
+
+Different people need different language.
+
+- New to AI agents? Read [AI agents in plain English](resources/ai-agents-in-plain-english.md).
+- Running a business workflow? Start with [choose one workflow](workshop/01-choose-a-workflow.md).
+- Building the implementation? Read [technical builder notes](resources/technical-builder-notes.md).
+- Teaching this material? Use the [language guide](resources/language-guide.md).
+
+The safety pattern stays the same: small workflow, clear limits, human approval, and evaluation.
+
+The explanation changes by audience.
 
 ## What you will produce
 
@@ -28,6 +48,8 @@ By the end of the workshop path, you should have:
 
 ## Workshop path
 
+If you are new, start with [Start Here](start-here.md) before using the workshop path.
+
 1. [Choose one workflow](workshop/01-choose-a-workflow.md)
 2. [Write the agent spec](workshop/02-write-an-agent-spec.md)
 3. [Run the first agent loop](workshop/03-run-the-first-agent.md)
@@ -39,6 +61,15 @@ By the end of the workshop path, you should have:
 - [Agent spec](templates/agent-spec.md)
 - [Evaluation checklist](templates/eval-checklist.md)
 - [Human approval flow](templates/human-approval-flow.md)
+
+## Resources
+
+- [AI agents in plain English](resources/ai-agents-in-plain-english.md)
+- [Language guide](resources/language-guide.md)
+- [Technical builder notes](resources/technical-builder-notes.md)
+- [Agent patterns](resources/agent-patterns.md)
+- [Common failure modes](resources/common-failure-modes.md)
+- [Tools and platforms](resources/tools-and-platforms.md)
 
 ## Example agents
 
