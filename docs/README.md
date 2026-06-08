@@ -1,6 +1,6 @@
 # Interactive Website
 
-This folder contains a dependency-free static website for the AgentWorks Academy Workshop Kit.
+This folder contains the beginner-friendly static website for the AgentWorks Academy Workshop Kit.
 
 Open locally:
 
@@ -14,12 +14,12 @@ Then visit:
 http://localhost:8000
 ```
 
-Why this lives in the same repo:
+Design intent:
 
-- The site is the beginner-friendly front door.
-- The markdown files remain the durable workshop library.
-- GitHub Pages can publish this folder without a separate deployment project.
-- Keeping the site and kit together prevents the website from drifting away from the actual materials.
+- The website is for people who do not know what agents, specs, repos, signal points, or APIs are.
+- The first job is not to teach every concept. It is to help someone create one plain-English assistant plan.
+- Technical details and scripts are still available, but hidden behind the workshop files / technical section.
+- The markdown repo remains the durable workshop library.
 
 Suggested GitHub Pages setting:
 
