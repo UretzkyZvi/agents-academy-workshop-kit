@@ -95,7 +95,7 @@ function selectPain(pain) {
   qsa(".choice-card").forEach((card) => card.classList.toggle("selected", card.dataset.pain === pain));
   renderExample();
   prefillForm();
-  showStep(2);
+  makePlan();
 }
 
 function renderExample() {
@@ -104,10 +104,10 @@ function renderExample() {
     <h3>${example.title}</h3>
     <p class="large-copy">${example.simple}</p>
     <div class="why-box">
-      <p class="mini-label">Why this is a good first test</p>
-      <ul>${example.goodBecause.map((item) => `<li>${item}</li>`).join("")}</ul>
+      <p class="mini-label">Good first test because</p>
+      <ul>${example.goodBecause.slice(0, 3).map((item) => `<li>${item}</li>`).join("")}</ul>
     </div>
-    <p class="safe-note"><strong>Important:</strong> the first version should draft, check, summarize, or flag. It should not send, delete, update records, or make final decisions.</p>
+    <p class="safe-note"><strong>Keep it safe:</strong> draft, check, summarize, or flag only. A human decides what happens next.</p>
   `;
 }
 
@@ -115,8 +115,8 @@ function prefillForm() {
   const form = qs("#idea-form");
   const example = painExamples[state.pain] || painExamples.unsure;
   if (!form) return;
-  ["source", "manual", "assistantJob", "limits", "reviewer", "success"].forEach((field) => {
-    form.elements[field].value = example[field] || "";
+  ["source", "assistantJob", "limits", "success"].forEach((field) => {
+    if (form.elements[field]) form.elements[field].value = example[field] || "";
   });
   saveForm();
 }
@@ -132,36 +132,32 @@ function currentTitle() {
 }
 
 function makePlan() {
-  const plan = `# First AI assistant idea: ${currentTitle()}
+  const plan = `# Starter AI assistant idea: ${currentTitle()}
 
-## What problem this helps with
-${currentTitle()}
+## 1. The tiny job
+Help with: ${currentTitle()}
 
-## Where the work shows up
-${value("source")}
+## 2. Start with five examples
+Copy five examples from: ${value("source")}
 
-## What you do manually today
-${value("manual")}
+Put them in a simple table or paste them into a chat. Do not connect Gmail, Calendar, CRM, or private tools yet.
 
-## What the assistant should draft, check, or summarize
+## 3. Ask the assistant to do only this
 ${value("assistantJob")}
 
-## What the assistant must not do
+## 4. Hard safety rule
 ${value("limits", "Do not send, delete, update, schedule, or make final decisions without human approval.")}
 
-## Human review rule
-${value("reviewer", "A human reviewer")} reviews the output before anything is sent, changed, scheduled, filed, or marked complete.
+A human reviews every draft, flag, checklist, or summary before anything happens.
 
-## First safe test
-Copy or export 5 examples. Put them in a simple table. Ask the assistant to draft/check/summarize. Review every output manually.
-
-Do not connect Gmail, Calendar, CRM, or private tools until this manual test is useful.
-
-## What would make it worth using
+## 5. Success check
 ${value("success")}
 
-## Next step
-If this feels clear, open the workshop kit files for the workflow map, assistant spec, signal source template, and evaluation checklist. If this still feels broad, make the task smaller.`;
+## Copy/paste test prompt
+You are helping me test a small AI assistant idea. I will paste five examples. For each one, ${value("assistantJob").toLowerCase()} Follow this rule: ${value("limits").toLowerCase()} Wait for my approval before anything else.
+
+## If this is useful
+Then open the workshop kit and turn this into a real workflow map and assistant spec. If it feels too broad, make the job smaller.`;
 
   qs("#plan-output").textContent = plan;
   localStorage.setItem("aw-plan", plan);
@@ -233,6 +229,7 @@ function init() {
   qsa("[data-back]").forEach((button) => button.addEventListener("click", () => showStep(button.dataset.back)));
   qsa("[data-copy]").forEach((button) => button.addEventListener("click", () => copyElementText(button.dataset.copy, button)));
   qs("#make-plan")?.addEventListener("click", makePlan);
+  qs("#quick-plan")?.addEventListener("click", makePlan);
   qs("#download-plan")?.addEventListener("click", downloadPlan);
   qs("#start-over")?.addEventListener("click", startOver);
   qs("#idea-form")?.addEventListener("input", saveForm);

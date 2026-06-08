@@ -31,62 +31,50 @@
       <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow">For people who are curious but not technical</p>
-          <h1>Find one safe AI assistant idea for your work.</h1>
+          <h1>Pick one annoying task. Get one safe AI assistant idea.</h1>
           <p class="hero-text">
-            Answer a few simple questions. You will get a one-page plan for a small assistant you can test manually before connecting Gmail, Calendar, CRM, or anything private.
+            Click the closest pain. The site will give you a starter plan you can test by copy/pasting five examples. No accounts, tools, coding, or private data needed.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#guided-flow">Start with my work</a>
-            <a class="button secondary" href="#examples">Show me examples first</a>
+            <a class="button primary" href="#guided-flow">Pick my task</a>
+            <a class="button secondary" href="#examples">Show examples</a>
           </div>
         </div>
         <aside class="promise-card" aria-label="What happens here">
           <p class="mini-label">What this does</p>
-          <h2>It helps you choose the first thing to try.</h2>
+          <h2>Your first test should be tiny.</h2>
           <ul>
-            <li>No coding today</li>
-            <li>No account connections today</li>
-            <li>No auto-sending or auto-updating</li>
-            <li>Just one clear assistant plan</li>
+            <li>Pick one repeated task</li>
+            <li>Use five copied examples</li>
+            <li>Let the assistant draft only</li>
+            <li>A human approves everything</li>
           </ul>
         </aside>
       </section>
 
-      <section class="plain-explainer" aria-label="Plain English explanation">
-        <div>
-          <p class="mini-label">Plain English</p>
-          <h2>An AI agent is an assistant with a job, some information to read, rules to follow, and a human review step.</h2>
-        </div>
-        <div class="formula" aria-label="Assistant formula">
-          <span>Job</span>
-          <span>+</span>
-          <span>Inputs</span>
-          <span>+</span>
-          <span>Rules</span>
-          <span>+</span>
-          <span>Review</span>
-        </div>
+      <section class="plain-explainer compact" aria-label="Plain English explanation">
+        <p><strong>Plain English:</strong> an AI assistant has one job, reads a small example, follows rules, and waits for human review.</p>
       </section>
 
       <section class="guided-section" id="guided-flow">
         <div class="section-heading narrow">
           <p class="eyebrow">Guided flow</p>
-          <h2>Start from the pain, not the technology.</h2>
-          <p>Pick what feels closest. The guide will show a plain-English example, ask a few questions, and create your first assistant idea.</p>
+          <h2>Start here. Pick the closest annoyance.</h2>
+          <p>Do not design the whole system. Just choose one thing that wastes time or gets missed.</p>
         </div>
 
         <div class="wizard-shell" aria-live="polite">
           <div class="progress-row" aria-label="Flow progress">
-            <span class="progress-pill active" data-progress="1">1. Pain</span>
-            <span class="progress-pill" data-progress="2">2. Example</span>
-            <span class="progress-pill" data-progress="3">3. Your version</span>
-            <span class="progress-pill" data-progress="4">4. Plan</span>
+            <span class="progress-pill active" data-progress="1">1. Pick task</span>
+            <span class="progress-pill" data-progress="2">2. See starter idea</span>
+            <span class="progress-pill" data-progress="3">3. Optional edits</span>
+            <span class="progress-pill" data-progress="4">4. Copy plan</span>
           </div>
 
           <section class="wizard-step active" data-step="1">
-            <p class="mini-label">Question 1</p>
-            <h3>What kind of work keeps coming back?</h3>
-            <p class="step-help">Do not overthink it. Choose the closest annoyance.</p>
+            <p class="mini-label">One click</p>
+            <h3>What feels most annoying right now?</h3>
+            <p class="step-help">Pick the closest one. You can change it later.</p>
             <div class="choice-grid" id="pain-choices">
               <button class="choice-card" type="button" data-pain="followups">
                 <span class="emoji">⏰</span>
@@ -125,44 +113,36 @@
             <p class="mini-label">Plain-English example</p>
             <div id="example-output" class="example-output"></div>
             <div class="wizard-actions">
-              <button class="button secondary" type="button" data-back="1">Back</button>
-              <button class="button primary" type="button" data-next="3">Build my version</button>
+              <button class="button secondary" type="button" data-back="1">Choose a different task</button>
+              <button class="button primary" type="button" id="quick-plan">Create starter plan</button>
+              <button class="button secondary" type="button" data-next="3">Customize first</button>
             </div>
           </section>
 
           <section class="wizard-step" data-step="3">
-            <p class="mini-label">Your version</p>
-            <h3>Answer these like you are explaining the job to a careful intern.</h3>
+            <p class="mini-label">Optional edits</p>
+            <h3>Want to tweak it? Edit what you know. Leave the rest alone.</h3>
+            <p class="step-help">The fields are already filled in from your choice. You do not need perfect answers.</p>
             <form class="question-form" id="idea-form">
               <label>
-                <span>Where does this work show up?</span>
-                <small>Example: Gmail label, calendar, CRM view, spreadsheet, folder, meeting notes.</small>
-                <input name="source" placeholder="Gmail label called New Intake" />
+                <span>Where are the examples?</span>
+                <small>Inbox, notes, spreadsheet, folder, CRM view, or anywhere you can copy five examples from.</small>
+                <input name="source" placeholder="Spreadsheet of open follow-ups" />
               </label>
               <label>
-                <span>What do you usually do manually?</span>
-                <small>Example: read the message, check what is missing, draft a reply.</small>
-                <textarea name="manual" placeholder="I read each request, figure out what is missing, and write a follow-up."></textarea>
+                <span>What should the assistant make?</span>
+                <small>Keep the first version to a draft, checklist, summary, or flag.</small>
+                <textarea name="assistantJob" placeholder="Flag stale items and draft a follow-up message."></textarea>
               </label>
               <label>
-                <span>What should the assistant draft, check, or summarize?</span>
-                <small>Keep it to draft/check/summarize for the first version.</small>
-                <textarea name="assistantJob" placeholder="Summarize the request, list missing info, and draft a reply."></textarea>
-              </label>
-              <label>
-                <span>What should it never do by itself?</span>
-                <small>Good rule: do not send, delete, update, schedule, or give professional advice.</small>
+                <span>What must stay human?</span>
+                <small>Default rule: no sending, deleting, updating, scheduling, or final decisions.</small>
                 <textarea name="limits" placeholder="Do not send messages or update records without approval."></textarea>
               </label>
               <label>
-                <span>Who reviews the work?</span>
-                <small>Name a person or role.</small>
-                <input name="reviewer" placeholder="Office manager" />
-              </label>
-              <label>
-                <span>What would make this worth using?</span>
-                <small>Example: fewer missed follow-ups, saves 30 minutes per week, catches missing info.</small>
-                <input name="success" placeholder="Save 30 minutes per week and miss fewer follow-ups" />
+                <span>How do you know it helped?</span>
+                <small>One simple win is enough.</small>
+                <input name="success" placeholder="Fewer missed follow-ups and 30 minutes saved each week" />
               </label>
             </form>
             <div class="wizard-actions">
@@ -173,11 +153,12 @@
 
           <section class="wizard-step" data-step="4">
             <p class="mini-label">Result</p>
-            <h3>Your first assistant idea</h3>
-            <p class="step-help">This is not a final build plan. It is the smallest safe idea to test manually.</p>
+            <h3>Your starter plan</h3>
+            <p class="step-help">Copy this into ChatGPT, Claude, Gemini, or Hermes with five real examples. Review everything by hand.</p>
             <div class="result-toolbar">
               <button class="small-button" type="button" data-copy="plan-output">Copy plan</button>
               <button class="small-button" type="button" id="download-plan">Download .md</button>
+              <button class="small-button quiet" type="button" data-back="3">Edit answers</button>
               <button class="small-button quiet" type="button" id="start-over">Start over</button>
             </div>
             <pre id="plan-output">Create a plan to see the result.</pre>
