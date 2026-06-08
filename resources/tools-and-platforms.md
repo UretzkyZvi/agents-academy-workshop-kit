@@ -30,9 +30,12 @@ Use these for the first workshop samples. Prove the workflow before building inf
 - CrewAI / AutoGen-style systems: useful for multi-agent experiments, but keep production workflows tightly scoped.
 - Dify and similar platforms: useful for low-code internal AI apps and workflow demos.
 
-### 3. Workflow glue
+### 3. Workflow glue and signal points
 
 - n8n / Make / Zapier: useful for no-code workflow glue once the human approval path is clear.
+- Gmail, Calendar, CRM, forms, folders, and spreadsheets: useful signal points, but start with exports and read-only access before live automation.
+
+See the [signal points integration guide](signal-points-integration-guide.md) before connecting accounts.
 
 ### 4. Tool interoperability
 

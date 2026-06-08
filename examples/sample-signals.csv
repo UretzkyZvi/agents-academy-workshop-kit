@@ -1,0 +1,4 @@
+id,date,person,organization,title,body,status,url
+sig-001,2026-06-08,Jane Client,Example Law,"New intake question","I filled out the form and wanted to know what documents you need before the consultation.",new,https://example.com/intake/001
+sig-002,2026-06-08,Sam Producer,Example Insurance,"Renewal follow-up needed","Client renewal is next month. We still need updated vehicle details and claims history.",open,https://example.com/deals/002
+sig-003,2026-06-08,Alex Founder,Example Co,"Research request","Can you send a short brief on three competitors and what changed this week?",new,https://example.com/tasks/003

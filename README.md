@@ -59,6 +59,7 @@ If you are new, start with [Start Here](start-here.md) before using the workshop
 
 - [Workflow map](templates/workflow-map.md)
 - [Agent spec](templates/agent-spec.md)
+- [Signal source template](templates/signal-source-template.md)
 - [Evaluation checklist](templates/eval-checklist.md)
 - [Human approval flow](templates/human-approval-flow.md)
 
@@ -66,10 +67,19 @@ If you are new, start with [Start Here](start-here.md) before using the workshop
 
 - [AI agents in plain English](resources/ai-agents-in-plain-english.md)
 - [Language guide](resources/language-guide.md)
+- [Signal points integration guide](resources/signal-points-integration-guide.md)
 - [Technical builder notes](resources/technical-builder-notes.md)
 - [Agent patterns](resources/agent-patterns.md)
 - [Common failure modes](resources/common-failure-modes.md)
 - [Tools and platforms](resources/tools-and-platforms.md)
+
+## Helper scripts
+
+The repo includes small local-first scripts for testing integrations without connecting real accounts first.
+
+- [Scripts guide](scripts/README.md)
+- `scripts/normalize_signal_csv.py`: normalize Gmail/Calendar/CRM exports into one signal format
+- `scripts/make_signal_review_brief.py`: turn normalized signals into an agent review brief
 
 ## Example agents
 

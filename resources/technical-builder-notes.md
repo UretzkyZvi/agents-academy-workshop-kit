@@ -19,6 +19,7 @@ Avoid starting with an autonomous multi-agent architecture unless the workflow p
 A practical first build needs:
 
 - a trigger: manual, scheduled, webhook, inbox event, form submission
+- signal points: Gmail, Calendar, CRM, forms, folders, spreadsheets, or other sources that tell the agent what needs attention
 - input sources: files, notes, CRM records, emails, tickets, documents
 - context rules: what the agent may read and what must stay out
 - tool permissions: explicit allowlist
@@ -101,6 +102,7 @@ For business teams, local workflow evals matter more than public benchmark score
 - OpenAI Agents SDK is useful for OpenAI-first applications with tools, handoffs, sessions, guardrails, human-in-the-loop, and tracing.
 - LangGraph is useful when the workflow needs durable graph orchestration, state, memory, and inspection.
 - MCP can make tool connections more modular, but it does not remove the need for permissions and review.
+- Signal point integrations should usually start as export-based tests, then read-only API access, then approval-gated write actions if needed.
 - n8n, Make, and Zapier are useful after the approval flow is clear.
 
 ## Anti-patterns
