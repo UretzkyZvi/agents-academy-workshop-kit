@@ -65,6 +65,52 @@ const painExamples = {
     reviewer: "The person who owns the work",
     success: "The draft or checklist is useful enough that I would try it again",
   },
+
+};
+
+const mockDataExamples = {
+  followups: [
+    { name: "Jordan Lee", item: "Proposal sent", lastContact: "12 days ago", note: "Asked for pricing options, no reply yet", status: "Needs gentle follow-up" },
+    { name: "Maya Patel", item: "Renewal discussion", lastContact: "8 days ago", note: "Wanted to confirm team size before renewing", status: "Waiting on client" },
+    { name: "Chris Morgan", item: "Demo recap", lastContact: "15 days ago", note: "Said they would share internally", status: "May be stale" },
+    { name: "Sam Rivera", item: "Invoice question", lastContact: "5 days ago", note: "Asked if payment terms could be extended", status: "Needs answer" },
+    { name: "Taylor Brooks", item: "Pilot next step", lastContact: "21 days ago", note: "Pilot looked promising but no next meeting booked", status: "High priority follow-up" },
+  ],
+  intake: [
+    { from: "Avery Chen", request: "Needs help setting up a workshop", missing: "Date, audience size, budget", urgency: "This month" },
+    { from: "Morgan Smith", request: "Asked about document review automation", missing: "Document type, volume, approval owner", urgency: "Not stated" },
+    { from: "Riley Johnson", request: "Wants a quote for training", missing: "Team size, location, preferred format", urgency: "Next quarter" },
+    { from: "Casey Brown", request: "Asked if an assistant can sort incoming leads", missing: "Source system, categories, review process", urgency: "Soon" },
+    { from: "Jamie Wilson", request: "Needs follow-up drafts for client emails", missing: "Example emails, tone preference, reviewer", urgency: "This week" },
+  ],
+  documents: [
+    { file: "intake-form-a.pdf", type: "Client intake", summary: "Basic background is present", flag: "Missing signed consent" },
+    { file: "invoice-042.pdf", type: "Invoice", summary: "Vendor billed for March services", flag: "Amount needs review" },
+    { file: "notes-upload.docx", type: "Meeting notes", summary: "Several action items mentioned", flag: "No owner assigned" },
+    { file: "contract-draft.pdf", type: "Draft agreement", summary: "Service terms appear outlined", flag: "Do not treat as legal review" },
+    { file: "receipt-photo.jpg", type: "Receipt", summary: "Travel expense receipt", flag: "Date is hard to read" },
+  ],
+  meetings: [
+    { meeting: "Client kickoff", notes: "Discussed timeline, owner for data export, and next check-in", looseEnd: "Confirm data export owner" },
+    { meeting: "Sales handoff", notes: "Lead asked for pilot scope and sample agenda", looseEnd: "Draft pilot recap" },
+    { meeting: "Ops sync", notes: "Team agreed to test with five fake examples first", looseEnd: "Collect fake examples" },
+    { meeting: "Partner call", notes: "Partner can introduce two prospects after reviewing one-pager", looseEnd: "Send one-pager" },
+    { meeting: "Training review", notes: "Attendees liked examples but wanted simpler language", looseEnd: "Rewrite instructions" },
+  ],
+  research: [
+    { target: "Acme Health", question: "Could they use intake automation?", source: "Public website", note: "Mentions manual onboarding" },
+    { target: "Northstar Legal", question: "Do they publish client resources?", source: "Blog", note: "Several articles on document-heavy workflows" },
+    { target: "Blue Ridge Ops", question: "Who owns operations?", source: "LinkedIn snippet", note: "Ops director listed publicly" },
+    { target: "ClearPath Clinics", question: "Repeated admin pain?", source: "Careers page", note: "Hiring for intake coordinator" },
+    { target: "Summit Advisors", question: "Could follow-up helper fit?", source: "Case study", note: "Long sales cycle mentioned" },
+  ],
+  unsure: [
+    { example: "Unread messages", input: "Five copied messages", assistantOutput: "Summary and suggested next step", humanCheck: "Approve before replying" },
+    { example: "Meeting notes", input: "Five messy notes", assistantOutput: "Decisions and action items", humanCheck: "Check accuracy" },
+    { example: "Open tasks", input: "Five stale tasks", assistantOutput: "Priority flag and draft nudge", humanCheck: "Decide what matters" },
+    { example: "Uploaded files", input: "Five fake file names and descriptions", assistantOutput: "Label and missing-info flag", humanCheck: "Confirm label" },
+    { example: "Research targets", input: "Five public targets", assistantOutput: "Short brief with unknowns", humanCheck: "Verify sources" },
+  ],
 };
 
 const state = {
@@ -140,7 +186,7 @@ Help with: ${currentTitle()}
 ## 2. Start with five examples
 Copy five examples from: ${value("source")}
 
-Put them in a simple table or paste them into a chat. Do not connect Gmail, Calendar, CRM, or private tools yet.
+Start with the fake sample data generated below. Then try five sanitized real examples. Do not connect Gmail, Calendar, CRM, or private tools yet.
 
 ## 3. Ask the assistant to do only this
 ${value("assistantJob")}
@@ -154,13 +200,17 @@ A human reviews every draft, flag, checklist, or summary before anything happens
 ${value("success")}
 
 ## Copy/paste test prompt
-You are helping me test a small AI assistant idea. I will paste five examples. For each one, ${value("assistantJob").toLowerCase()} Follow this rule: ${value("limits").toLowerCase()} Wait for my approval before anything else.
+You are helping me test a small AI assistant idea. I will paste fake sample data. For each row, ${value("assistantJob").toLowerCase()} Follow this rule: ${value("limits").toLowerCase()} Use only the attached sample data. Wait for my approval before anything else.
+
+## How to attach the data
+Paste the fake data below this prompt, or upload the downloaded fake-data.md file if your tool supports uploads. For the first test, "attach" just means the assistant can see the sample rows in the same chat.
 
 ## If this is useful
 Then open the workshop kit and turn this into a real workflow map and assistant spec. If it feels too broad, make the job smaller.`;
 
   qs("#plan-output").textContent = plan;
   localStorage.setItem("aw-plan", plan);
+  generateMockData();
   saveForm();
   showStep(4);
 }
@@ -187,6 +237,8 @@ function restoreForm() {
   }
   const plan = localStorage.getItem("aw-plan");
   if (plan) qs("#plan-output").textContent = plan;
+  const mockData = localStorage.getItem("aw-mock-data");
+  if (mockData && qs("#mock-data-output")) qs("#mock-data-output").textContent = mockData;
 }
 
 async function copyElementText(id, button) {
@@ -203,22 +255,59 @@ async function copyElementText(id, button) {
   }
 }
 
-function downloadPlan() {
-  const text = qs("#plan-output")?.innerText || "";
+function mockDataMarkdown() {
+  const rows = mockDataExamples[state.pain] || mockDataExamples.unsure;
+  const title = currentTitle();
+  const headers = Object.keys(rows[0]);
+  const table = [
+    `# Fake sample data for: ${title}`,
+    "",
+    "These rows are made up. Use them to test the assistant before using private or real data.",
+    "",
+    `| ${headers.join(" | ")} |`,
+    `| ${headers.map(() => "---").join(" | ")} |`,
+    ...rows.map((row) => `| ${headers.map((key) => String(row[key]).replace(/\|/g, "-")).join(" | ")} |`),
+    "",
+    "## Attach this to the agent",
+    "Paste these fake rows under the starter plan. Tell the assistant: Use this fake data only. Draft/check/summarize only. Do not send, delete, update, schedule, or make final decisions.",
+  ];
+  return table.join("\n");
+}
+
+function generateMockData() {
+  const output = qs("#mock-data-output");
+  if (!output) return;
+  const data = mockDataMarkdown();
+  output.textContent = data;
+  localStorage.setItem("aw-mock-data", data);
+}
+
+function downloadText(text, filename) {
   const blob = new Blob([text], { type: "text/markdown" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "first-ai-assistant-idea.md";
+  link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
 }
 
+function downloadMockData() {
+  const text = qs("#mock-data-output")?.innerText || mockDataMarkdown();
+  downloadText(text, "fake-sample-data.md");
+}
+
+function downloadPlan() {
+  const text = qs("#plan-output")?.innerText || "";
+  downloadText(text, "first-ai-assistant-idea.md");
+}
+
 function startOver() {
-  ["aw-pain", "aw-form", "aw-plan"].forEach((key) => localStorage.removeItem(key));
+  ["aw-pain", "aw-form", "aw-plan", "aw-mock-data"].forEach((key) => localStorage.removeItem(key));
   state.pain = "";
   qs("#idea-form")?.reset();
   qs("#plan-output").textContent = "Create a plan to see the result.";
+  qs("#mock-data-output").textContent = "Choose a task to generate fake sample data.";
   qsa(".choice-card").forEach((card) => card.classList.remove("selected"));
   showStep(1);
 }
@@ -231,6 +320,8 @@ function init() {
   qs("#make-plan")?.addEventListener("click", makePlan);
   qs("#quick-plan")?.addEventListener("click", makePlan);
   qs("#download-plan")?.addEventListener("click", downloadPlan);
+  qs("#generate-mock-data")?.addEventListener("click", generateMockData);
+  qs("#download-mock-data")?.addEventListener("click", downloadMockData);
   qs("#start-over")?.addEventListener("click", startOver);
   qs("#idea-form")?.addEventListener("input", saveForm);
 

@@ -23,6 +23,7 @@
         <a href="#guided-flow">Start</a>
         <a href="#examples">Examples</a>
         <a href="#safe-testing">Safe testing</a>
+        <a href="#mock-data-guide-info">Mock data</a>
         <a href="#workshop-kit">Workshop kit</a>
       </nav>
     </header>
@@ -33,7 +34,7 @@
           <p class="eyebrow">For people who are curious but not technical</p>
           <h1>Pick one annoying task. Get one safe AI assistant idea.</h1>
           <p class="hero-text">
-            Click the closest pain. The site will give you a starter plan you can test by copy/pasting five examples. No accounts, tools, coding, or private data needed.
+            Click the closest pain. The site will give you a starter plan and fake sample data you can test before using anything private. No accounts, tools, coding, or real client data needed.
           </p>
           <div class="hero-actions">
             <a class="button primary" href="#guided-flow">Pick my task</a>
@@ -45,7 +46,7 @@
           <h2>Your first test should be tiny.</h2>
           <ul>
             <li>Pick one repeated task</li>
-            <li>Use five copied examples</li>
+            <li>Generate five fake examples</li>
             <li>Let the assistant draft only</li>
             <li>A human approves everything</li>
           </ul>
@@ -68,7 +69,7 @@
             <span class="progress-pill active" data-progress="1">1. Pick task</span>
             <span class="progress-pill" data-progress="2">2. See starter idea</span>
             <span class="progress-pill" data-progress="3">3. Optional edits</span>
-            <span class="progress-pill" data-progress="4">4. Copy plan</span>
+            <span class="progress-pill" data-progress="4">4. Plan + fake data</span>
           </div>
 
           <section class="wizard-step active" data-step="1">
@@ -154,14 +155,37 @@
           <section class="wizard-step" data-step="4">
             <p class="mini-label">Result</p>
             <h3>Your starter plan</h3>
-            <p class="step-help">Copy this into ChatGPT, Claude, Gemini, or Hermes with five real examples. Review everything by hand.</p>
+            <p class="step-help">Use the plan with fake data first. If it works, then try copied real examples with private details removed.</p>
             <div class="result-toolbar">
               <button class="small-button" type="button" data-copy="plan-output">Copy plan</button>
-              <button class="small-button" type="button" id="download-plan">Download .md</button>
+              <button class="small-button" type="button" id="download-plan">Download plan</button>
+              <button class="small-button" type="button" id="generate-mock-data">Generate fake data</button>
               <button class="small-button quiet" type="button" data-back="3">Edit answers</button>
               <button class="small-button quiet" type="button" id="start-over">Start over</button>
             </div>
             <pre id="plan-output">Create a plan to see the result.</pre>
+
+            <div class="mock-data-panel" id="mock-data-guide">
+              <div>
+                <p class="mini-label">Built-in mock data</p>
+                <h4>Fake examples for this use case</h4>
+                <p>These are not real people or real clients. They are practice rows based on the task you picked.</p>
+              </div>
+              <div class="result-toolbar compact-toolbar">
+                <button class="small-button" type="button" data-copy="mock-data-output">Copy fake data</button>
+                <button class="small-button" type="button" id="download-mock-data">Download fake-data.md</button>
+              </div>
+              <pre id="mock-data-output">Choose a task to generate fake sample data.</pre>
+              <div class="attach-card">
+                <p class="mini-label">How to attach it to the agent</p>
+                <ol>
+                  <li>Copy the starter plan.</li>
+                  <li>Copy the fake data.</li>
+                  <li>Paste both into ChatGPT, Claude, Gemini, or Hermes.</li>
+                  <li>Say: “Use this fake data only. Show me the draft/check/summary. Do not send or update anything.”</li>
+                </ol>
+              </div>
+            </div>
           </section>
         </div>
       </section>
@@ -201,11 +225,24 @@
           <p>Most people get stuck when they start with Gmail, Calendar, CRM, OAuth, permissions, and APIs. Do this instead.</p>
         </div>
         <div class="safe-flow">
-          <div><span>1</span><strong>Copy/export 5 examples</strong><small>No private account connection needed.</small></div>
-          <div><span>2</span><strong>Put them in a simple table</strong><small>Date, person, title, notes, status.</small></div>
+          <div><span>1</span><strong>Generate fake examples</strong><small>Use made-up data based on the selected use case.</small></div>
+          <div><span>2</span><strong>Attach fake data to the prompt</strong><small>Paste the data under the starter plan.</small></div>
           <div><span>3</span><strong>Ask for a draft/check</strong><small>No sending. No updating.</small></div>
-          <div><span>4</span><strong>Human reviews everything</strong><small>Keep control with the person who owns the work.</small></div>
-          <div><span>5</span><strong>Then consider read-only access</strong><small>Only if the manual test is useful.</small></div>
+          <div><span>4</span><strong>Try sanitized real examples</strong><small>Remove private details before testing.</small></div>
+          <div><span>5</span><strong>Then consider read-only access</strong><small>Only if the fake and manual tests are useful.</small></div>
+        </div>
+      </section>
+
+      <section class="section mock-explain-section" id="mock-data-guide-info">
+        <div class="section-heading">
+          <p class="eyebrow">Mock data</p>
+          <h2>The sample data should match the use case.</h2>
+          <p>Follow-up helpers need fake open leads. Intake helpers need fake requests. Document helpers need fake document rows. Meeting helpers need fake notes. Research helpers need fake targets. The generator changes the data based on the task so the test feels real without using private information.</p>
+        </div>
+        <div class="mock-explain-grid">
+          <article><strong>Why fake data first?</strong><p>It lets people learn the workflow without risking private emails, client files, CRM records, or calendar data.</p></article>
+          <article><strong>What does “attach” mean?</strong><p>For the first test, it just means paste the fake data below the starter prompt. Later it can become a CSV upload, spreadsheet, folder, or read-only integration.</p></article>
+          <article><strong>When to use real data?</strong><p>Only after the fake-data test makes sense. Start with copied examples where names, emails, amounts, and sensitive details are removed.</p></article>
         </div>
       </section>
 
