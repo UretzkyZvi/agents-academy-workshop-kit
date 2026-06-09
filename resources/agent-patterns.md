@@ -29,3 +29,19 @@ Use it to improve consistency, not as the final authority.
 The agent runs on a schedule and reports to a human channel.
 
 Examples: daily lead scan, weekly competitor brief, monthly SOP review.
+
+## 6. Long-running workflow agent
+
+The agent carries one workflow across multiple steps, pauses while waiting for a person, document, signature, or external update, and resumes from saved state.
+
+Examples: client intake follow-up, insurance renewal packet collection, onboarding, invoice dispute tracking.
+
+Use this only when the workflow has:
+
+- a clear status field
+- a named human owner
+- an approval or waiting condition
+- a next action
+- a deadline or review cadence
+
+Do not rely on chat history alone. Write the state down in a case note, spreadsheet, CRM field, ticket, or database.
