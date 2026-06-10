@@ -49,6 +49,25 @@ Failure behavior:
 Do not give broad tool access because it is convenient.
 Give narrow access because the workflow requires it.
 
+### MCP implementation note
+
+MCP can make tool connections cleaner, especially when several agents or apps need the same source. It does not make the source safe by default.
+
+For each MCP server or connector, record:
+
+```text
+Server / connector:
+Workflow that may use it:
+Read permissions:
+Write permissions:
+Who may invoke it:
+Approval required before:
+Run log location:
+Owner:
+```
+
+If an agent or workflow is exposed as an MCP server, treat it like a new internal tool. Decide who can call it and what it is allowed to do before connecting it to other systems.
+
 ## State and memory
 
 Most first agents do not need complex memory.
@@ -77,6 +96,24 @@ Use approval before:
 - sensitive documents are moved
 - anything legal, medical, financial, insurance, or compliance-related is acted on
 
+## Lightweight governance record
+
+Conservative teams do not need a large governance program to start, but they do need a visible record. For each proposed agent, keep one short note:
+
+```text
+Workflow owner:
+Business purpose:
+Data touched:
+External systems touched:
+Actions the agent may take without approval:
+Actions requiring approval:
+Evaluation evidence:
+Failure / rollback plan:
+Review cadence:
+```
+
+This maps well to the NIST-style pattern of governing the use case, mapping risks, measuring results, and managing changes.
+
 ## Evaluation
 
 Do not evaluate only with vibes.
@@ -100,8 +137,8 @@ For business teams, local workflow evals matter more than public benchmark score
 - Manual LLM chat is enough for early samples.
 - Hermes Agent is useful for tool-using workflows, files, messaging, cron, browser/web, and multi-agent operations.
 - OpenAI Agents SDK is useful for OpenAI-first applications with tools, handoffs, sessions, guardrails, human-in-the-loop, and tracing.
-- LangGraph is useful when the workflow needs durable graph orchestration, state, memory, and inspection.
-- MCP can make tool connections more modular, but it does not remove the need for permissions and review.
+- LangGraph is useful when the workflow needs durable graph orchestration, state, memory, middleware, interrupts, and inspection.
+- MCP can make tool connections more modular, but it does not remove the need for permissions, data minimization, approval, and review.
 - Signal point integrations should usually start as export-based tests, then read-only API access, then approval-gated write actions if needed.
 - n8n, Make, and Zapier are useful after the approval flow is clear.
 

@@ -1,6 +1,6 @@
 # Latest Agent Field Notes
 
-Last seeded: 2026-06-09
+Last updated: 2026-06-10
 
 This file is maintained by a daily Hermes cron task. It should capture useful changes in the AI-agent field that improve the workshop kit.
 
@@ -23,6 +23,25 @@ This file is maintained by a daily Hermes cron task. It should capture useful ch
 - governance, privacy, and data-handling guidance
 
 ## Update log
+
+### 2026-06-10
+
+#### Field scan
+
+- LangChain and LangGraph reached 1.0, with LangGraph positioned around durable state and LangChain adding standardized agents plus middleware for human-in-the-loop tool approval, summarization, and PII redaction. Workshop implication: keep LangGraph in the "build when you need state, branching, interrupts, and inspection" bucket rather than as a default first tool. Source: https://blog.langchain.com/langchain-langgraph-1dot0/
+- Anthropic's finance/insurance agent announcement shows vertical agent products moving toward governed connectors, Microsoft 365 integration, MCP apps, and benchmarked financial workflows. Workshop implication: for insurance and professional-services teams, the practical pattern is still governed data access plus draft/review workflows; do not imply that vertical agents remove supervision, confidentiality review, or firm policy. Source: https://www.anthropic.com/news/finance-agents
+- Anthropic's MCP/code-execution guidance says agents can scale tool use by writing code that calls MCP tools instead of loading every tool definition and result into the model context, reducing context overhead substantially. Workshop implication: for builder audiences, treat MCP as a tool boundary and routing layer; teach least-privilege server access and logs even when the model uses code to call tools. Source: https://www.anthropic.com/engineering/code-execution-with-mcp
+- NIST continues to extend the AI Risk Management Framework, including a 2026 concept note for trustworthy AI in critical infrastructure. Workshop implication: conservative teams should map each agent workflow to risk controls: govern, map, measure, manage; for small firms this becomes a simple record of data touched, action authority, evaluation evidence, and owner. Source: https://www.nist.gov/itl/ai-risk-management-framework
+
+#### Repo changes made
+
+- Updated `resources/tools-and-platforms.md` to note LangChain/LangGraph 1.0, two-way MCP interoperability as a selection consideration, and governance/risk-record criteria.
+- Updated `resources/technical-builder-notes.md` with a short MCP implementation note and a NIST-style governance record for conservative teams.
+- Updated `templates/eval-checklist.md` so reviewers capture data sources, external actions, and whether PII/confidential material was minimized.
+
+#### Recommendation change
+
+No change to the core stance. The new signal reinforces the kit's workflow-first advice: use mature agent frameworks and MCP when they solve a real integration/state problem, but keep approvals, run records, data minimization, and local evals as default requirements.
 
 ### 2026-06-09
 

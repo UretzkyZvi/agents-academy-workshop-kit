@@ -7,6 +7,9 @@ Sample ID:
 Date:
 Reviewer:
 Run / trace link, if available:
+Data sources used:
+External systems or tools touched:
+PII/confidential material minimized? yes/no
 
 Did the agent follow the spec? yes/no
 Where did it drift?
