@@ -9,6 +9,7 @@ Reviewer:
 Run / trace link, if available:
 Data sources used:
 External systems or tools touched:
+Runtime / sandbox / platform used:
 PII/confidential material minimized? yes/no
 
 Did the agent follow the spec? yes/no
@@ -19,6 +20,7 @@ Did it guess where it should have flagged uncertainty?
 Were the right tools used?
 Were any tool calls unnecessary or risky?
 Did any sensitive action pause for human approval?
+Did approval prompts feel clear and limited, or noisy/repetitive?
 If the workflow paused, could it resume from saved state?
 Was the output useful?
 How long did review take?

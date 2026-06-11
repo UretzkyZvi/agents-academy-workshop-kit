@@ -49,6 +49,23 @@ Failure behavior:
 Do not give broad tool access because it is convenient.
 Give narrow access because the workflow requires it.
 
+## Containment and blast radius
+
+Human approval is necessary, but it is not the only safety control. Reviewers can get tired of prompts, especially if the system asks for approval too often.
+
+For any agent with tools, also define what the agent is technically unable to do:
+
+```text
+File or folder boundary:
+Network / egress boundary:
+External accounts reachable:
+Write actions disabled by default:
+Sandbox or test environment:
+Rollback path if something goes wrong:
+```
+
+Good workshop default: start in a sandbox, with export files or read-only access, then add approval-gated writes only after sample runs are passing.
+
 ### MCP implementation note
 
 MCP can make tool connections cleaner, especially when several agents or apps need the same source. It does not make the source safe by default.
@@ -81,6 +98,23 @@ Use simple state first:
 - reviewer notes
 
 Avoid letting memory silently change behavior. If memory affects output, make it visible or reviewable.
+
+## Modular instructions
+
+Do not cram every policy, checklist, style guide, and playbook into one giant prompt. Policy-heavy agents are easier to review when instructions are modular.
+
+For each instruction module, record:
+
+```text
+Name:
+When to load it:
+Owner:
+Source document:
+Last reviewed:
+Allowed workflow:
+```
+
+Examples: intake checklist, renewal follow-up rules, client communication style, jurisdiction-specific legal disclaimer, compliance escalation rule.
 
 ## Human approval
 
@@ -139,6 +173,7 @@ For business teams, local workflow evals matter more than public benchmark score
 - OpenAI Agents SDK is useful for OpenAI-first applications with tools, handoffs, sessions, guardrails, human-in-the-loop, and tracing.
 - LangGraph is useful when the workflow needs durable graph orchestration, state, memory, middleware, interrupts, and inspection.
 - MCP can make tool connections more modular, but it does not remove the need for permissions, data minimization, approval, and review.
+- Treat sandboxing, egress limits, read-only modes, and tool scopes as first-class product requirements, not optional hardening.
 - Signal point integrations should usually start as export-based tests, then read-only API access, then approval-gated write actions if needed.
 - n8n, Make, and Zapier are useful after the approval flow is clear.
 

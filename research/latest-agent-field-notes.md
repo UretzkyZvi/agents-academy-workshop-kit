@@ -1,6 +1,6 @@
 # Latest Agent Field Notes
 
-Last updated: 2026-06-10
+Last updated: 2026-06-11
 
 This file is maintained by a daily Hermes cron task. It should capture useful changes in the AI-agent field that improve the workshop kit.
 
@@ -23,6 +23,26 @@ This file is maintained by a daily Hermes cron task. It should capture useful ch
 - governance, privacy, and data-handling guidance
 
 ## Update log
+
+### 2026-06-11
+
+#### Field scan
+
+- Anthropic's containment write-up is a useful corrective to naive human-in-the-loop advice: permission prompts alone create approval fatigue, and users approved roughly 93% of prompts in Claude Code telemetry. Their recommended control pattern is to cap blast radius with environment boundaries such as sandboxes, VMs, and egress controls, while still using human review where it matters. Workshop implication: approval remains required for sensitive actions, but conservative teams should also ask what the agent is technically unable to do. Source: https://www.anthropic.com/engineering/how-we-contain-claude
+- Anthropic's agentic-coding eval note shows infrastructure can move benchmark results by several percentage points because agent tests include runtime resources, time limits, dependency installs, and sandbox behavior. Workshop implication: local evals should record the environment and tool constraints, not only the model name or final answer. Source: https://www.anthropic.com/engineering/infrastructure-noise
+- Google's ADK SkillToolset guide describes progressive disclosure for agent skills: load small metadata by default, full instructions only when needed, and resources only on demand. Workshop implication: for legal, insurance, and operations playbooks, do not cram every policy into one system prompt; keep domain instructions modular, named, reviewed, and loaded only for the current workflow. Source: https://developers.googleblog.com/developers-guide-to-building-adk-agents-with-skills/
+- The current MCP specification keeps security and trust front-and-center: explicit user consent, data privacy, tool safety, and OAuth-style authorization for HTTP transports. Workshop implication: MCP belongs in the kit as an interoperability pattern, but every connector still needs a permission record, allowed scopes, and logging. Sources: https://modelcontextprotocol.io/specification/2025-11-25 and https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization
+
+#### Repo changes made
+
+- Updated `resources/technical-builder-notes.md` with a short containment/blast-radius section and a modular-instructions note for policy-heavy workflows.
+- Updated `templates/human-approval-flow.md` so approval design captures prompt volume and technical containment, not just reviewer choice.
+- Updated `templates/eval-checklist.md` to record runtime/tool environment and prompt/approval fatigue.
+- Updated `resources/common-failure-modes.md` with approval fatigue and monolithic prompt failure modes.
+
+#### Recommendation change
+
+Slight strengthening of the recommendation: human approval is necessary but not sufficient. For any agent with tools, teach two controls together: (1) explicit approvals for sensitive decisions and side effects, and (2) containment that limits what the agent can access or change even if a prompt or model step goes wrong.
 
 ### 2026-06-10
 
