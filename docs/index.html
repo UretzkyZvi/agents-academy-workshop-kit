@@ -20,6 +20,7 @@
         </span>
       </a>
       <nav aria-label="Primary navigation">
+        <a href="#agent-quest">Play</a>
         <a href="#guided-flow">Start</a>
         <a href="#examples">Examples</a>
         <a href="#safe-testing">Safe testing</a>
@@ -33,11 +34,11 @@
           <p class="eyebrow">For people who are curious but not technical</p>
           <h1>Pick one annoying task. Get a safe copy/paste test.</h1>
           <p class="hero-text">
-            Click the closest pain. The site will give you a message to paste into an AI chat, plus fake examples to test with. No accounts, tools, coding, or real client data needed.
+            Play a tiny 8-bit lesson, or skip straight to a copy/paste test. You will get a message for an AI chat, plus fake examples to practice with. No accounts, tools, coding, or real client data needed.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#guided-flow">Pick my task</a>
-            <a class="button secondary" href="#examples">Show examples</a>
+            <a class="button primary" href="#agent-quest">Play Agent Quest</a>
+            <a class="button secondary" href="#guided-flow">Skip to copy/paste test</a>
           </div>
         </div>
         <aside class="promise-card" aria-label="What happens here">
@@ -54,6 +55,38 @@
 
       <section class="plain-explainer compact" aria-label="Plain English explanation">
         <p><strong>Plain English:</strong> an AI assistant has one job, reads a small example, follows rules, and waits for human review.</p>
+      </section>
+
+
+      <section class="agent-quest-section" id="agent-quest" aria-labelledby="agent-quest-title">
+        <div class="section-heading quest-heading">
+          <p class="eyebrow">8-bit lesson</p>
+          <h2 id="agent-quest-title">Train Byte on one safe task.</h2>
+          <p>Guide a tiny AI helper through a fake work request. Byte can draft and check, but a human stays in charge.</p>
+        </div>
+
+        <div class="quest-shell" data-quest-step="0">
+          <div class="quest-stage" aria-label="Agent Quest pixel scene">
+            <div class="pixel-skyline" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="quest-path" aria-hidden="true"></div>
+            <div class="quest-station station-instruction is-active" data-station="0"><span class="station-icon">📜</span><strong>Instruction</strong></div>
+            <div class="quest-station station-data" data-station="1"><span class="station-icon">📦</span><strong>Fake examples</strong></div>
+            <div class="quest-station station-desk" data-station="2"><span class="station-icon">✍️</span><strong>Draft desk</strong></div>
+            <div class="quest-station station-gate" data-station="3"><span class="station-icon">🛑</span><strong>Approval gate</strong></div>
+            <div class="quest-station station-output" data-station="4"><span class="station-icon">✅</span><strong>Copy/paste test</strong></div>
+            <div class="byte-sprite" aria-label="Byte the tiny AI helper"><span class="byte-eye left"></span><span class="byte-eye right"></span><span class="byte-mouth"></span></div>
+          </div>
+
+          <div class="quest-panel">
+            <p class="mini-label">Agent Quest</p>
+            <h3 id="quest-title">Byte found a messy request.</h3>
+            <p id="quest-story" class="quest-story">A client wrote: “Can you help us with the workshop thing next month?” Byte needs one narrow job before doing anything.</p>
+            <div id="quest-feedback" class="quest-feedback">Choose the safest instruction.</div>
+            <div id="quest-choices" class="quest-choices" aria-live="polite"></div>
+          </div>
+        </div>
       </section>
 
       <section class="guided-section" id="guided-flow">

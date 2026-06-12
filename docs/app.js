@@ -117,6 +117,67 @@ const state = {
   pain: localStorage.getItem("aw-pain") || "",
 };
 
+const questSteps = [
+  { title: "Byte found a messy request.", story: "A client wrote: “Can you help us with the workshop thing next month?” Byte needs one narrow job before doing anything.", feedback: "Choose the safest instruction.", choices: [
+    { label: "Handle the whole client project", safe: false, response: "Too big. Byte gets confused when the job is broad." },
+    { label: "Find what information is missing", safe: true, response: "Good. One narrow job is easier to check." },
+    { label: "Reply and promise a date", safe: false, response: "Too risky. Byte should not promise or send yet." },
+  ]},
+  { title: "Byte walks to the data crate.", story: "The real client inbox is locked. For the first test, Byte should practice on fake examples.", feedback: "Pick what Byte should read first.", choices: [
+    { label: "Use five fake requests", safe: true, response: "Yes. Fake examples make the first test safe." },
+    { label: "Connect Gmail now", safe: false, response: "Not yet. Tools and accounts come later." },
+    { label: "Paste private client files", safe: false, response: "No private data in the first test." },
+  ]},
+  { title: "Byte works at the draft desk.", story: "Byte reads the fake requests and can make something a human can review.", feedback: "What should Byte produce?", choices: [
+    { label: "A missing-info checklist", safe: true, response: "Good. A checklist is easy for a human to review." },
+    { label: "A final client decision", safe: false, response: "Too much authority. Humans make final decisions." },
+    { label: "An auto-sent email", safe: false, response: "Not for the first test. Draft only." },
+  ]},
+  { title: "Byte reaches the approval gate.", story: "Byte made a useful draft. The gate asks who decides what happens next.", feedback: "Open the safe gate.", choices: [
+    { label: "Human reviews before sending", safe: true, response: "Correct. Human approval keeps the test safe." },
+    { label: "Byte sends it automatically", safe: false, response: "Too risky. Sending stays locked." },
+    { label: "Byte updates records", safe: false, response: "Not yet. Updating tools comes later." },
+  ]},
+  { title: "You trained Byte safely.", story: "Byte now knows the pattern: one job, fake examples, draft/check only, human approval.", feedback: "Turn this lesson into your copy/paste test.", choices: [
+    { label: "Create my safe copy/paste test", safe: true, finish: true, response: "Ready. Creating the test below." },
+    { label: "Play again", safe: true, reset: true, response: "Starting over." },
+  ]},
+];
+let questIndex = 0;
+function renderQuest() {
+  const shell = qs(".quest-shell");
+  const title = qs("#quest-title");
+  const story = qs("#quest-story");
+  const feedback = qs("#quest-feedback");
+  const choices = qs("#quest-choices");
+  if (!shell || !title || !story || !feedback || !choices) return;
+  const step = questSteps[questIndex];
+  shell.dataset.questStep = String(questIndex);
+  title.textContent = step.title;
+  story.textContent = step.story;
+  feedback.textContent = step.feedback;
+  feedback.className = "quest-feedback";
+  choices.innerHTML = step.choices.map((choice, index) => `<button class="quest-choice" type="button" data-quest-choice="${index}">${choice.label}</button>`).join("");
+  qsa(".quest-station").forEach((station) => {
+    station.classList.toggle("is-active", Number(station.dataset.station) === Math.min(questIndex, 4));
+    station.classList.toggle("is-done", Number(station.dataset.station) < Math.min(questIndex, 4));
+  });
+}
+function chooseQuestOption(index) {
+  const step = questSteps[questIndex];
+  const choice = step?.choices[index];
+  const feedback = qs("#quest-feedback");
+  if (!choice || !feedback) return;
+  feedback.textContent = choice.response;
+  feedback.className = `quest-feedback ${choice.safe ? "safe" : "warn"}`;
+  if (!choice.safe) return;
+  if (choice.reset) { questIndex = 0; setTimeout(renderQuest, 450); return; }
+  if (choice.finish) { setTimeout(() => selectPain("intake"), 450); return; }
+  questIndex = Math.min(questIndex + 1, questSteps.length - 1);
+  setTimeout(renderQuest, 650);
+}
+
+
 function qs(selector) {
   return document.querySelector(selector);
 }
@@ -351,6 +412,11 @@ function init() {
   qs("#download-mock-data")?.addEventListener("click", downloadMockData);
   qs("#start-over")?.addEventListener("click", startOver);
   qs("#idea-form")?.addEventListener("input", saveForm);
+  qs("#quest-choices")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-quest-choice]");
+    if (button) chooseQuestOption(Number(button.dataset.questChoice));
+  });
+  renderQuest();
 
   restoreForm();
   if (state.pain && painExamples[state.pain]) {
