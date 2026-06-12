@@ -7,6 +7,7 @@ Sample ID:
 Date:
 Reviewer:
 Run / trace link, if available:
+Platform/product used and export path for specs, samples, rubrics, and logs:
 Data sources used:
 External systems or tools touched:
 Runtime / sandbox / platform used:
@@ -18,6 +19,7 @@ Was the output accurate?
 What needed correction?
 Did it guess where it should have flagged uncertainty?
 Were the right tools used?
+Were tool descriptions and parameters clear enough to prevent the wrong tool or wrong inputs?
 Were any tool calls unnecessary or risky?
 Did any sensitive action pause for human approval?
 Did approval prompts feel clear and limited, or noisy/repetitive?

@@ -25,11 +25,12 @@ Use these for the first workshop samples. Prove the workflow before building inf
 ### 2. Agent runtimes and orchestration
 
 - Hermes Agent: useful for tool-using personal/company agents, Telegram/email workflows, files, web, cron, and multi-agent work.
-- OpenAI Agents SDK: useful for OpenAI-first teams that need tools, handoffs, sessions, human-in-the-loop controls, guardrails, and tracing.
+- OpenAI Agents SDK: useful for OpenAI-first teams that need tools, handoffs, sessions, human-in-the-loop controls, guardrails, and tracing. Do not make any hosted builder or hosted eval dashboard the source of truth; OpenAI has announced the wind-down of Agent Builder and Evals after November 30, 2026, so keep workflow specs, sample sets, and eval rubrics portable.
 - LangGraph / LangChain: useful for custom app workflows that need durable execution, graph-based orchestration, memory, middleware, inspection, and human-in-the-loop tool approval. Their 1.0 releases are a good sign for teams that need framework stability, but they are still overkill for a first workshop sample.
+- Microsoft Agent Framework: useful for Microsoft-heavy teams that want a supported .NET/Python framework with the AutoGen/Semantic Kernel line converging around stable APIs, multi-agent workflows, checkpointing, pause/resume, approvals, A2A, and MCP. Still start with the workflow map and local evals before introducing the framework.
 - Google ADK: useful for code-first Gemini/Vertex AI workflows, multi-agent orchestration, evaluation, deployment, and long-running stateful agents.
 - CrewAI / AutoGen-style systems: useful for multi-agent experiments, but keep production workflows tightly scoped.
-- Dify and similar platforms: useful for low-code internal AI apps and workflow demos, especially when the team needs a visual builder before custom code.
+- Dify and similar platforms: useful for low-code internal AI apps and workflow demos, especially when the team needs a visual builder before custom code. If a low-code workflow is exposed as a tool or MCP server, document who may call it, expected latency, logs, and rollback before connecting it to other agents.
 
 ### 3. Workflow glue and signal points
 
@@ -52,6 +53,8 @@ Before using any platform on a client workflow, check whether it supports:
 - **Durable state:** can a multi-day workflow remember status, owner, waiting condition, and next action without relying only on chat history?
 - **Least-privilege tools:** can you expose only the specific tools and data sources needed for this workflow?
 - **Evaluation hooks:** can you replay samples or grade runs against the workshop evaluation checklist?
+- **Portability:** if the vendor changes or retires a builder/eval product, can you export the spec, samples, rubrics, logs, and approval rules?
+- **Latency and progress:** if the agent or workflow is called as a tool, can the caller see progress, timeouts, and partial failure states?
 - **Data minimization and governance:** can you limit what data the agent sees, redact or avoid sensitive fields, and keep a simple risk record for conservative teams?
 
 ## Selection rule

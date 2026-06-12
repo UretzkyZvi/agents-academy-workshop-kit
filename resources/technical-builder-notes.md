@@ -85,6 +85,21 @@ Owner:
 
 If an agent or workflow is exposed as an MCP server, treat it like a new internal tool. Decide who can call it and what it is allowed to do before connecting it to other systems.
 
+## Tool design review
+
+Tool quality affects agent quality. Before adding or changing a tool, review:
+
+```text
+Tool description clear enough for the model to choose it correctly:
+Parameters that should be fixed, not model-selected:
+Parameters the model may infer:
+Expected latency / timeout:
+Progress or partial-result behavior:
+Tool-specific sample evals passed:
+```
+
+Keep descriptions specific. A vague tool like `update_record` invites risky calls; a narrow tool like `draft_renewal_follow_up_for_review` is easier to test and approve.
+
 ## State and memory
 
 Most first agents do not need complex memory.

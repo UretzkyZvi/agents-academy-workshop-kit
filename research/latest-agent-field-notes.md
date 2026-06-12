@@ -1,6 +1,6 @@
 # Latest Agent Field Notes
 
-Last updated: 2026-06-11
+Last updated: 2026-06-12
 
 This file is maintained by a daily Hermes cron task. It should capture useful changes in the AI-agent field that improve the workshop kit.
 
@@ -23,6 +23,26 @@ This file is maintained by a daily Hermes cron task. It should capture useful ch
 - governance, privacy, and data-handling guidance
 
 ## Update log
+
+### 2026-06-12
+
+#### Field scan
+
+- OpenAI's AgentKit page now carries an important lifecycle note: Agent Builder and Evals are being wound down, with availability ending after November 30, 2026. Workshop implication: avoid teaching proprietary visual builders or hosted eval products as durable foundations unless the team has an export/migration plan; keep specs, eval rubrics, and sample sets portable. Source: https://openai.com/index/introducing-agentkit/
+- Microsoft Agent Framework reached 1.0 for .NET and Python and is positioned as the convergence of Semantic Kernel and AutoGen, with stable APIs, long-term support, multi-agent workflow patterns, checkpointing, human-in-the-loop approvals, pause/resume, A2A, and MCP. Workshop implication: Microsoft-heavy conservative teams now have a more enterprise-aligned framework option, but it still belongs after workflow mapping and local evals, not before. Sources: https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-version-1-0/ and https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-at-build-2026-announce/
+- Microsoft's Build 2026 Agent Harness framing is useful because it treats shell/filesystem access, approval flows, context management, managed session state, observability, and versioning as production concerns. Workshop implication: when a team wants agents that touch files or systems, require a harness/run-record conversation before granting write tools.
+- Dify documentation now clearly shows MCP in both directions: Dify workflows can use MCP tools, and Dify apps can be exposed as MCP servers. The docs also warn that MCP does not remove app latency and recommend progress indicators or breaking complex workflows into smaller operations. Workshop implication: low-code MCP demos should document server IDs, dev/staging/prod consistency, who may call the app-as-tool, expected latency, and logs. Sources: https://docs.dify.ai/en/use-dify/build/mcp and https://docs.dify.ai/en/use-dify/publish/publish-mcp
+- Anthropic's tool-writing guidance remains a strong practical reminder: agent performance often depends on tool descriptions, tool ergonomics, and tool-specific evals, not only model choice. Workshop implication: include tool description quality and parameter safety in builder reviews. Source: https://www.anthropic.com/engineering/writing-tools-for-agents
+
+#### Repo changes made
+
+- Updated `resources/tools-and-platforms.md` with Microsoft Agent Framework, OpenAI product-lifecycle caution, low-code MCP publication caveats, and latency/run-record selection criteria.
+- Updated `resources/technical-builder-notes.md` with a short tool-design review block covering descriptions, parameter modes, latency, and tool-specific evals.
+- Updated `templates/eval-checklist.md` so reviewers capture platform/product lifecycle risk and tool-description/parameter issues.
+
+#### Recommendation change
+
+No change to the core stance. Slightly strengthen portability guidance: workshop assets should remain platform-independent. Treat hosted builders and eval dashboards as useful conveniences, not the source of truth; keep workflow maps, specs, sample sets, approval rules, and eval rubrics in files the team controls.
 
 ### 2026-06-11
 
