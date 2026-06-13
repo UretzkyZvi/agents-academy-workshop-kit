@@ -285,7 +285,7 @@ body.play-mode .details { overflow: hidden; padding: 0; }
 @keyframes legWiggle { to { transform: translateX(3px); } }
 @keyframes packetPulse { to { transform: translate(-50%, -58%) scale(1.08); } }
 
-.chain-run { grid-template-columns: minmax(0, 1.55fr) minmax(315px, .58fr); }
+.chain-run { grid-template-columns: minmax(0, 1.35fr) minmax(390px, .75fr); }
 .chain-floor { min-height: 0; }
 .chain-path {
   position: absolute;
@@ -345,6 +345,74 @@ body.play-mode .details { overflow: hidden; padding: 0; }
 .chain-caption strong { font-family: 'Press Start 2P', monospace; color: var(--orange); font-size: .62rem; }
 .chain-caption span { font-weight: 900; }
 .chain-side .mini-focus h3 { color: var(--orange); }
+.pixel-person {
+  --shirt: #45e5d9;
+  --hair: #3a2d45;
+  --pants: #2d3d68;
+  position: relative;
+  width: 58px;
+  height: 82px;
+  background: transparent;
+  image-rendering: pixelated;
+  transform: scale(1.02);
+}
+.pixel-person::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 2px;
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--line);
+  border-radius: 10px 10px 8px 8px;
+  background: #ffd7a8;
+  box-shadow: 0 -8px 0 var(--hair), -8px 4px 0 var(--hair), 8px 4px 0 var(--hair), inset 7px 10px 0 -5px #1f2a44, inset 19px 10px 0 -5px #1f2a44;
+}
+.pixel-person::after {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 36px;
+  width: 40px;
+  height: 30px;
+  border: 3px solid var(--line);
+  border-radius: 10px;
+  background: var(--shirt);
+  box-shadow: 5px 31px 0 -3px var(--pants), 25px 31px 0 -3px var(--pants), 5px 43px 0 -4px var(--line), 25px 43px 0 -4px var(--line);
+}
+.person-0 { --shirt: #39dbe2; --hair: #3a2d45; --pants: #2d3d68; }
+.person-1 { --shirt: #ffd45c; --hair: #8a4f2f; --pants: #31547a; }
+.person-2 { --shirt: #78e08f; --hair: #232b3e; --pants: #543c8f; }
+.person-3 { --shirt: #ff9ac2; --hair: #6d3a22; --pants: #2f5270; }
+.chain-agent.walking .pixel-person { animation: spriteWalk .42s steps(2) infinite alternate; }
+.packet-teacher { display: grid; grid-template-rows: auto auto auto minmax(0,1fr); }
+.packet-board {
+  min-height: 0;
+  margin-top: .5rem;
+  display: grid;
+  gap: .35rem;
+}
+.packet-board h4 {
+  margin: 0;
+  color: var(--orange);
+  font-family: 'Press Start 2P', monospace;
+  font-size: .55rem;
+  letter-spacing: -.02em;
+}
+.packet-board pre {
+  margin: 0;
+  max-height: 112px;
+  overflow: hidden;
+  white-space: pre-wrap;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: #fff9d7;
+  padding: .5rem;
+  color: var(--ink);
+  font: 800 .75rem/1.35 Inter, system-ui, sans-serif;
+}
+.packet-board pre + h4 { margin-top: .15rem; }
+@keyframes spriteWalk { to { transform: translateY(-5px) scale(1.12); filter: drop-shadow(0 8px 0 rgba(39,50,74,.12)); } }
 
 @media (max-width: 980px) {
   html, body { overflow: auto; }
