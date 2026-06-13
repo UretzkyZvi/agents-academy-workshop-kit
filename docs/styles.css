@@ -634,7 +634,17 @@ body.play-mode .details { overflow: hidden; padding: 0; }
   font-size: .76rem;
   font-weight: 900;
 }
-.mission-side { min-height: 0; display: grid; grid-template-rows: minmax(132px, auto) minmax(0, 1fr) auto; gap: .5rem; }
+.mission-side {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(110px, auto) minmax(0, 1fr) auto;
+  gap: .45rem;
+  border: 3px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,254,244,.68);
+  padding: .55rem;
+  box-shadow: inset 0 0 0 4px rgba(255,255,255,.35);
+}
 .mission-side .auto-log, .mission-side .stage-actions { grid-area: auto; }
 .mission-side .office-log { min-height: 0; }
 .mission-focus {
@@ -884,6 +894,96 @@ select { width: 100%; border: 3px solid var(--line); border-radius: 12px; backgr
   box-shadow: 6px 6px 0 rgba(39,50,74,.15);
 }
 .video-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+/* Reduce nested-board feeling: fewer heavy boxes, more map/game surface. */
+body.play-mode .terminal { background: rgba(255,255,255,.5); box-shadow: none; }
+body.play-mode .terminal-body { gap: .55rem; }
+.topdown-map { border-width: 3px; box-shadow: inset 0 0 28px rgba(88,182,255,.18); }
+.topdown-map .map-title {
+  left: 4%; right: 4%; top: 3.5%;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255,254,244,.72);
+  box-shadow: none;
+  backdrop-filter: blur(2px);
+}
+.topdown-map .map-room {
+  border-width: 2px;
+  box-shadow: 0 4px 0 rgba(39,50,74,.2), inset 0 0 0 2px rgba(255,255,255,.35);
+  background-blend-mode: soft-light, soft-light, normal;
+}
+.topdown-map .map-room::before { border-width: 2px; height: 11px; inset: -8px -5px auto -5px; }
+.topdown-map .room-sign { border: 0; background: rgba(255,254,244,.75); }
+.topdown-map .map-prop { border-width: 2px; box-shadow: 2px 3px 0 rgba(39,50,74,.12); opacity: .85; }
+.topdown-map .artifact-shelf {
+  left: 4%; right: 4%; bottom: 3.5%;
+  min-height: 78px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255,254,244,.72);
+  box-shadow: 0 -2px 0 rgba(39,50,74,.16) inset;
+  backdrop-filter: blur(2px);
+}
+.topdown-map .artifact-shelf h3 { margin-bottom: .35rem; font-size: .52rem; }
+.artifact-chip { cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.artifact-chip:hover { transform: translateY(-2px); background: #dcfff2; }
+.mission-focus, .office-log, .stage-actions {
+  border: 0;
+  border-radius: 12px;
+  box-shadow: none;
+  background: rgba(255,255,255,.5);
+}
+.mission-focus { padding: .65rem; }
+.office-log { background: rgba(255,255,255,.7); }
+.stage-actions { background: rgba(255,255,255,.7); }
+.model-badge, .context-meter { border-width: 1px; }
+.chat-card { border-width: 2px; box-shadow: none; }
+.chat-card pre { border-width: 1px; }
+.help-modal-backdrop, .artifact-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(18,28,48,.56);
+  backdrop-filter: blur(4px);
+}
+.artifact-modal {
+  position: relative;
+  width: min(860px, 94%);
+  max-height: 94%;
+  overflow: auto;
+  border: 5px solid var(--line);
+  border-radius: 22px;
+  background: #fffefa;
+  padding: 1rem;
+  box-shadow: 12px 12px 0 rgba(0,0,0,.24);
+}
+.artifact-modal h3 { margin: .35rem 2.5rem .25rem 0; color: var(--orange); font-family: 'Press Start 2P', monospace; font-size: clamp(.82rem, 1.35vw, 1.15rem); line-height: 1.25; }
+.artifact-modal small { display: block; color: var(--soft-ink); font-weight: 900; margin-bottom: .6rem; }
+.artifact-modal pre {
+  margin: 0;
+  max-height: min(58vh, 520px);
+  overflow: auto;
+  white-space: pre-wrap;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: #fff7d3;
+  color: var(--ink);
+  padding: .8rem;
+  font: 800 .88rem/1.45 ui-monospace, Consolas, monospace;
+}
+.artifact-modal-actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: .7rem; }
+.artifact-modal-actions button {
+  border: 3px solid var(--line);
+  border-radius: 14px;
+  background: #fff0a6;
+  color: var(--ink);
+  padding: .55rem .7rem;
+  font-weight: 900;
+  cursor: pointer;
+}
 
 @media (max-width: 980px) {
   html, body { overflow: auto; }

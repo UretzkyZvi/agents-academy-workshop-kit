@@ -74,7 +74,7 @@ const state = {
   screen: "title", cursor: 0, provider: "mock", apiKey: "",
   appText: "Turn a full messy meeting transcript into a client-ready follow-up while showing context windows, model choices, and artifacts.",
   template: "meeting", data: "", agents: [], runLog: [], chat: [], artifacts: [],
-  activeAgent: -1, runPhase: "idle", running: false, score: 0, helpTerm: null,
+  activeAgent: -1, runPhase: "idle", running: false, score: 0, helpTerm: null, activeArtifact: null,
 };
 const flow = ["title", "brain", "define", "data", "agents", "run", "export"];
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -306,6 +306,23 @@ function helpModal(){
     </section>
   </div>`;
 }
+function artifactModal(){
+  const artifact = state.activeArtifact ? state.artifacts.find(a => a.name === state.activeArtifact) : null;
+  if(!artifact) return "";
+  return `<div class="artifact-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="artifact-title">
+    <section class="artifact-modal">
+      <button id="close-artifact" class="modal-close" aria-label="Close artifact">×</button>
+      <p class="kicker">ARTIFACT FILE</p>
+      <h3 id="artifact-title">${esc(artifact.name)}</h3>
+      <small>${esc(artifact.agent ? `Created by ${artifact.agent}` : 'Original mission input')}</small>
+      <pre>${esc(artifact.text)}</pre>
+      <div class="artifact-modal-actions">
+        <button id="copy-artifact">Copy file text</button>
+        <button id="download-artifact">Download file</button>
+      </div>
+    </section>
+  </div>`;
+}
 function termButtons(){ return `<div class="term-row">${Object.keys(glossary).map(k=>`<button class="term-help" data-term="${k}">? ${esc(glossary[k].title)}</button>`).join("")}</div>`; }
 function contextMeter(input, agent){ const model = modelFor(agent); const pct = Math.min(100, Math.round((estimateTokens(input)/model.limit)*100)); return `<div class="context-meter"><div><b>Context window</b><button class="term-help tiny-help" data-term="context-window">?</button><span>${estimateTokens(input)} / ${model.limit} teaching tokens</span></div><meter min="0" max="100" value="${pct}"></meter><strong>${pct}% full</strong></div>`; }
 function detailsForScreen(){
@@ -357,7 +374,7 @@ function runScreen(){
       </div>`}).join("")}
       ${activeAgent?`<div class="map-agent" style="--x:${stationLayout(active+1).x};--y:${stationLayout(active+1).y}">${pixelActor(active, activeAgent.name)}<b>${esc(activeAgent.name)}</b></div>`:''}
       <div class="file-packet ${state.running||state.runPhase==='complete'?'moving':''}" style="--x:${stationLayout(active<0?0:active+1).x};--y:${stationLayout(active<0?0:active+1).y}">${state.runPhase==='artifact'?'FILE OUT':'FILE'}</div>
-      <div class="artifact-shelf"><h3>Artifact shelf</h3>${state.artifacts.map(a=>`<button class="artifact-chip" title="${esc(a.name)}">${a.kind==='input'?'📄':'🗂️'} ${esc(a.name)}</button>`).join("")}</div>
+      <div class="artifact-shelf"><h3>Artifact shelf</h3>${state.artifacts.map(a=>`<button class="artifact-chip" data-artifact="${esc(a.name)}" title="Open ${esc(a.name)}">${a.kind==='input'?'📄':'🗂️'} ${esc(a.name)}</button>`).join("")}</div>
     </section>
     <aside class="mission-side">
       <div class="mission-focus">${activeAgent?`<h3>${activeAgent.icon} ${esc(activeAgent.name)}</h3><p>${esc(activeAgent.role)}</p><div class="model-badge"><b>${esc(modelFor(activeAgent).model)}</b><span>${esc(modelFor(activeAgent).strength)} · ${esc(modelFor(activeAgent).cost)}</span><button class="term-help tiny-help" data-term="model">?</button></div>${contextMeter(activeInput, activeAgent)}`:`<h3>${state.runLog.length?'🏁 Outcome ready':'Mission ready'}</h3><p>${state.runLog.length?'Inspect the artifact chain below. The same transcript produced files, not just explanations.':'Press Play to move a full transcript through model-specific rooms on the mission floor.'}</p>${termButtons()}`}</div>
@@ -365,6 +382,7 @@ function runScreen(){
       ${!state.running?`<div class="stage-actions"><button id="stage-play">${state.runLog.length?'Play Again':'Play Mission'}</button>${state.runLog.length?'<button id="stage-export">Export Run</button>':''}<button id="stage-edit">Edit Models</button></div>`:''}
     </aside>
     ${helpModal()}
+    ${artifactModal()}
   </div>`;
 }
 function contentForScreen(){
@@ -389,12 +407,17 @@ function render(){
   document.querySelectorAll(".term-help").forEach(b=>b.addEventListener("click",()=>{state.helpTerm=b.dataset.term; render();}));
   $("#close-help")?.addEventListener("click",()=>{state.helpTerm=null; render();});
   document.querySelector(".help-modal-backdrop")?.addEventListener("click",(e)=>{ if(e.target.classList.contains("help-modal-backdrop")){ state.helpTerm=null; render(); } });
+  document.querySelectorAll(".artifact-chip").forEach(b=>b.addEventListener("click",()=>{state.activeArtifact=b.dataset.artifact; render();}));
+  $("#close-artifact")?.addEventListener("click",()=>{state.activeArtifact=null; render();});
+  document.querySelector(".artifact-modal-backdrop")?.addEventListener("click",(e)=>{ if(e.target.classList.contains("artifact-modal-backdrop")){ state.activeArtifact=null; render(); } });
+  $("#copy-artifact")?.addEventListener("click",()=>{ const a=state.artifacts.find(x=>x.name===state.activeArtifact); if(a) copyText(a.text); });
+  $("#download-artifact")?.addEventListener("click",()=>{ const a=state.artifacts.find(x=>x.name===state.activeArtifact); if(a) download(a.text,a.name,a.name.endsWith('.json')?'application/json':'text/plain'); });
   const log=$("#auto-log"); if(log) log.scrollTop=log.scrollHeight;
   setStatus(state.screen==="run"?(state.running?"MISSION RUNNING · WATCH FILES MOVE":"READY TO PLAY MISSION"):"USE MENU OR KEYBOARD");
 }
 function select(){ const item=menuForScreen()[state.cursor]; if(item) item[1](); }
 function back(){ const idx=flow.indexOf(state.screen); if(idx>0 && !state.running) setScreen(flow[idx-1]); }
-document.addEventListener("keydown",e=>{ const menu=menuForScreen(); if(["ArrowDown","ArrowUp","Enter"," ","Escape"].includes(e.key)) e.preventDefault(); if(menu.length&&e.key==="ArrowDown"){state.cursor=(state.cursor+1)%menu.length;render();} if(menu.length&&e.key==="ArrowUp"){state.cursor=(state.cursor-1+menu.length)%menu.length;render();} if(e.key==="Enter"||e.key===" ") select(); if(e.key==="Escape"){ if(state.helpTerm){ state.helpTerm=null; render(); } else back(); } if(/^[1-9]$/.test(e.key)&&menu[Number(e.key)-1]){state.cursor=Number(e.key)-1;select();} });
+document.addEventListener("keydown",e=>{ const menu=menuForScreen(); if(["ArrowDown","ArrowUp","Enter"," ","Escape"].includes(e.key)) e.preventDefault(); if(menu.length&&e.key==="ArrowDown"){state.cursor=(state.cursor+1)%menu.length;render();} if(menu.length&&e.key==="ArrowUp"){state.cursor=(state.cursor-1+menu.length)%menu.length;render();} if(e.key==="Enter"||e.key===" ") select(); if(e.key==="Escape"){ if(state.activeArtifact){ state.activeArtifact=null; render(); } else if(state.helpTerm){ state.helpTerm=null; render(); } else back(); } if(/^[1-9]$/.test(e.key)&&menu[Number(e.key)-1]){state.cursor=Number(e.key)-1;select();} });
 const canvas=$("#arena"), ctx=canvas.getContext("2d"); let tick=0;
 function draw(){ tick++; const w=canvas.width,h=canvas.height; ctx.fillStyle="#fff7df"; ctx.fillRect(0,0,w,h); ctx.strokeStyle="rgba(88,182,255,.22)"; ctx.lineWidth=2; for(let x=0;x<w;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();} for(let y=0;y<h;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();} ctx.fillStyle="rgba(255,212,92,.32)"; ctx.fillRect(0,360,w,180); ctx.fillStyle="#6ee7b7"; ctx.beginPath(); ctx.arc(480+Math.sin(tick/20)*18,430+Math.cos(tick/25)*8,36,0,Math.PI*2); ctx.fill(); ctx.strokeStyle="#274060"; ctx.lineWidth=5; ctx.stroke(); ctx.fillStyle="#274060"; ctx.font="18px monospace"; ctx.textAlign="center"; ctx.fillText("QUEST",480,436); requestAnimationFrame(draw); }
 generateFromDefinition(); render(); draw();
