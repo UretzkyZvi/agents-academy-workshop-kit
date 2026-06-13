@@ -114,6 +114,20 @@ Use simple state first:
 
 Avoid letting memory silently change behavior. If memory affects output, make it visible or reviewable.
 
+## Context and tool-surface hygiene
+
+Large context windows and large tool catalogs do not remove the need for selection. For each run, assemble the smallest high-signal context and active tool surface that can complete the workflow.
+
+Good defaults:
+
+- load the workflow spec, current input, relevant template, and recent reviewer notes
+- keep raw historical tool output out of context unless it is needed for this decision
+- expose only the tools needed for the current workflow stage
+- if a platform supports tool search or deferred tool loading, still keep scopes and logs narrow
+- preserve decisions, unresolved issues, and approval state when compacting or summarizing long runs
+
+For legal, insurance, and finance-adjacent work, context reduction must not erase required citations, source documents, reviewer edits, or uncertainty flags.
+
 ## Modular instructions
 
 Do not cram every policy, checklist, style guide, and playbook into one giant prompt. Policy-heavy agents are easier to review when instructions are modular.
@@ -180,6 +194,14 @@ Reviewer decision: approve / edit / reject / escalate
 ```
 
 For business teams, local workflow evals matter more than public benchmark scores.
+
+Turn reviewer feedback into reusable tests. A good improvement loop is:
+
+```text
+trace / run log -> reviewer correction -> expected behavior -> eval case -> spec/tool/template change -> rerun
+```
+
+If a correction is important enough to make during review, decide whether it should become an eval case before the next sample run.
 
 ## Platform notes
 

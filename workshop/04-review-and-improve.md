@@ -50,6 +50,21 @@ If the workflow feels risky:
 - remove external sending
 - add approval checkpoints
 
+## Turn review into the next test
+
+After each sample run, save one short run record:
+
+```text
+Sample ID:
+Trace / log link, if available:
+Reviewer correction:
+Expected behavior next time:
+Spec, tool, or template change needed:
+Reusable eval case created: yes/no
+```
+
+Do not rely on memory or vibes. If the same correction would matter on a client, claim, intake, renewal, or founder-ops workflow, turn it into a reusable eval case before the next run.
+
 ## Final workshop output
 
 ```text

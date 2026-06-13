@@ -29,7 +29,7 @@ Use these for the first workshop samples. Prove the workflow before building inf
 - LangGraph / LangChain: useful for custom app workflows that need durable execution, graph-based orchestration, memory, middleware, inspection, and human-in-the-loop tool approval. Their 1.0 releases are a good sign for teams that need framework stability, but they are still overkill for a first workshop sample.
 - Microsoft Agent Framework: useful for Microsoft-heavy teams that want a supported .NET/Python framework with the AutoGen/Semantic Kernel line converging around stable APIs, multi-agent workflows, checkpointing, pause/resume, approvals, A2A, and MCP. Still start with the workflow map and local evals before introducing the framework.
 - Google ADK: useful for code-first Gemini/Vertex AI workflows, multi-agent orchestration, evaluation, deployment, and long-running stateful agents.
-- CrewAI / AutoGen-style systems: useful for multi-agent experiments, but keep production workflows tightly scoped.
+- CrewAI / AutoGen-style systems: useful for multi-agent experiments and flow-style orchestration, but keep production workflows tightly scoped. Before using them with real data, check checkpoint restore behavior, per-run state isolation, concurrency, and observability/tracing.
 - Dify and similar platforms: useful for low-code internal AI apps and workflow demos, especially when the team needs a visual builder before custom code. If a low-code workflow is exposed as a tool or MCP server, document who may call it, expected latency, logs, and rollback before connecting it to other agents.
 
 ### 3. Workflow glue and signal points

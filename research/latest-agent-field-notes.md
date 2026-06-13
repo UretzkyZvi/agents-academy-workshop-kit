@@ -1,6 +1,6 @@
 # Latest Agent Field Notes
 
-Last updated: 2026-06-12
+Last updated: 2026-06-13
 
 This file is maintained by a daily Hermes cron task. It should capture useful changes in the AI-agent field that improve the workshop kit.
 
@@ -23,6 +23,27 @@ This file is maintained by a daily Hermes cron task. It should capture useful ch
 - governance, privacy, and data-handling guidance
 
 ## Update log
+
+### 2026-06-13
+
+#### Field scan
+
+- OpenAI's May 2026 cookbook example on an agent improvement loop is a practical pattern worth teaching: start from real traces, add human and model feedback, convert the feedback into reusable evals, then hand the prioritized changes back to a builder. The useful framing is that the "harness" is the contract around the model: instructions, tools, routing, output requirements, and validation checks. Workshop implication: after sample runs, do not only edit the prompt; turn repeated corrections into named eval cases and harness changes. Source: https://developers.openai.com/cookbook/examples/agents_sdk/agent_improvement_loop
+- Anthropic's advanced tool-use guidance formalizes two patterns for large tool libraries: tool search / deferred loading, where the model discovers tool definitions only when needed, and programmatic tool calling, where tools can be invoked inside a code execution environment to reduce context load. Workshop implication: large firms or integration-heavy teams should not dump every CRM, document, and email tool into the prompt; keep the default tool surface small, searchable, logged, and least-privilege. Source: https://www.anthropic.com/engineering/advanced-tool-use
+- Anthropic's context-engineering guidance is a useful non-hype reminder that long-context agents still need context hygiene: clear system prompts, high-signal context, compaction, structured notes, and sometimes multi-agent separation. Workshop implication: for legal/insurance playbooks, preserve reviewed decisions and unresolved issues, but remove stale raw tool output and irrelevant history from future runs. Source: https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
+- CrewAI's current changelog shows production-agent concerns continuing to move from demos toward runtime mechanics: checkpoint restore behavior, per-run runtime state isolation, conversation/runtime separation, OpenTelemetry docs, and enterprise data integrations such as Databricks and Snowflake. Workshop implication: if a team chooses a multi-agent/flow framework, ask how it isolates concurrent runs, restores checkpoints, and exposes traces before giving it real data. Source: https://docs.crewai.com/en/changelog
+- The Financial Stability Board published a June 2026 consultation report on responsible AI adoption for financial institutions, organized around sound practices across the AI lifecycle. Workshop implication: conservative insurance and financial-adjacent teams should keep the lightweight governance record in this repo; the practical minimum is owner, purpose, data touched, authority, evaluation evidence, failure plan, and review cadence. Source: https://www.fsb.org/2026/06/sound-practices-for-responsible-adoption-of-artificial-intelligence-ai-consultation-report/
+
+#### Repo changes made
+
+- Updated `workshop/04-review-and-improve.md` so review loops explicitly convert corrections into reusable eval cases before the next run.
+- Updated `templates/eval-checklist.md` to capture the trace/feedback/eval handoff and context/tool-surface issues.
+- Updated `resources/technical-builder-notes.md` with short guidance on context/tool-surface management and making eval cases from reviewer feedback.
+- Updated `resources/tools-and-platforms.md` with a concise CrewAI/flow-framework selection caution around checkpointing, run isolation, and observability.
+
+#### Recommendation change
+
+No change to the core stance. Strengthen the iteration step: every serious workshop sample should leave behind a small run record and at least one reusable eval case or explicit kill reason. For tool-heavy agents, keep the active context and tool surface intentionally small rather than treating a larger context window or MCP catalog as permission to expose everything.
 
 ### 2026-06-12
 
