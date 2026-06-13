@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AgentWorks Quest Console</title>
-    <meta name="description" content="A one-screen arcade console for training, testing, and exporting tiny AI agent teams." />
+    <meta name="description" content="A one-screen arcade console where real agent characters process mock work step by step." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
@@ -17,7 +17,7 @@
           <div><span class="tiny">PLAYER</span><strong>OPERATOR</strong></div>
           <div><span class="tiny">SCORE</span><strong id="score">0000</strong></div>
           <div class="logo">AGENTWORKS QUEST</div>
-          <div><span class="tiny">TRUST</span><strong id="trust">LEVEL 0</strong></div>
+          <div><span class="tiny">RUN</span><strong id="run-readout">IDLE</strong></div>
           <div><span class="tiny">BRAIN</span><strong id="brain-readout">MOCK</strong></div>
         </header>
 
@@ -32,9 +32,9 @@
             <div class="terminal-body">
               <div class="story-panel">
                 <p class="kicker" id="kicker">INSERT COIN</p>
-                <h1 id="screen-title">Train tiny helpers. Export real agent specs.</h1>
-                <p id="screen-copy">Operate Byte’s training console. Pick a brain, choose a mission, assemble the team, lock risky powers, run the fake-data test, then export the agent package.</p>
-                <pre id="details">Mock mode is ready. Real keys are optional later. No real data needed for the first run.</pre>
+                <h1 id="screen-title">Watch real agents work.</h1>
+                <p id="screen-copy">Add a key or use mock mode. Define the application. Generate fake work. Approve agent profiles. Press Play and watch each character show prompt, input, call, work, and output.</p>
+                <div id="details" class="details">System ready.</div>
               </div>
               <nav class="menu" id="menu" aria-label="Console menu"></nav>
             </div>
@@ -43,7 +43,7 @@
 
         <footer class="statusbar">
           <span id="status">SYSTEM READY · PRESS START</span>
-          <span id="progress">BRAIN: -- · MISSION: -- · TEAM: -- · TEST: -- · EXPORT: --</span>
+          <span id="progress">BRAIN: -- · APP: -- · DATA: -- · AGENTS: -- · RUN: --</span>
         </footer>
       </section>
     </main>
