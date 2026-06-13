@@ -106,14 +106,32 @@ function detailsForScreen(){
   if(state.screen==="define") return `<label class="field"><span>What should this agent team help with?</span><textarea id="app-text">${esc(state.appText)}</textarea></label><label class="field"><span>${provider.name} key ${state.provider==='mock'?'(optional)':'(used by local server)'}</span><input id="api-key" type="password" value="${esc(state.apiKey)}" placeholder="Paste key for a real run, or leave empty for demo" /></label>`;
   if(state.screen==="data") return `<label class="field"><span>${esc(currentTemplate().dataLabel)}</span><textarea id="fake-data">${esc(state.data||currentTemplate().fakeData)}</textarea></label><p class="friendly-note">Users see the fake conversations, meetings, or documents before agents touch anything real.</p>`;
   if(state.screen==="agents") return `<div class="agent-grid">${state.agents.map((a,i)=>`<article class="agent-card"><div class="avatar">${a.icon}</div><h3>${esc(a.name)}</h3><label>Profile<input id="agent-role-${i}" value="${esc(a.role)}" /></label><label>Prompt<textarea id="agent-prompt-${i}">${esc(a.prompt)}</textarea></label></article>`).join("")}</div>`;
-  if(state.screen==="run") return `<div class="orchestration-stage">
-    <div class="work-table ${state.activeAgent>=0?'pulse':''}"><span class="table-icon">📄</span><strong>FAKE WORK</strong><small>${esc(currentTemplate().dataLabel)}</small></div>
-    <div class="actor-row">${state.agents.map((a,i)=>`<div class="actor ${state.activeAgent===i?'active':''} ${state.runLog[i]&&state.runLog[i].output!=='working...'?'done':''}"><div class="actor-body">${a.icon}</div><strong>${esc(a.name)}</strong><small>${esc(a.role)}</small></div>`).join("")}</div>
-    <div class="handoff-line">${state.agents.map((a,i)=>`<span class="node ${state.runLog[i]?'lit':''}">${i+1}</span>`).join('<b>→</b>')}</div>
-    <div class="focus-panel">${state.activeAgent>=0?`<h3>${state.agents[state.activeAgent].icon} ${esc(state.agents[state.activeAgent].name)} is working</h3><p>${esc(state.runLog[state.activeAgent]?.doing||'Moving to the work table...')}</p><div class="packet"><b>Current input:</b> ${esc((state.runLog[state.activeAgent]?.input||state.data)).slice(0,420)}</div>`:`<h3>${state.runLog.length?'✅ Human review package ready':'Press Play to start the orchestration'}</h3><p>The menus disappear during the run so the user watches the characters and teaching log.</p>`}</div>
-    <div class="auto-log" id="auto-log">${state.chat.map(m=>`<p><b>${esc(m.who)}:</b> ${esc(m.text)}</p>`).join("")}</div>
-    ${!state.running?`<div class="stage-actions"><button id="stage-play">${state.runLog.length?'Play Again':'Play Agents'}</button>${state.runLog.length?'<button id="stage-export">Export Run</button>':''}<button id="stage-edit">Edit Agents</button></div>`:''}
-  </div>`;
+  if(state.screen==="run") {
+    const homes = [[12,68],[28,68],[44,68],[60,68]];
+    const targets = [[22,32],[38,32],[54,32],[70,32]];
+    const active = state.activeAgent;
+    return `<div class="office-run">
+      <div class="office-floor" aria-label="Small agents walking in the office">
+        <div class="office-zone zone-source"><span>📄</span><b>Work table</b><small>${esc(currentTemplate().dataLabel)}</small></div>
+        <div class="office-zone zone-scan"><span>🔎</span><b>Scout desk</b></div>
+        <div class="office-zone zone-build"><span>🧩</span><b>Build desk</b></div>
+        <div class="office-zone zone-check"><span>✅</span><b>Check desk</b></div>
+        <div class="office-zone zone-out"><span>📦</span><b>Output tray</b></div>
+        <div class="path-line path-a"></div><div class="path-line path-b"></div><div class="path-line path-c"></div>
+        ${state.agents.map((a,i)=>{ const h=homes[i]||[15+i*12,68], t=targets[i]||[24+i*12,32]; const done=state.runLog[i]&&state.runLog[i].output!=='working...'; return `<div class="mini-agent ${active===i?'walking':''} ${done?'done':''}" style="--home-x:${h[0]}%;--home-y:${h[1]}%;--target-x:${t[0]}%;--target-y:${t[1]}%;--delay:${i*.12}s">
+          <div class="agent-bubble">${esc(a.name)}${active===i?' is working':''}</div>
+          <div class="agent-head">${a.icon}</div><div class="agent-body"></div><div class="agent-legs"></div>
+        </div>`;}).join("")}
+        <div class="data-packet ${active>=0?'moving':''}" style="--packet-x:${active>=0 ? (targets[active]||[50,35])[0] : 78}%;--packet-y:${active>=0 ? (targets[active]||[50,35])[1]+10 : 28}%">DATA</div>
+        <div class="office-caption">${active>=0?`${esc(state.agents[active].name)} is walking, reading, and preparing the next packet.`:state.runLog.length?'Human review package is ready in the output tray.':'Press Play to watch the office start.'}</div>
+      </div>
+      <aside class="office-side">
+        <div class="mini-focus">${active>=0?`<h3>${state.agents[active].icon} ${esc(state.agents[active].name)}</h3><p>${esc(state.runLog[active]?.doing||'Walking to the work table...')}</p><small>Input: ${esc((state.runLog[active]?.input||state.data)).slice(0,190)}...</small>`:`<h3>${state.runLog.length?'✅ Done':'Ready'}</h3><p>${state.runLog.length?'The agents finished. Export or play again.':'The agents will move around the office one at a time.'}</p>`}</div>
+        <div class="auto-log office-log" id="auto-log">${state.chat.slice(-7).map(m=>`<p><b>${esc(m.who)}:</b> ${esc(m.text)}</p>`).join("")}</div>
+        ${!state.running?`<div class="stage-actions"><button id="stage-play">${state.runLog.length?'Play Again':'Play Agents'}</button>${state.runLog.length?'<button id="stage-export">Export Run</button>':''}<button id="stage-edit">Edit Agents</button></div>`:''}
+      </aside>
+    </div>`;
+  }
   if(state.screen==="export") return `<div class="export-preview"><h3>Export includes</h3><ul><li>Agent profile cards</li><li>Full run log</li><li>LangGraph scaffold</li><li>CrewAI scaffold</li><li>JSON manifest</li></ul><pre>${esc(makeMarkdownSpec()).slice(0,1000)}...</pre></div>`;
   return `<div class="welcome-card"><div class="big-avatar">🤖</div><p>No black-box magic. Users watch little agents work step by step on fake conversations, meetings, or documents.</p><p class="friendly-note">Bright arcade mode. Less terminal. More training game.</p></div>`;
 }
