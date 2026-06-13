@@ -3,163 +3,50 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AgentWorks Quest — train your first AI helper</title>
-    <meta name="description" content="A gamified, fake-data-first way to train, test, and export your first AI agent helper." />
+    <title>AgentWorks Quest Console</title>
+    <meta name="description" content="A one-screen arcade console for training, testing, and exporting tiny AI agent teams." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800;950&family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <a class="brand" href="#top" aria-label="AgentWorks Quest home">
-        <span class="brand-mark">AW</span>
-        <span><strong>AgentWorks Quest</strong><small>Train helpers. Lock risks. Export agents.</small></span>
-      </a>
-      <nav aria-label="Quest navigation">
-        <a href="#brain-room">Brain</a>
-        <a href="#mission-room">Mission</a>
-        <a href="#team-room">Team</a>
-        <a href="#test-lab">Test</a>
-        <a href="#export-portal">Export</a>
-      </nav>
-    </header>
+    <main class="cabinet" aria-label="AgentWorks Quest arcade console">
+      <section class="bezel">
+        <header class="hud">
+          <div><span class="tiny">PLAYER</span><strong>OPERATOR</strong></div>
+          <div><span class="tiny">SCORE</span><strong id="score">0000</strong></div>
+          <div class="logo">AGENTWORKS QUEST</div>
+          <div><span class="tiny">TRUST</span><strong id="trust">LEVEL 0</strong></div>
+          <div><span class="tiny">BRAIN</span><strong id="brain-readout">MOCK</strong></div>
+        </header>
 
-    <main id="top">
-      <section class="hero arcade-room">
-        <div class="hero-copy">
-          <p class="eyebrow">A tiny game for real agent design</p>
-          <h1>Build agents by training tiny helpers.</h1>
-          <p class="hero-text">Choose Byte's brain, pick a mission, train a little team, test on fake work, and export the setup. No scary automation. No real data needed for the first run.</p>
-          <div class="hero-actions">
-            <a class="button primary" href="#brain-room">Start the quest</a>
-            <button class="button secondary" type="button" data-scroll-export>Skip to export demo</button>
-          </div>
-        </div>
-        <div class="game-cabinet" aria-label="Pixel scene of Byte entering AgentWorks Quest">
-          <div class="screen-grid"></div>
-          <div class="pixel-sun"></div>
-          <div class="pixel-cloud one"></div>
-          <div class="pixel-cloud two"></div>
-          <div class="byte hero-byte"><span></span><i></i></div>
-          <div class="hero-door"><strong>QUEST</strong></div>
-          <div class="speech">Hi. I’m Byte. Train me safely.</div>
-        </div>
-      </section>
-
-      <section class="trust-ladder" aria-label="Trust ladder">
-        <div><strong>Level 0</strong><span>Mock mode</span></div>
-        <div><strong>Level 1</strong><span>Fake examples</span></div>
-        <div><strong>Level 2</strong><span>Sanitized real examples</span></div>
-        <div><strong>Level 3</strong><span>Read-only data</span></div>
-        <div><strong>Level 4</strong><span>Human-approved actions</span></div>
-      </section>
-
-      <section class="quest-room" id="brain-room">
-        <div class="room-heading">
-          <p class="eyebrow">Room 1</p>
-          <h2>Choose Byte’s brain.</h2>
-          <p>Mock mode works now. Bring-your-own-key options are staged as a safe MVP interface. Keys stay in the browser session for this prototype.</p>
-        </div>
-        <div class="provider-grid" id="provider-grid" aria-live="polite"></div>
-        <div class="key-console" id="key-console" hidden>
-          <label>
-            <span id="key-label">API key</span>
-            <input id="api-key" type="password" autocomplete="off" placeholder="Paste key for this browser session" />
-          </label>
-          <p>Prototype rule: use mock mode by default. If a key is entered later, do not store it unless the user explicitly asks.</p>
-        </div>
-      </section>
-
-      <section class="quest-room" id="mission-room">
-        <div class="room-heading">
-          <p class="eyebrow">Room 2</p>
-          <h2>Pick the problem Byte should learn.</h2>
-          <p>Start with one annoying task. The game turns it into a mission with helper roles, safety locks, fake examples, and exports.</p>
-        </div>
-        <div class="mission-grid" id="mission-grid"></div>
-        <div class="custom-mission">
-          <label>
-            <span>Or type your own mission</span>
-            <textarea id="custom-mission" placeholder="Example: I spend too much time reading intake emails and figuring out what info is missing."></textarea>
-          </label>
-          <button class="button primary" type="button" id="build-custom">Generate mock mission</button>
-        </div>
-      </section>
-
-      <section class="quest-room quest-board" id="team-room">
-        <div class="room-heading">
-          <p class="eyebrow">Room 3</p>
-          <h2 id="mission-title">Mission: Intake Cleanup</h2>
-          <p id="mission-summary">Byte will train a tiny team that summarizes new requests, finds missing information, drafts a reply, and stops at human approval.</p>
-        </div>
-        <div class="world-map" aria-label="Agent training map">
-          <div class="map-line"></div>
-          <div class="map-station active" data-map="0"><span>📥</span><strong>Input Crate</strong></div>
-          <div class="map-station" data-map="1"><span>🧭</span><strong>Scout</strong></div>
-          <div class="map-station" data-map="2"><span>🔍</span><strong>Checker</strong></div>
-          <div class="map-station" data-map="3"><span>✍️</span><strong>Writer</strong></div>
-          <div class="map-station locked" data-map="4"><span>🛡️</span><strong>Gatekeeper</strong></div>
-          <div class="byte map-byte"><span></span><i></i></div>
-        </div>
-        <div class="agent-cards" id="agent-cards"></div>
-      </section>
-
-      <section class="quest-room" id="training-room">
-        <div class="room-heading">
-          <p class="eyebrow">Room 4</p>
-          <h2>Train the safety locks.</h2>
-          <p>Every useful helper needs boundaries. Lock risky powers before the test lab opens.</p>
-        </div>
-        <div class="lock-grid" id="lock-grid"></div>
-      </section>
-
-      <section class="quest-room lab" id="test-lab">
-        <div class="room-heading">
-          <p class="eyebrow">Room 5</p>
-          <h2>Run the fake-data test.</h2>
-          <p>Byte practices on made-up work first. You can approve, reject, or export the trained setup.</p>
-        </div>
-        <div class="lab-layout">
-          <div class="sample-card">
-            <p class="mini-label">Fake input</p>
-            <h3 id="sample-title">Avery Chen</h3>
-            <p id="sample-body">Needs help setting up a workshop but did not include date, audience size, or budget.</p>
-            <button class="button secondary" type="button" id="next-sample">Next fake card</button>
-          </div>
-          <div class="run-panel">
-            <button class="big-run" type="button" id="run-test">Run Byte’s team</button>
-            <pre id="test-output">Press Run Byte’s team to see the mock output.</pre>
-            <div class="approval-row">
-              <button type="button" class="pill approve" data-approve>Looks good</button>
-              <button type="button" class="pill warn" data-reject>Too broad</button>
-              <button type="button" class="pill danger" data-unsafe>Unsafe</button>
+        <div class="crt">
+          <canvas id="arena" width="960" height="540" aria-hidden="true"></canvas>
+          <div class="scanlines"></div>
+          <section class="terminal" aria-live="polite">
+            <div class="terminal-head">
+              <span id="screen-label">TITLE SCREEN</span>
+              <span>↑↓ MOVE · ENTER SELECT · ESC BACK</span>
             </div>
-          </div>
+            <div class="terminal-body">
+              <div class="story-panel">
+                <p class="kicker" id="kicker">INSERT COIN</p>
+                <h1 id="screen-title">Train tiny helpers. Export real agent specs.</h1>
+                <p id="screen-copy">Operate Byte’s training console. Pick a brain, choose a mission, assemble the team, lock risky powers, run the fake-data test, then export the agent package.</p>
+                <pre id="details">Mock mode is ready. Real keys are optional later. No real data needed for the first run.</pre>
+              </div>
+              <nav class="menu" id="menu" aria-label="Console menu"></nav>
+            </div>
+          </section>
         </div>
-      </section>
 
-      <section class="quest-room export-room" id="export-portal">
-        <div class="room-heading">
-          <p class="eyebrow">Final room</p>
-          <h2>Export the agent package.</h2>
-          <p>This MVP exports portable artifacts first. True one-click imports need platform-specific research, but these files can already be pasted or imported manually.</p>
-        </div>
-        <div class="export-grid">
-          <button class="export-card" type="button" data-export="prompt"><strong>Copy starter prompt</strong><span>Use in ChatGPT, Claude, Gemini, OpenRouter, or Hermes.</span></button>
-          <button class="export-card" type="button" data-export="spec"><strong>Download agent-spec.md</strong><span>Human-readable workflow, roles, locks, tests.</span></button>
-          <button class="export-card" type="button" data-export="json"><strong>Download agentworks-agent.json</strong><span>Universal manifest for future imports.</span></button>
-          <button class="export-card" type="button" data-export="hermes"><strong>Download Hermes SKILL.md</strong><span>Turn the trained helper into a Hermes-style reusable skill.</span></button>
-          <button class="export-card" type="button" data-export="instructions"><strong>Download AI instructions.md</strong><span>Paste into Claude Projects, GPT builder, or another AI workspace.</span></button>
-        </div>
-        <pre id="export-preview">Choose a mission to generate an export preview.</pre>
+        <footer class="statusbar">
+          <span id="status">SYSTEM READY · PRESS START</span>
+          <span id="progress">BRAIN: -- · MISSION: -- · TEAM: -- · TEST: -- · EXPORT: --</span>
+        </footer>
       </section>
     </main>
-
-    <footer>
-      <p>AgentWorks Quest MVP. Fake-data-first. Human-approved. Exportable.</p>
-      <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit">View source</a>
-    </footer>
 
     <script src="app.js"></script>
   </body>

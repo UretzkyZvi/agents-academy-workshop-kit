@@ -1,279 +1,225 @@
+const $ = (s) => document.querySelector(s);
+
 const providers = [
-  { id: "mock", name: "Mock mode", note: "Free demo brain. No key needed.", status: "Ready now" },
-  { id: "openrouter", name: "OpenRouter", note: "Many models through one key.", status: "BYOK soon" },
-  { id: "openai", name: "OpenAI", note: "GPT models with your key.", status: "BYOK soon" },
-  { id: "anthropic", name: "Anthropic", note: "Claude models with your key.", status: "BYOK soon" },
-  { id: "google", name: "Google Gemini", note: "Gemini models with your key.", status: "BYOK soon" },
+  ["mock", "MOCK MODE", "Ready now. No API key. Byte uses scripted mission generation."],
+  ["openrouter", "OPENROUTER", "BYOK path. Many models through one key. Prototype UI only."],
+  ["openai", "OPENAI", "BYOK path. GPT models. Prototype UI only."],
+  ["anthropic", "ANTHROPIC", "BYOK path. Claude models. Prototype UI only."],
+  ["google", "GOOGLE GEMINI", "BYOK path. Gemini models. Prototype UI only."],
 ];
 
-const missionTemplates = {
+const missions = {
   intake: {
-    title: "Intake Cleanup",
-    icon: "📥",
-    pitch: "New requests are messy and someone has to find what is missing.",
-    summary: "Byte trains a team that summarizes new requests, finds missing information, drafts a reply, and stops at human approval.",
-    input: "new request text",
-    output: "summary, missing-info checklist, reply draft",
-    sample: [
-      { title: "Avery Chen", body: "Needs help setting up a workshop but did not include date, audience size, or budget." },
-      { title: "Morgan Smith", body: "Asked about document review automation but did not say document type, volume, or reviewer." },
-      { title: "Riley Johnson", body: "Wants training pricing but did not include team size, location, or preferred format." },
-    ],
-    agents: [
-      ["Scout", "Reads the request and writes a plain summary.", "request text", "short summary"],
-      ["Checker", "Finds missing facts and risk flags.", "request + summary", "missing-info checklist"],
-      ["Writer", "Drafts a gentle reply for review.", "checklist", "draft reply"],
-      ["Gatekeeper", "Blocks sending until a human approves.", "draft + locks", "approval queue"],
-    ],
+    name: "INTAKE CLEANUP",
+    brief: "New requests arrive messy. Train a team to summarize the request, find missing info, draft a reply, and stop at approval.",
+    sample: "Avery needs a workshop next month but forgot date, audience size, budget, and decision owner.",
+    agents: ["SCOUT reads the request", "CHECKER finds missing facts", "WRITER drafts a reply", "GATEKEEPER blocks risky actions"],
+    output: "Missing info: date, audience size, budget, decision owner. Draft reply prepared for human review only.",
   },
   followups: {
-    title: "Follow-up Patrol",
-    icon: "⏰",
-    pitch: "Leads, clients, renewals, or tasks go stale.",
-    summary: "Byte trains a team that checks open items, flags stale follow-ups, drafts a nudge, and waits for approval.",
-    input: "open follow-up list",
-    output: "stale-item flags and draft nudges",
-    sample: [
-      { title: "Jordan Lee", body: "Proposal sent 12 days ago. Asked for pricing options. No reply yet." },
-      { title: "Maya Patel", body: "Renewal discussion 8 days ago. Needed team size confirmation." },
-      { title: "Taylor Brooks", body: "Pilot looked promising 21 days ago but no next meeting was booked." },
-    ],
-    agents: [
-      ["Scout", "Reads open follow-up items.", "task list", "status summary"],
-      ["Timer", "Finds stale or high-priority items.", "status summary", "follow-up flags"],
-      ["Writer", "Drafts short nudges.", "flags", "draft message"],
-      ["Gatekeeper", "Blocks sending and CRM updates.", "draft + locks", "approval queue"],
-    ],
+    name: "FOLLOW-UP PATROL",
+    brief: "Open items go stale. Train a team to spot stale follow-ups and draft safe nudges.",
+    sample: "Jordan received a proposal 12 days ago and never replied. Pricing options were the last topic.",
+    agents: ["SCOUT reads open items", "TIMER finds stale work", "WRITER drafts nudges", "GATEKEEPER blocks sending"],
+    output: "Stale item flagged. Draft nudge prepared. Sending remains locked until human approval.",
   },
   meetings: {
-    title: "Meeting Cleanup",
-    icon: "🗓️",
-    pitch: "Notes, decisions, and action items get scattered.",
-    summary: "Byte trains a team that turns messy notes into decisions, action items, and a follow-up draft.",
-    input: "meeting notes",
-    output: "summary, decisions, action items, follow-up draft",
-    sample: [
-      { title: "Client kickoff", body: "Discussed timeline, data export owner, and next check-in. No owner confirmed." },
-      { title: "Ops sync", body: "Team agreed to test five fake examples first. Someone needs to collect them." },
-      { title: "Partner call", body: "Partner can introduce prospects after reviewing a one-pager." },
-    ],
-    agents: [
-      ["Scout", "Reads messy meeting notes.", "notes", "short summary"],
-      ["Sorter", "Separates decisions from action items.", "summary + notes", "decision/action list"],
-      ["Writer", "Drafts a follow-up note.", "action list", "draft follow-up"],
-      ["Gatekeeper", "Blocks sending and task assignment.", "draft + locks", "approval queue"],
-    ],
+    name: "MEETING CLEANUP",
+    brief: "Notes are chaotic. Train a team to extract decisions, action items, and a follow-up draft.",
+    sample: "Kickoff notes mention timeline, export owner, and next check-in. No owner was confirmed.",
+    agents: ["SCOUT reads notes", "SORTER separates decisions", "WRITER drafts recap", "GATEKEEPER blocks sending"],
+    output: "Action items extracted. Missing owner flagged. Follow-up recap drafted for review.",
   },
   documents: {
-    title: "Document Triage",
-    icon: "📄",
-    pitch: "Documents pile up and need first-pass review.",
-    summary: "Byte trains a team that labels documents, summarizes them, and flags missing or unclear items.",
-    input: "document names and pasted excerpts",
-    output: "document label, summary, missing/unclear flags",
-    sample: [
-      { title: "intake-form-a.pdf", body: "Basic background is present, but signed consent is missing." },
-      { title: "contract-draft.pdf", body: "Service terms appear outlined. Needs human legal review." },
-      { title: "receipt-photo.jpg", body: "Travel expense receipt. Date is hard to read." },
-    ],
-    agents: [
-      ["Scout", "Reads names and excerpts.", "document text", "plain summary"],
-      ["Labeler", "Classifies the document type.", "summary", "document label"],
-      ["Checker", "Flags unclear or missing items.", "label + text", "review flags"],
-      ["Gatekeeper", "Blocks final legal, medical, or compliance decisions.", "flags + locks", "review queue"],
-    ],
+    name: "DOCUMENT TRIAGE",
+    brief: "Documents pile up. Train a team to classify, summarize, and flag unclear items.",
+    sample: "intake-form-a.pdf has background info but signed consent is missing.",
+    agents: ["SCOUT reads excerpts", "LABELER classifies docs", "CHECKER flags gaps", "GATEKEEPER blocks final advice"],
+    output: "Document labeled. Consent missing. Human review required before any professional conclusion.",
   },
   research: {
-    title: "Research Scout",
-    icon: "🔎",
-    pitch: "You keep looking up similar people, companies, or topics.",
-    summary: "Byte trains a team that organizes public research notes and creates a sourced brief for review.",
-    input: "public links or notes",
-    output: "short research brief with unknowns and source list",
-    sample: [
-      { title: "Acme Health", body: "Website mentions manual onboarding and a growing ops team." },
-      { title: "Northstar Legal", body: "Blog posts suggest document-heavy client intake workflows." },
-      { title: "ClearPath Clinics", body: "Careers page lists intake coordinator role." },
-    ],
-    agents: [
-      ["Scout", "Reads public notes or links.", "research notes", "source summary"],
-      ["Verifier", "Separates facts from guesses.", "source summary", "fact/unknown list"],
-      ["Writer", "Creates a short brief.", "facts + unknowns", "research brief"],
-      ["Gatekeeper", "Blocks unsupported claims and outreach.", "brief + locks", "review queue"],
-    ],
+    name: "RESEARCH SCOUT",
+    brief: "Research repeats. Train a team to organize notes into facts, unknowns, and a short brief.",
+    sample: "Acme Health site mentions manual onboarding and a growing operations team.",
+    agents: ["SCOUT reads public notes", "VERIFIER splits facts from guesses", "WRITER drafts brief", "GATEKEEPER blocks unsupported claims"],
+    output: "Facts separated from guesses. Short brief drafted with unknowns and source notes.",
   },
 };
 
-const locks = [
-  ["send", "Send messages", "Locked until human approval is wired."],
-  ["delete", "Delete records", "Locked for MVP and early real tests."],
-  ["update", "Update tools", "Locked until read-only tests pass."],
-  ["decide", "Make final decisions", "Humans own final calls."],
-  ["advice", "Give professional advice", "Legal, medical, financial, and compliance advice stays blocked."],
-];
+const locks = ["SEND MESSAGES", "DELETE RECORDS", "UPDATE TOOLS", "FINAL DECISIONS", "PROFESSIONAL ADVICE"];
 
 const state = {
+  screen: "title",
+  cursor: 0,
   provider: "mock",
   mission: "intake",
-  sample: 0,
-  approvals: [],
+  locks: new Set(locks),
+  score: 0,
+  testRun: false,
 };
 
-const $ = (s) => document.querySelector(s);
-const $$ = (s) => [...document.querySelectorAll(s)];
+const flow = ["title", "brain", "mission", "team", "locks", "test", "export"];
 
-function mission() { return missionTemplates[state.mission] || missionTemplates.intake; }
+function currentMission() { return missions[state.mission]; }
+function pad(n) { return String(n).padStart(4, "0"); }
+function setScreen(screen) { state.screen = screen; state.cursor = 0; render(); }
+function addScore(n) { state.score = Math.min(9999, state.score + n); }
 
-function renderProviders() {
-  $("#provider-grid").innerHTML = providers.map((p) => `
-    <button class="provider-card ${state.provider === p.id ? "selected" : ""}" type="button" data-provider="${p.id}">
-      <strong>${p.name}</strong>
-      <span>${p.note}</span>
-      <em>${p.status}</em>
-    </button>
-  `).join("");
-  $("#key-console").hidden = state.provider === "mock";
-  $("#key-label").textContent = `${providers.find((p) => p.id === state.provider)?.name || "Provider"} API key`;
-}
-
-function renderMissions() {
-  $("#mission-grid").innerHTML = Object.entries(missionTemplates).map(([id, m]) => `
-    <button class="mission-card ${state.mission === id ? "selected" : ""}" type="button" data-mission="${id}">
-      <span>${m.icon}</span><strong>${m.title}</strong><small>${m.pitch}</small>
-    </button>
-  `).join("");
-}
-
-function renderTeam() {
-  const m = mission();
-  $("#mission-title").textContent = `Mission: ${m.title}`;
-  $("#mission-summary").textContent = m.summary;
-  $("#agent-cards").innerHTML = m.agents.map(([name, job, reads, produces], index) => `
-    <article class="agent-card">
-      <div class="agent-avatar">${["🧭", "🔍", "✍️", "🛡️"][index] || "🤖"}</div>
-      <h3>${name}</h3>
-      <p>${job}</p>
-      <dl><dt>Reads</dt><dd>${reads}</dd><dt>Produces</dt><dd>${produces}</dd><dt>Cannot</dt><dd>send, delete, update, or decide without approval</dd></dl>
-    </article>
-  `).join("");
-  $("#export-preview").textContent = makeSpec();
-  renderSample();
-}
-
-function renderLocks() {
-  $("#lock-grid").innerHTML = locks.map(([id, label, desc]) => `
-    <button class="lock-card ${state.approvals.includes(id) ? "locked" : ""}" type="button" data-lock="${id}">
-      <span>${state.approvals.includes(id) ? "🔒" : "🔓"}</span>
-      <strong>${label}</strong>
-      <small>${desc}</small>
-    </button>
-  `).join("");
-}
-
-function renderSample() {
-  const m = mission();
-  const s = m.sample[state.sample % m.sample.length];
-  $("#sample-title").textContent = s.title;
-  $("#sample-body").textContent = s.body;
-}
-
-function mockOutput() {
-  const m = mission();
-  const s = m.sample[state.sample % m.sample.length];
-  const missingLine = m.title.includes("Intake") ? "Missing info: date, audience size, budget, owner, or urgency." : "Flags: unclear owner, missing next step, and needs human review.";
-  return `${m.title} test run\n\nInput card: ${s.title}\n${s.body}\n\nScout summary:\n- ${s.body}\n\nChecker output:\n- ${missingLine}\n\nWriter draft:\n- Here is a safe draft/checklist a human can review before anything is sent or changed.\n\nGatekeeper:\n- Sending locked\n- Tool updates locked\n- Final decisions locked\n- Human approval required`;
-}
-
-function starterPrompt() {
-  const m = mission();
-  return `You are my ${m.title} helper.\n\nYour job: ${m.summary}\n\nRead: ${m.input}\nProduce: ${m.output}\n\nRules:\n- Use only the examples I provide.\n- Draft, check, summarize, or flag only.\n- Do not send messages, delete records, update tools, make final decisions, or give professional advice.\n- Wait for human approval before anything else.\n\nStart by processing the fake examples below.`;
-}
-
-function manifest() {
-  const m = mission();
-  return {
-    format: "agentworks.quest.v1",
-    provider: state.provider,
-    mission: m.title,
-    summary: m.summary,
-    input: m.input,
-    output: m.output,
-    agents: m.agents.map(([name, job, reads, produces]) => ({ name, job, reads, produces, cannot: ["send", "delete", "update", "final_decision", "professional_advice"] })),
-    locks: locks.map(([id, label]) => ({ id, label, locked: true })),
-    fake_examples: m.sample,
-  };
+function makePrompt() {
+  const m = currentMission();
+  return `You are my ${m.name} helper.\n\nMission: ${m.brief}\n\nAgent team:\n${m.agents.map((a) => `- ${a}`).join("\n")}\n\nSafety locks:\n${locks.map((l) => `- ${l}: locked until human approval`).join("\n")}\n\nRules:\n- Use only the examples I provide.\n- Draft, check, summarize, or flag only.\n- Do not send messages, delete records, update tools, make final decisions, or give professional advice.\n- Wait for human approval.\n\nFake example:\n${m.sample}`;
 }
 
 function makeSpec() {
-  const m = mission();
-  return `# AgentWorks Quest Export: ${m.title}\n\n## Mission\n${m.summary}\n\n## Input\n${m.input}\n\n## Output\n${m.output}\n\n## Agent team\n${m.agents.map(([name, job, reads, produces]) => `### ${name}\n- Job: ${job}\n- Reads: ${reads}\n- Produces: ${produces}\n- Cannot: send, delete, update, or decide without approval`).join("\n\n")}\n\n## Safety locks\n${locks.map(([, label]) => `- ${label}: locked`).join("\n")}\n\n## Starter prompt\n${starterPrompt()}\n\n## Fake examples\n${m.sample.map((s, i) => `Example ${i + 1}: ${s.title}\n${s.body}`).join("\n\n")}`;
+  const m = currentMission();
+  return `# AgentWorks Quest Export: ${m.name}\n\n## Mission\n${m.brief}\n\n## Agent Team\n${m.agents.map((a) => `- ${a}`).join("\n")}\n\n## Safety Locks\n${locks.map((l) => `- ${l}: locked`).join("\n")}\n\n## Fake Test\nInput: ${m.sample}\nOutput: ${m.output}\n\n## Starter Prompt\n${makePrompt()}\n`;
+}
+
+function manifest() {
+  const m = currentMission();
+  return { format: "agentworks.quest.console.v1", provider: state.provider, mission: m.name, brief: m.brief, agents: m.agents, locks, fake_test: { input: m.sample, expected_output: m.output }, prompt: makePrompt() };
 }
 
 function hermesSkill() {
-  const m = mission();
-  return `---\nname: ${m.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-helper\ndescription: ${m.summary}\n---\n\n# ${m.title} Helper\n\nUse this when the user wants help with: ${m.input}.\n\n## Workflow\n\n${m.agents.map(([name, job], i) => `${i + 1}. ${name}: ${job}`).join("\n")}\n\n## Safety\n\nDo not send messages, delete records, update systems, make final decisions, or give professional advice without explicit human approval.\n\n## Starter prompt\n\n${starterPrompt()}\n`;
-}
-
-function download(text, filename, type = "text/markdown") {
-  const blob = new Blob([text], { type });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
+  const m = currentMission();
+  return `---\nname: ${m.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-helper\ndescription: ${m.brief}\n---\n\n# ${m.name} Helper\n\n${m.brief}\n\n## Team\n${m.agents.map((a) => `- ${a}`).join("\n")}\n\n## Safety\n${locks.map((l) => `- ${l}: locked until explicit human approval`).join("\n")}\n\n## Starter Prompt\n${makePrompt()}\n`;
 }
 
 async function copyText(text) {
-  try { await navigator.clipboard.writeText(text); }
-  catch { window.prompt("Copy this text", text); }
+  try { await navigator.clipboard.writeText(text); setStatus("COPIED TO CLIPBOARD"); }
+  catch { window.prompt("Copy this", text); }
+}
+function download(text, filename, type = "text/markdown") {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+  setStatus(`DOWNLOADED ${filename.toUpperCase()}`);
 }
 
-function exportArtifact(kind) {
-  if (kind === "prompt") return copyText(starterPrompt());
-  if (kind === "spec") return download(makeSpec(), "agent-spec.md");
-  if (kind === "json") return download(JSON.stringify(manifest(), null, 2), "agentworks-agent.json", "application/json");
-  if (kind === "hermes") return download(hermesSkill(), "SKILL.md");
-  if (kind === "instructions") return download(starterPrompt(), "ai-instructions.md");
+function menuForScreen() {
+  if (state.screen === "title") return [
+    ["START NEW QUEST", () => setScreen("brain")],
+    ["LOAD DEMO MISSION", () => { state.provider = "mock"; state.mission = "intake"; addScore(100); setScreen("team"); }],
+    ["EXPORT SAMPLE", () => setScreen("export")],
+  ];
+  if (state.screen === "brain") return providers.map(([id, name, note]) => [name, () => { state.provider = id; addScore(id === "mock" ? 100 : 150); setScreen("mission"); }, note]);
+  if (state.screen === "mission") return Object.entries(missions).map(([id, m]) => [m.name, () => { state.mission = id; addScore(200); setScreen("team"); }, m.brief]);
+  if (state.screen === "team") return [["CONTINUE TO SAFETY LOCKS", () => { addScore(150); setScreen("locks"); }], ["CHANGE MISSION", () => setScreen("mission")], ["VIEW EXPORT PREVIEW", () => setScreen("export")]];
+  if (state.screen === "locks") return [["LOCK ALL RISKY POWERS", () => { state.locks = new Set(locks); addScore(200); setScreen("test"); }], ["CONTINUE TO TEST LAB", () => setScreen("test")], ["BACK TO TEAM", () => setScreen("team")]];
+  if (state.screen === "test") return [["RUN FAKE-DATA TEST", () => { state.testRun = true; addScore(300); render(); }], ["APPROVE MOCK OUTPUT", () => { state.testRun = true; addScore(250); setScreen("export"); }], ["CHANGE MISSION", () => setScreen("mission")]];
+  if (state.screen === "export") return [["COPY STARTER PROMPT", () => copyText(makePrompt())], ["DOWNLOAD AGENT SPEC", () => download(makeSpec(), "agent-spec.md")], ["DOWNLOAD JSON MANIFEST", () => download(JSON.stringify(manifest(), null, 2), "agentworks-agent.json", "application/json")], ["DOWNLOAD HERMES SKILL", () => download(hermesSkill(), "SKILL.md")], ["DOWNLOAD AI INSTRUCTIONS", () => download(makePrompt(), "ai-instructions.md")], ["START OVER", () => setScreen("title")]];
+  return [];
 }
 
-function init() {
-  renderProviders(); renderMissions(); renderLocks(); renderTeam();
-
-  $("#provider-grid").addEventListener("click", (e) => {
-    const card = e.target.closest("[data-provider]");
-    if (!card) return;
-    state.provider = card.dataset.provider;
-    renderProviders(); renderTeam();
-  });
-  $("#mission-grid").addEventListener("click", (e) => {
-    const card = e.target.closest("[data-mission]");
-    if (!card) return;
-    state.mission = card.dataset.mission;
-    state.sample = 0;
-    renderMissions(); renderTeam();
-    $("#team-room").scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-  $("#build-custom").addEventListener("click", () => {
-    const text = $("#custom-mission").value.toLowerCase();
-    state.mission = text.includes("meeting") ? "meetings" : text.includes("document") || text.includes("file") ? "documents" : text.includes("research") ? "research" : text.includes("follow") ? "followups" : "intake";
-    renderMissions(); renderTeam();
-    $("#team-room").scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-  $("#lock-grid").addEventListener("click", (e) => {
-    const lock = e.target.closest("[data-lock]");
-    if (!lock) return;
-    const id = lock.dataset.lock;
-    state.approvals = state.approvals.includes(id) ? state.approvals.filter((x) => x !== id) : [...state.approvals, id];
-    renderLocks();
-  });
-  $("#next-sample").addEventListener("click", () => { state.sample += 1; renderSample(); });
-  $("#run-test").addEventListener("click", () => { $("#test-output").textContent = mockOutput(); });
-  $$('[data-approve], [data-reject], [data-unsafe]').forEach((b) => b.addEventListener("click", () => {
-    $("#test-output").textContent += `\n\nHuman review: ${b.textContent.trim()}`;
-  }));
-  $$('[data-export]').forEach((b) => b.addEventListener("click", () => exportArtifact(b.dataset.export)));
-  $('[data-scroll-export]').addEventListener('click', () => $('#export-portal').scrollIntoView({ behavior: 'smooth' }));
+function contentForScreen() {
+  const m = currentMission();
+  const providerName = providers.find((p) => p[0] === state.provider)?.[1] || "MOCK";
+  const base = {
+    label: state.screen.toUpperCase(),
+    kicker: "AGENT TRAINING CONSOLE",
+    title: "Train tiny helpers. Export real agent specs.",
+    copy: "Operate Byte’s console. Everything happens in this one arcade screen.",
+    details: "",
+  };
+  if (state.screen === "brain") return { label: "BRAIN SELECT", kicker: "CHOOSE BYTE'S BRAIN", title: "Pick the model source.", copy: "Mock mode is ready now. BYOK options are shown as the future path.", details: providers.map(([id, name, note]) => `${state.provider === id ? ">" : " "} ${name}: ${note}`).join("\n") };
+  if (state.screen === "mission") return { label: "MISSION SELECT", kicker: "PICK THE PROBLEM", title: "Choose one annoying workflow.", copy: "One mission becomes an agent team, safety locks, fake test, and export package.", details: Object.values(missions).map((x) => `${x.name}: ${x.brief}`).join("\n\n") };
+  if (state.screen === "team") return { label: "TEAM BUILDER", kicker: m.name, title: "Your tiny helper team is online.", copy: m.brief, details: m.agents.map((a) => `▣ ${a}`).join("\n") };
+  if (state.screen === "locks") return { label: "SAFETY LOCKS", kicker: "LOCK RISKY POWERS", title: "Do not let Byte act too soon.", copy: "MVP rule: draft, check, summarize, and flag only. Humans approve anything risky.", details: locks.map((l) => `[X] ${l}`).join("\n") };
+  if (state.screen === "test") return { label: "TEST LAB", kicker: "FAKE DATA ONLY", title: "Run the mock test.", copy: m.sample, details: state.testRun ? `BYTE TEAM OUTPUT:\n${m.output}\n\nGATEKEEPER:\nSending locked. Tool updates locked. Human approval required.` : "Press RUN FAKE-DATA TEST." };
+  if (state.screen === "export") return { label: "EXPORT PORTAL", kicker: "PACKAGE READY", title: "Export the trained helper.", copy: `${m.name} · ${providerName} · fake-data tested`, details: makeSpec().slice(0, 900) + "\n..." };
+  return { ...base, label: "TITLE SCREEN", kicker: "INSERT COIN", title: "AgentWorks Quest", copy: "A one-screen arcade console where non-technical humans train AI helpers, lock risky powers, test on fake work, and export agent specs.", details: "ROBOTRON MODE: NO SCROLLING. ONE SCREEN. MENU DRIVEN.\n\nPRESS START NEW QUEST." };
 }
 
-document.addEventListener("DOMContentLoaded", init);
+function setStatus(text) { $("#status").textContent = text; }
+function render() {
+  const content = contentForScreen();
+  const menu = menuForScreen();
+  $("#screen-label").textContent = content.label;
+  $("#kicker").textContent = content.kicker;
+  $("#screen-title").textContent = content.title;
+  $("#screen-copy").textContent = content.copy;
+  $("#details").textContent = content.details;
+  $("#score").textContent = pad(state.score);
+  $("#trust").textContent = `LEVEL ${state.screen === "title" ? 0 : Math.min(4, flow.indexOf(state.screen))}`;
+  $("#brain-readout").textContent = (providers.find((p) => p[0] === state.provider)?.[1] || "MOCK").replace(" MODE", "");
+  $("#progress").textContent = `BRAIN: ${state.provider.toUpperCase()} · MISSION: ${currentMission().name} · TEAM: ${flow.indexOf(state.screen) >= 3 ? "ON" : "--"} · TEST: ${state.testRun ? "PASS" : "--"} · EXPORT: ${state.screen === "export" ? "READY" : "--"}`;
+  $("#menu").innerHTML = menu.map(([label, , hint], i) => `<button class="menu-item ${i === state.cursor ? "active" : ""}" type="button" data-i="${i}"><span>${i === state.cursor ? ">" : " "}</span><strong>${label}</strong>${hint ? `<small>${hint}</small>` : ""}</button>`).join("");
+  $("#menu").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { state.cursor = Number(b.dataset.i); select(); }));
+  setStatus(statusText());
+}
+
+function statusText() {
+  if (state.screen === "title") return "SYSTEM READY · PRESS START";
+  if (state.screen === "brain") return "CHOOSE MODEL SOURCE · MOCK MODE RECOMMENDED";
+  if (state.screen === "mission") return "SELECT ONE PAIN · NO GIANT WORKFLOWS";
+  if (state.screen === "team") return "TEAM BUILT · EACH HELPER HAS ONE JOB";
+  if (state.screen === "locks") return "RISKY POWERS LOCKED BEFORE REAL DATA";
+  if (state.screen === "test") return "FAKE-DATA TEST LAB · PRACTICE BEFORE REAL WORK";
+  return "EXPORT PORTAL · COPY OR DOWNLOAD AGENT PACKAGE";
+}
+
+function select() {
+  const item = menuForScreen()[state.cursor];
+  if (item) item[1]();
+}
+function back() {
+  const idx = flow.indexOf(state.screen);
+  if (idx > 0) setScreen(flow[idx - 1]);
+}
+
+document.addEventListener("keydown", (e) => {
+  const menu = menuForScreen();
+  if (["ArrowDown", "ArrowUp", "Enter", " ", "Escape"].includes(e.key)) e.preventDefault();
+  if (e.key === "ArrowDown") { state.cursor = (state.cursor + 1) % menu.length; render(); }
+  if (e.key === "ArrowUp") { state.cursor = (state.cursor - 1 + menu.length) % menu.length; render(); }
+  if (e.key === "Enter" || e.key === " ") select();
+  if (e.key === "Escape") back();
+  if (/^[1-9]$/.test(e.key) && menu[Number(e.key) - 1]) { state.cursor = Number(e.key) - 1; select(); }
+});
+
+// Canvas arcade backdrop
+const canvas = $("#arena");
+const ctx = canvas.getContext("2d");
+let t = 0;
+function draw() {
+  t += 1;
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = "#070817";
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "rgba(64,248,255,.18)";
+  ctx.lineWidth = 2;
+  for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+  const nodes = [[180,140,"BRAIN"],[780,140,"MISSION"],[180,400,"LOCKS"],[780,400,"EXPORT"],[480,270,"BYTE"]];
+  for (const [x,y,label] of nodes) {
+    ctx.fillStyle = label === "BYTE" ? "#ffe45c" : "#111b4d";
+    ctx.strokeStyle = label === "BYTE" ? "#ff4fd8" : "#40f8ff";
+    ctx.lineWidth = 5;
+    ctx.fillRect(x - 54, y - 28, 108, 56);
+    ctx.strokeRect(x - 54, y - 28, 108, 56);
+    ctx.fillStyle = "#f8f7ff";
+    ctx.font = "14px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(label, x, y + 5);
+  }
+  const bx = 480 + Math.sin(t / 24) * 16;
+  const by = 270 + Math.cos(t / 30) * 10;
+  ctx.fillStyle = "#3c5cff";
+  ctx.strokeStyle = "#f8f7ff";
+  ctx.lineWidth = 4;
+  ctx.fillRect(bx - 18, by - 26, 36, 44);
+  ctx.strokeRect(bx - 18, by - 26, 36, 44);
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(bx - 10, by - 12, 6, 6);
+  ctx.fillRect(bx + 5, by - 12, 6, 6);
+  ctx.fillStyle = "#ff4f5e";
+  for (let i = 0; i < 8; i++) {
+    const x = (i * 137 + t * (i % 2 ? 1 : -1)) % w;
+    const y = (i * 83 + t * .7) % h;
+    ctx.fillRect((x + w) % w, y, 12, 12);
+  }
+  requestAnimationFrame(draw);
+}
+
+render(); draw();
