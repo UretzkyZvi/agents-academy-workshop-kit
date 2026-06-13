@@ -80,6 +80,78 @@ textarea { min-height: 130px; resize: vertical; }
 .run-card p { margin: .35rem 0; font-size: .82rem; color: var(--soft-ink); }
 .run-card pre, .export-preview pre { max-height: 180px; overflow: auto; white-space: pre-wrap; border: 2px solid var(--line); border-radius: 12px; background: #fffefa; padding: .6rem; color: var(--ink); font: 700 .78rem/1.45 ui-monospace, Consolas, monospace; }
 ul { margin: .4rem 0 .7rem 1.2rem; color: var(--soft-ink); }
+
+body.play-mode .hud,
+body.play-mode .terminal-head,
+body.play-mode .story-panel > .kicker,
+body.play-mode .story-panel > h1,
+body.play-mode .story-panel > p,
+body.play-mode #menu { display: none; }
+body.play-mode .bezel { grid-template-rows: 1fr auto; }
+body.play-mode .crt { margin: .7rem; }
+body.play-mode .terminal-body { grid-template-columns: 1fr; padding: .65rem; }
+body.play-mode .story-panel { grid-template-rows: 1fr; }
+body.play-mode .details { overflow: hidden; padding: 0; }
+.orchestration-stage {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr .86fr;
+  grid-template-rows: auto minmax(165px, 1fr) auto auto;
+  grid-template-areas:
+    "table log"
+    "actors log"
+    "handoff log"
+    "focus actions";
+  gap: .7rem;
+}
+.work-table, .focus-panel, .auto-log, .stage-actions {
+  border: 3px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 5px 5px 0 rgba(39,50,74,.14);
+}
+.work-table { grid-area: table; display: flex; align-items: center; gap: .7rem; padding: .75rem; }
+.work-table.pulse { animation: tablePulse .8s infinite alternate; }
+.table-icon { width: 52px; height: 52px; display: grid; place-items: center; border: 3px solid var(--line); border-radius: 14px; background: #fff0a6; font-size: 1.7rem; }
+.work-table strong { font-family: 'Press Start 2P', monospace; font-size: .82rem; }
+.work-table small { color: var(--soft-ink); font-weight: 900; }
+.actor-row { grid-area: actors; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); align-items: center; gap: .65rem; }
+.actor {
+  min-height: 150px;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  justify-items: center;
+  align-content: center;
+  gap: .45rem;
+  border: 3px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,255,255,.9);
+  padding: .7rem;
+  text-align: center;
+  transition: transform .25s ease, background .25s ease;
+}
+.actor.active { transform: translateY(-16px) scale(1.04); background: #fff0a6; animation: actorBounce .6s infinite alternate; }
+.actor.done { background: #dcfff2; }
+.actor-body { width: 64px; height: 64px; display: grid; place-items: center; border: 4px solid var(--line); border-radius: 20px; background: var(--sky); font-size: 1.9rem; }
+.actor strong { color: var(--ink); }
+.actor small { color: var(--soft-ink); font-size: .78rem; line-height: 1.2; max-height: 2.4em; overflow: hidden; }
+.handoff-line { grid-area: handoff; align-self: center; justify-self: center; display: flex; align-items: center; gap: .5rem; padding: .45rem .65rem; border: 3px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.92); }
+.handoff-line b { color: var(--orange); }
+.node { width: 28px; height: 28px; display: grid; place-items: center; border: 2px solid var(--line); border-radius: 999px; background: white; font-weight: 900; }
+.node.lit { background: var(--green); }
+.focus-panel { grid-area: focus; min-height: 92px; padding: .65rem; overflow: hidden; }
+.focus-panel h3 { margin: 0 0 .35rem; color: var(--ink); }
+.focus-panel p { font-size: .92rem; }
+.packet { margin-top: .45rem; padding: .55rem; border-radius: 12px; background: #fff7d3; color: var(--ink); font-size: .85rem; line-height: 1.35; max-height: 70px; overflow: hidden; }
+.auto-log { grid-area: log; min-height: 0; overflow: hidden; padding: .75rem; display: flex; flex-direction: column; justify-content: flex-end; gap: .45rem; }
+.auto-log p { margin: 0; padding: .5rem .6rem; border-radius: 12px; background: #eefaff; color: var(--ink); font-size: .9rem; line-height: 1.32; }
+.auto-log p:last-child { background: #fff0a6; }
+.stage-actions { grid-area: actions; display: flex; align-items: center; justify-content: flex-end; gap: .55rem; padding: .65rem; }
+.stage-actions button { border: 3px solid var(--line); border-radius: 14px; background: #fff0a6; color: var(--ink); padding: .6rem .75rem; font-weight: 900; cursor: pointer; box-shadow: 4px 4px 0 rgba(39,50,74,.16); }
+@keyframes actorBounce { to { transform: translateY(-24px) scale(1.06); } }
+@keyframes tablePulse { to { background: #fff0a6; } }
+
 @media (max-width: 980px) {
   html, body { overflow: auto; }
   .cabinet { height: auto; min-height: 100dvh; }
@@ -88,7 +160,9 @@ ul { margin: .4rem 0 .7rem 1.2rem; color: var(--soft-ink); }
   .logo { grid-column: 1 / -1; grid-row: 1; }
   .crt { min-height: 780px; }
   .terminal-body { grid-template-columns: 1fr; }
-  .choice-grid, .agent-grid, .run-lane { grid-template-columns: 1fr; }
+  .choice-grid, .agent-grid, .run-lane, .actor-row { grid-template-columns: 1fr; }
+  .orchestration-stage { grid-template-columns: 1fr; grid-template-areas: "table" "actors" "focus" "log" "actions"; }
+  .auto-log { min-height: 220px; }
   .statusbar { grid-template-columns: 1fr; }
   #progress { text-align: left; }
 }

@@ -48,212 +48,101 @@ const templates = {
 };
 
 const state = {
-  screen: "title",
-  cursor: 0,
-  provider: "mock",
-  apiKey: "",
+  screen: "title", cursor: 0, provider: "mock", apiKey: "",
   appText: "I want to organize all the information from conversations and meetings. Show decisions, action items, risks, follow-ups, and what needs human approval.",
-  template: "conversations",
-  data: "",
-  agents: [],
-  runLog: [],
-  running: false,
-  score: 0,
+  template: "conversations", data: "", agents: [], runLog: [], chat: [],
+  activeAgent: -1, packetFrom: -1, running: false, score: 0,
 };
-
 const flow = ["title", "brain", "define", "data", "agents", "run", "export"];
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const escapeHtml = (s = "") => String(s).replace(/[&<>"]/g, (m) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[m]));
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const esc = (s = "") => String(s).replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 const currentTemplate = () => templates[state.template] || templates.conversations;
-
-function setScreen(screen) { state.screen = screen; state.cursor = 0; render(); }
-function addScore(n) { state.score = Math.min(9999, state.score + n); }
-function setStatus(text) { $("#status").textContent = text; }
-
-function inferTemplate(text) {
-  const t = text.toLowerCase();
-  if (t.includes("document") || t.includes("pdf") || t.includes("file")) return "document";
-  if (t.includes("meeting") || t.includes("transcript") || t.includes("summary")) return "meeting";
-  return "conversations";
+const addScore = n => state.score = Math.min(9999, state.score + n);
+function setScreen(screen){ state.screen = screen; state.cursor = 0; render(); }
+function inferTemplate(text){ const t=text.toLowerCase(); if(t.includes("document")||t.includes("pdf")||t.includes("file")) return "document"; if(t.includes("meeting")||t.includes("transcript")||t.includes("summary")) return "meeting"; return "conversations"; }
+function generateFromDefinition(){ state.template = inferTemplate(state.appText); const t=currentTemplate(); state.data=t.fakeData; state.agents=JSON.parse(JSON.stringify(t.agents)); addScore(300); }
+function agentInput(i){ return i===0 ? state.data : (state.runLog[i-1]?.output || state.data); }
+function mockAgentOutput(agent,input,i){
+  if(i===0) return `Found the work type: ${currentTemplate().title}.\nImportant pieces: meetings/chats/docs, people, decisions, risks, follow-ups, missing approvals.`;
+  if(i===1) return `Structured packet:\n- Decisions: start with fake examples; show handoffs clearly.\n- Action items: collect examples; approve profiles; run the chain.\n- Open questions: which real system connects later?\n- Missing info: approval owner and success criteria.`;
+  if(i===2) return `Safety check:\n- Do not send messages automatically.\n- Do not update tools yet.\n- Sensitive details need review before real runs.\n- Human approval required.`;
+  return `Human-ready summary:\nThe agent team organized the messy information into decisions, action items, risks, and follow-ups.\nNext step: human reviews, edits, then approves export or another test.`;
 }
-
-function generateFromDefinition() {
-  state.template = inferTemplate(state.appText);
-  const t = currentTemplate();
-  state.data = t.fakeData;
-  state.agents = JSON.parse(JSON.stringify(t.agents));
-  addScore(300);
-}
-
-function agentInput(index) {
-  if (index === 0) return state.data;
-  const prev = state.runLog[index - 1];
-  return prev ? prev.output : state.data;
-}
-
-function mockAgentOutput(agent, input, index) {
-  const title = currentTemplate().title;
-  if (index === 0) return `${agent.name} found the main work type: ${title}.\nKey source material: meetings/chats/doc notes.\nImportant signals: decisions, owners, risks, follow-ups, and missing approvals.`;
-  if (index === 1) return `Structured output:\n- Decisions: start with fake examples; show agent handoffs clearly.\n- Action items: collect examples; approve profiles; run the agent chain.\n- Owners: named only when present.\n- Open questions: which real system connects later?\n- Missing info: approval owner and success criteria.`;
-  if (index === 2) return `Safety check:\n- Do not send messages automatically.\n- Do not update CRM/docs yet.\n- Flag sensitive client details before real runs.\n- Human approval required before using real data or external tools.`;
-  return `Human-ready output:\nSummary: The agent team organized the messy information into decisions, action items, risks, and follow-ups.\nNext step: Human reviews the summary, edits anything wrong, then approves export or another test run.`;
-}
-
-async function callServerAgent(agent, input, index) {
-  const res = await fetch("/api/run-agent", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ provider: state.provider, apiKey: state.apiKey, agent, input, appText: state.appText, index }),
-  });
-  if (!res.ok) throw new Error(await res.text());
-  const json = await res.json();
-  return json.output;
-}
-
-async function runAgents() {
-  if (!state.agents.length) generateFromDefinition();
-  state.running = true;
-  state.runLog = [];
-  setScreen("run");
-  for (let i = 0; i < state.agents.length; i++) {
-    const agent = state.agents[i];
-    const input = agentInput(i);
-    const step = {
-      icon: agent.icon,
-      name: agent.name,
-      role: agent.role,
-      prompt: agent.prompt,
-      input,
-      call: state.provider === "mock" ? "Demo Brain local simulation" : `${providers.find(p => p.id === state.provider)?.name} via local /api/run-agent`,
-      doing: "Reading input, applying its profile, producing output for the next helper...",
-      output: "working...",
-    };
-    state.runLog.push(step);
-    render();
-    await sleep(700);
-    try {
-      step.output = state.provider === "mock" || !state.apiKey ? mockAgentOutput(agent, input, i) : await callServerAgent(agent, input, i);
-    } catch (err) {
-      step.output = `Server/API run failed, so Byte fell back to demo mode.\nReason: ${err.message}\n\n${mockAgentOutput(agent, input, i)}`;
-    }
-    addScore(250);
-    render();
-    await sleep(450);
+async function callServerAgent(agent,input,index){ const res=await fetch("/api/run-agent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider:state.provider,apiKey:state.apiKey,agent,input,appText:state.appText,index})}); if(!res.ok) throw new Error(await res.text()); return (await res.json()).output; }
+async function runAgents(){
+  if(!state.agents.length) generateFromDefinition();
+  state.running=true; state.runLog=[]; state.chat=[{who:"Byte",text:"The work is on the table. Fake data only. Watch each helper touch it and pass it forward."}]; state.activeAgent=-1; state.packetFrom=-1; setScreen("run");
+  for(let i=0;i<state.agents.length;i++){
+    const agent=state.agents[i]; state.activeAgent=i; state.packetFrom=i-1; state.chat.push({who:agent.name,text:`${agent.icon} walks to the table and picks up the current work packet.`}); render(); await sleep(650);
+    const input=agentInput(i); const step={icon:agent.icon,name:agent.name,role:agent.role,prompt:agent.prompt,input,call:state.provider==="mock"?"Demo Brain local simulation":`${providers.find(p=>p.id===state.provider)?.name} via local /api/run-agent`,doing:"Reading input, applying its profile, producing output for the next helper...",output:"working..."};
+    state.runLog.push(step); state.chat.push({who:agent.name,text:`Prompt loaded: ${agent.prompt}`}); state.chat.push({who:agent.name,text:`Input received from ${i===0?"the work table":state.agents[i-1].name}.`}); render(); await sleep(900);
+    try{ step.output = state.provider==="mock" || !state.apiKey ? mockAgentOutput(agent,input,i) : await callServerAgent(agent,input,i); state.chat.push({who:agent.name,text:"Done. Output packet passed forward."}); }
+    catch(err){ step.output=`Server/API failed, demo mode continued.\nReason: ${err.message}\n\n${mockAgentOutput(agent,input,i)}`; state.chat.push({who:agent.name,text:"Real call failed, so demo mode kept the lesson moving."}); }
+    addScore(250); render(); await sleep(750);
   }
-  state.running = false;
-  addScore(500);
-  render();
+  state.activeAgent=-1; state.packetFrom=state.agents.length-1; state.chat.push({who:"Byte",text:"Orchestration complete. The human review package is ready."}); state.running=false; addScore(500); render();
 }
-
-function makeMarkdownSpec() {
-  return `# AgentWorks Quest Agent Team\n\n## Application\n${state.appText}\n\n## Fake Data\n${state.data}\n\n## Agents\n${state.agents.map(a => `### ${a.name}\n- Role: ${a.role}\n- Prompt: ${a.prompt}`).join("\n\n")}\n\n## Run Log\n${state.runLog.map(s => `### ${s.name}\nPrompt: ${s.prompt}\n\nInput:\n${s.input}\n\nCall:\n${s.call}\n\nOutput:\n${s.output}`).join("\n\n")}\n`;
-}
-function makeLangGraph() {
-  return `from typing import TypedDict\nfrom langgraph.graph import StateGraph, START, END\n\nclass AgentState(TypedDict):\n    text: str\n    log: list[str]\n\ndef call_agent(name, prompt, text):\n    # Replace this with your LLM call.\n    return f"{name} processed: {text[:200]}"\n\n${state.agents.map(a => `def ${a.name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}(state: AgentState):\n    out = call_agent(${JSON.stringify(a.name)}, ${JSON.stringify(a.prompt)}, state["text"])\n    return {"text": out, "log": state["log"] + [out]}\n`).join("\n")}\ngraph = StateGraph(AgentState)\n${state.agents.map(a => `graph.add_node("${a.name}", ${a.name.toLowerCase().replace(/[^a-z0-9]+/g, "_")})`).join("\n")}\ngraph.add_edge(START, "${state.agents[0]?.name || "Agent"}")\n${state.agents.slice(0,-1).map((a,i) => `graph.add_edge("${a.name}", "${state.agents[i+1].name}")`).join("\n")}\ngraph.add_edge("${state.agents.at(-1)?.name || "Agent"}", END)\napp = graph.compile()\nprint(app.invoke({"text": ${JSON.stringify(state.data)}, "log": []}))\n`;
-}
-function makeCrewAI() {
-  return `from crewai import Agent, Task, Crew\n\n${state.agents.map(a => `${a.name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_agent = Agent(\n    role=${JSON.stringify(a.name)},\n    goal=${JSON.stringify(a.role)},\n    backstory=${JSON.stringify(a.prompt)}\n)`).join("\n\n")}\n\n${state.agents.map((a,i) => `task_${i+1} = Task(\n    description=${JSON.stringify(`${a.prompt}\n\nInput:\n${i === 0 ? state.data : 'Use the previous task output.'}`)},\n    agent=${a.name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_agent,\n    expected_output="Clear structured output for the next helper"\n)`).join("\n\n")}\n\ncrew = Crew(agents=[${state.agents.map(a => `${a.name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_agent`).join(", ")}], tasks=[${state.agents.map((_,i) => `task_${i+1}`).join(", ")}])\nprint(crew.kickoff())\n`;
-}
-
-async function copyText(text) { try { await navigator.clipboard.writeText(text); setStatus("COPIED"); } catch { window.prompt("Copy this", text); } }
-function download(text, filename, type="text/plain") { const blob = new Blob([text], {type}); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); setStatus(`SAVED ${filename}`); }
-
-function menuForScreen() {
-  if (state.screen === "title") return [["START", () => setScreen("brain")], ["PLAY DEMO RUN", () => { generateFromDefinition(); runAgents(); }], ["EXPORT EXAMPLES", () => { generateFromDefinition(); setScreen("export"); }]];
-  if (state.screen === "brain") return providers.map(p => [p.name.toUpperCase(), () => { state.provider = p.id; addScore(100); setScreen("define"); }, p.note]);
-  if (state.screen === "define") return [["GENERATE FAKE WORK + AGENTS", () => { saveDefineFields(); generateFromDefinition(); setScreen("data"); }], ["SKIP TO AGENT PROFILES", () => { saveDefineFields(); generateFromDefinition(); setScreen("agents"); }]];
-  if (state.screen === "data") return [["APPROVE FAKE DATA", () => { saveDataField(); setScreen("agents"); }], ["REGENERATE FROM DEFINITION", () => { saveDataField(); generateFromDefinition(); setScreen("data"); }], ["EDIT APPLICATION", () => setScreen("define")]];
-  if (state.screen === "agents") return [["APPROVE PROFILES", () => { saveAgentFields(); addScore(250); setScreen("run"); }], ["PLAY AGENTS NOW", () => { saveAgentFields(); runAgents(); }], ["BACK TO FAKE DATA", () => setScreen("data")]];
-  if (state.screen === "run") return [[state.running ? "AGENTS RUNNING..." : "PLAY AGENTS", () => { if (!state.running) runAgents(); }], ["EXPORT RUN", () => setScreen("export")], ["EDIT AGENTS", () => setScreen("agents")]];
-  if (state.screen === "export") return [["COPY AGENT SPEC", () => copyText(makeMarkdownSpec())], ["DOWNLOAD AGENT SPEC", () => download(makeMarkdownSpec(), "agent-spec.md", "text/markdown")], ["DOWNLOAD LANGGRAPH PY", () => download(makeLangGraph(), "agentworks_langgraph.py", "text/x-python")], ["DOWNLOAD CREWAI PY", () => download(makeCrewAI(), "agentworks_crewai.py", "text/x-python")], ["DOWNLOAD RUN JSON", () => download(JSON.stringify({ app: state.appText, data: state.data, agents: state.agents, runLog: state.runLog }, null, 2), "agentworks-run.json", "application/json")], ["START OVER", () => setScreen("title")]];
+function makeMarkdownSpec(){ return `# AgentWorks Quest Agent Team\n\n## Application\n${state.appText}\n\n## Fake Data\n${state.data}\n\n## Agents\n${state.agents.map(a=>`### ${a.name}\n- Role: ${a.role}\n- Prompt: ${a.prompt}`).join("\n\n")}\n\n## Run Log\n${state.runLog.map(s=>`### ${s.name}\nPrompt: ${s.prompt}\n\nInput:\n${s.input}\n\nCall:\n${s.call}\n\nOutput:\n${s.output}`).join("\n\n")}`; }
+function makeLangGraph(){ return `from typing import TypedDict\nfrom langgraph.graph import StateGraph, START, END\n\nclass AgentState(TypedDict):\n    text: str\n    log: list[str]\n\ndef call_agent(name, prompt, text):\n    return f"{name} processed: {text[:200]}"\n\n${state.agents.map(a=>`def ${a.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")}(state: AgentState):\n    out = call_agent(${JSON.stringify(a.name)}, ${JSON.stringify(a.prompt)}, state["text"])\n    return {"text": out, "log": state["log"] + [out]}\n`).join("\n")}\ngraph = StateGraph(AgentState)\n${state.agents.map(a=>`graph.add_node("${a.name}", ${a.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")})`).join("\n")}\ngraph.add_edge(START, "${state.agents[0]?.name||"Agent"}")\n${state.agents.slice(0,-1).map((a,i)=>`graph.add_edge("${a.name}", "${state.agents[i+1].name}")`).join("\n")}\ngraph.add_edge("${state.agents.at(-1)?.name||"Agent"}", END)\napp = graph.compile()\nprint(app.invoke({"text": ${JSON.stringify(state.data)}, "log": []}))`; }
+function makeCrewAI(){ return `from crewai import Agent, Task, Crew\n\n${state.agents.map(a=>`${a.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")}_agent = Agent(role=${JSON.stringify(a.name)}, goal=${JSON.stringify(a.role)}, backstory=${JSON.stringify(a.prompt)})`).join("\n\n")}\n\n${state.agents.map((a,i)=>`task_${i+1} = Task(description=${JSON.stringify(`${a.prompt}\n\nInput:\n${i===0?state.data:'Use the previous task output.'}`)}, agent=${a.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")}_agent, expected_output="Clear structured output for the next helper")`).join("\n\n")}\n\ncrew = Crew(agents=[${state.agents.map(a=>`${a.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")}_agent`).join(", ")}], tasks=[${state.agents.map((_,i)=>`task_${i+1}`).join(", ")}])\nprint(crew.kickoff())`; }
+async function copyText(text){ try{ await navigator.clipboard.writeText(text); setStatus("COPIED"); }catch{ window.prompt("Copy this", text); } }
+function download(text,filename,type="text/plain"){ const blob=new Blob([text],{type}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); setStatus(`SAVED ${filename}`); }
+function saveDefineFields(){ const app=$("#app-text"),key=$("#api-key"); if(app) state.appText=app.value; if(key) state.apiKey=key.value.trim(); }
+function saveDataField(){ const d=$("#fake-data"); if(d) state.data=d.value; }
+function saveAgentFields(){ state.agents=state.agents.map((a,i)=>({...a,role:$(`#agent-role-${i}`)?.value||a.role,prompt:$(`#agent-prompt-${i}`)?.value||a.prompt})); }
+function menuForScreen(){
+  if(state.screen==="title") return [["START",()=>setScreen("brain")],["PLAY DEMO RUN",()=>{generateFromDefinition();runAgents();}],["EXPORT EXAMPLES",()=>{generateFromDefinition();setScreen("export");}]];
+  if(state.screen==="brain") return providers.map(p=>[p.name.toUpperCase(),()=>{state.provider=p.id;addScore(100);setScreen("define");},p.note]);
+  if(state.screen==="define") return [["GENERATE FAKE WORK + AGENTS",()=>{saveDefineFields();generateFromDefinition();setScreen("data");}],["SKIP TO AGENT PROFILES",()=>{saveDefineFields();generateFromDefinition();setScreen("agents");}]];
+  if(state.screen==="data") return [["APPROVE FAKE DATA",()=>{saveDataField();setScreen("agents");}],["REGENERATE FROM DEFINITION",()=>{saveDataField();generateFromDefinition();setScreen("data");}],["EDIT APPLICATION",()=>setScreen("define")]];
+  if(state.screen==="agents") return [["APPROVE PROFILES",()=>{saveAgentFields();addScore(250);setScreen("run");}],["PLAY AGENTS NOW",()=>{saveAgentFields();runAgents();}],["BACK TO FAKE DATA",()=>setScreen("data")]];
+  if(state.screen==="run") return state.running ? [] : [[state.runLog.length?"PLAY AGAIN":"PLAY AGENTS",()=>{if(!state.running)runAgents();}],["EXPORT RUN",()=>setScreen("export")],["EDIT AGENTS",()=>setScreen("agents")]];
+  if(state.screen==="export") return [["COPY AGENT SPEC",()=>copyText(makeMarkdownSpec())],["DOWNLOAD AGENT SPEC",()=>download(makeMarkdownSpec(),"agent-spec.md","text/markdown")],["DOWNLOAD LANGGRAPH PY",()=>download(makeLangGraph(),"agentworks_langgraph.py","text/x-python")],["DOWNLOAD CREWAI PY",()=>download(makeCrewAI(),"agentworks_crewai.py","text/x-python")],["DOWNLOAD RUN JSON",()=>download(JSON.stringify({app:state.appText,data:state.data,agents:state.agents,runLog:state.runLog},null,2),"agentworks-run.json","application/json")],["START OVER",()=>setScreen("title")]];
   return [];
 }
-
-function saveDefineFields() { const app = $("#app-text"); const key = $("#api-key"); if (app) state.appText = app.value; if (key) state.apiKey = key.value.trim(); }
-function saveDataField() { const data = $("#fake-data"); if (data) state.data = data.value; }
-function saveAgentFields() {
-  state.agents = state.agents.map((a, i) => ({ ...a, role: $(`#agent-role-${i}`)?.value || a.role, prompt: $(`#agent-prompt-${i}`)?.value || a.prompt }));
+function detailsForScreen(){
+  const provider=providers.find(p=>p.id===state.provider)||providers[0];
+  if(state.screen==="brain") return `<div class="choice-grid">${providers.map(p=>`<div class="chip ${p.id===state.provider?'on':''}"><strong>${p.name}</strong><span>${p.note}</span></div>`).join("")}</div><p class="friendly-note">Demo mode runs anywhere. Real API keys work when the local server is running.</p>`;
+  if(state.screen==="define") return `<label class="field"><span>What should this agent team help with?</span><textarea id="app-text">${esc(state.appText)}</textarea></label><label class="field"><span>${provider.name} key ${state.provider==='mock'?'(optional)':'(used by local server)'}</span><input id="api-key" type="password" value="${esc(state.apiKey)}" placeholder="Paste key for a real run, or leave empty for demo" /></label>`;
+  if(state.screen==="data") return `<label class="field"><span>${esc(currentTemplate().dataLabel)}</span><textarea id="fake-data">${esc(state.data||currentTemplate().fakeData)}</textarea></label><p class="friendly-note">Users see the fake conversations, meetings, or documents before agents touch anything real.</p>`;
+  if(state.screen==="agents") return `<div class="agent-grid">${state.agents.map((a,i)=>`<article class="agent-card"><div class="avatar">${a.icon}</div><h3>${esc(a.name)}</h3><label>Profile<input id="agent-role-${i}" value="${esc(a.role)}" /></label><label>Prompt<textarea id="agent-prompt-${i}">${esc(a.prompt)}</textarea></label></article>`).join("")}</div>`;
+  if(state.screen==="run") return `<div class="orchestration-stage">
+    <div class="work-table ${state.activeAgent>=0?'pulse':''}"><span class="table-icon">📄</span><strong>FAKE WORK</strong><small>${esc(currentTemplate().dataLabel)}</small></div>
+    <div class="actor-row">${state.agents.map((a,i)=>`<div class="actor ${state.activeAgent===i?'active':''} ${state.runLog[i]&&state.runLog[i].output!=='working...'?'done':''}"><div class="actor-body">${a.icon}</div><strong>${esc(a.name)}</strong><small>${esc(a.role)}</small></div>`).join("")}</div>
+    <div class="handoff-line">${state.agents.map((a,i)=>`<span class="node ${state.runLog[i]?'lit':''}">${i+1}</span>`).join('<b>→</b>')}</div>
+    <div class="focus-panel">${state.activeAgent>=0?`<h3>${state.agents[state.activeAgent].icon} ${esc(state.agents[state.activeAgent].name)} is working</h3><p>${esc(state.runLog[state.activeAgent]?.doing||'Moving to the work table...')}</p><div class="packet"><b>Current input:</b> ${esc((state.runLog[state.activeAgent]?.input||state.data)).slice(0,420)}</div>`:`<h3>${state.runLog.length?'✅ Human review package ready':'Press Play to start the orchestration'}</h3><p>The menus disappear during the run so the user watches the characters and teaching log.</p>`}</div>
+    <div class="auto-log" id="auto-log">${state.chat.map(m=>`<p><b>${esc(m.who)}:</b> ${esc(m.text)}</p>`).join("")}</div>
+    ${!state.running?`<div class="stage-actions"><button id="stage-play">${state.runLog.length?'Play Again':'Play Agents'}</button>${state.runLog.length?'<button id="stage-export">Export Run</button>':''}<button id="stage-edit">Edit Agents</button></div>`:''}
+  </div>`;
+  if(state.screen==="export") return `<div class="export-preview"><h3>Export includes</h3><ul><li>Agent profile cards</li><li>Full run log</li><li>LangGraph scaffold</li><li>CrewAI scaffold</li><li>JSON manifest</li></ul><pre>${esc(makeMarkdownSpec()).slice(0,1000)}...</pre></div>`;
+  return `<div class="welcome-card"><div class="big-avatar">🤖</div><p>No black-box magic. Users watch little agents work step by step on fake conversations, meetings, or documents.</p><p class="friendly-note">Bright arcade mode. Less terminal. More training game.</p></div>`;
 }
-
-function detailsForScreen() {
-  const provider = providers.find(p => p.id === state.provider) || providers[0];
-  if (state.screen === "brain") return `<div class="choice-grid">${providers.map(p => `<div class="chip ${p.id===state.provider?'on':''}"><strong>${p.name}</strong><span>${p.note}</span></div>`).join("")}</div><p class="friendly-note">For MVP: demo mode runs anywhere. Real API keys work when the local server is running.</p>`;
-  if (state.screen === "define") return `<label class="field"><span>What should this agent team help with?</span><textarea id="app-text">${escapeHtml(state.appText)}</textarea></label><label class="field"><span>${provider.name} key ${state.provider==='mock'?'(optional)':('(used by local server)')}</span><input id="api-key" type="password" value="${escapeHtml(state.apiKey)}" placeholder="Paste key for a real run, or leave empty for demo" /></label>`;
-  if (state.screen === "data") return `<label class="field"><span>${escapeHtml(currentTemplate().dataLabel)}</span><textarea id="fake-data">${escapeHtml(state.data || currentTemplate().fakeData)}</textarea></label><p class="friendly-note">This is where users see the fake conversations, meetings, or documents before agents touch anything real.</p>`;
-  if (state.screen === "agents") return `<div class="agent-grid">${state.agents.map((a,i) => `<article class="agent-card"><div class="avatar">${a.icon}</div><h3>${escapeHtml(a.name)}</h3><label>Profile<input id="agent-role-${i}" value="${escapeHtml(a.role)}" /></label><label>Prompt<textarea id="agent-prompt-${i}">${escapeHtml(a.prompt)}</textarea></label></article>`).join("")}</div>`;
-  if (state.screen === "run") return state.runLog.length ? `<div class="run-lane">${state.runLog.map((s,i) => `<article class="run-card ${s.output==='working...'?'working':''}"><div class="avatar">${s.icon}</div><h3>${escapeHtml(s.name)}</h3><p><b>Prompted:</b> ${escapeHtml(s.prompt)}</p><p><b>Input:</b> ${escapeHtml(s.input).slice(0,280)}</p><p><b>Calling:</b> ${escapeHtml(s.call)}</p><p><b>Doing:</b> ${escapeHtml(s.doing)}</p><pre>${escapeHtml(s.output)}</pre><small>Output passes to ${state.agents[i+1]?.name || 'the human review screen'}.</small></article>`).join("")}</div>` : `<div class="play-pad"><div class="big-avatar">▶</div><p>Press Play. Each character will reveal what it was prompted, what it read, what it called, what it did, and what it passed forward.</p></div>`;
-  if (state.screen === "export") return `<div class="export-preview"><h3>Export includes</h3><ul><li>Agent profile cards</li><li>Full run log</li><li>LangGraph scaffold</li><li>CrewAI scaffold</li><li>JSON manifest</li></ul><pre>${escapeHtml(makeMarkdownSpec()).slice(0,1000)}...</pre></div>`;
-  return `<div class="welcome-card"><div class="big-avatar">🤖</div><p>No black-box magic. Users watch the little agents work step by step on fake conversations, meetings, or documents.</p><p class="friendly-note">Bright arcade mode. Less terminal. More training game.</p></div>`;
+function contentForScreen(){
+  const t=currentTemplate();
+  if(state.screen==="brain") return {label:"CHOOSE BRAIN",kicker:"STEP 1",title:"Pick how Byte thinks.",copy:"Use demo mode or paste a key for local server runs."};
+  if(state.screen==="define") return {label:"DEFINE APP",kicker:"STEP 2",title:"Tell Byte the job.",copy:"Example: organize conversations and meetings into decisions, action items, risks, and follow-ups."};
+  if(state.screen==="data") return {label:"FAKE WORK",kicker:"STEP 3",title:"Generate safe practice data.",copy:`Current application: ${t.title}. Users see the fake work before any agent runs.`};
+  if(state.screen==="agents") return {label:"AGENT CARDS",kicker:"STEP 4",title:"Approve the characters.",copy:"Each character is an agent profile. Users can edit the role and prompt before pressing Play."};
+  if(state.screen==="run") return {label:"LIVE RUN",kicker:"",title:"",copy:""};
+  if(state.screen==="export") return {label:"EXPORT",kicker:"STEP 6",title:"Take the agent team out.",copy:"Export a plain spec, run JSON, LangGraph scaffold, or CrewAI scaffold."};
+  return {label:"TITLE",kicker:"WELCOME",title:"Train agent characters.",copy:"Define the application, generate fake work, approve profiles, then press Play and watch the agents pass work to each other."};
 }
-
-function contentForScreen() {
-  const t = currentTemplate();
-  const base = { label: "TITLE", kicker: "WELCOME", title: "Train agent characters.", copy: "Define the application, generate fake work, approve profiles, then press Play and watch the agents pass work to each other." };
-  if (state.screen === "brain") return { label: "CHOOSE BRAIN", kicker: "STEP 1", title: "Pick how Byte thinks.", copy: "Use demo mode or paste a key for local server runs. The point is to show real agent behavior, not just a static mockup." };
-  if (state.screen === "define") return { label: "DEFINE APP", kicker: "STEP 2", title: "Tell Byte the job.", copy: "Example: organize conversations and meetings into decisions, action items, risks, and follow-ups." };
-  if (state.screen === "data") return { label: "FAKE WORK", kicker: "STEP 3", title: "Generate safe practice data.", copy: `Current application: ${t.title}. Users see the fake work before any agent runs.` };
-  if (state.screen === "agents") return { label: "AGENT CARDS", kicker: "STEP 4", title: "Approve the characters.", copy: "Each character is an agent profile. Users can edit the role and prompt before pressing Play." };
-  if (state.screen === "run") return { label: "LIVE RUN", kicker: "STEP 5", title: "Agents are working.", copy: "Watch prompt → input → call → action → output. Each output becomes the next agent's input." };
-  if (state.screen === "export") return { label: "EXPORT", kicker: "STEP 6", title: "Take the agent team out.", copy: "Export a plain spec, run JSON, LangGraph scaffold, or CrewAI scaffold." };
-  return base;
+function setStatus(t){ $("#status").textContent=t; }
+function render(){
+  document.body.classList.toggle("play-mode", state.screen==="run");
+  const content=contentForScreen(), menu=menuForScreen();
+  $("#screen-label").textContent=content.label; $("#kicker").textContent=content.kicker; $("#screen-title").textContent=content.title; $("#screen-copy").textContent=content.copy; $("#details").innerHTML=detailsForScreen();
+  $("#score").textContent=String(state.score).padStart(4,"0"); $("#run-readout").textContent=state.running?"LIVE":state.runLog.length?"DONE":"IDLE"; $("#brain-readout").textContent=(providers.find(p=>p.id===state.provider)?.name||"Demo").split(" ")[0].toUpperCase();
+  $("#progress").textContent=`BRAIN: ${state.provider.toUpperCase()} · APP: ${state.appText?"SET":"--"} · DATA: ${state.data?"READY":"--"} · AGENTS: ${state.agents.length||"--"} · RUN: ${state.runLog.length?"DONE":"--"}`;
+  $("#menu").innerHTML=menu.map(([label,,hint],i)=>`<button class="menu-item ${i===state.cursor?'active':''}" type="button" data-i="${i}"><span>${i===state.cursor?'▶':' '}</span><strong>${label}</strong>${hint?`<small>${esc(hint)}</small>`:''}</button>`).join("");
+  $("#menu").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{state.cursor=Number(b.dataset.i);select();}));
+  $("#stage-play")?.addEventListener("click",runAgents); $("#stage-export")?.addEventListener("click",()=>setScreen("export")); $("#stage-edit")?.addEventListener("click",()=>setScreen("agents")); const log=$("#auto-log"); if(log) log.scrollTop=log.scrollHeight;
+  setStatus(state.screen==="run"?(state.running?"WATCHING AGENTS WORK · NO MENU DURING RUN":"READY TO PLAY AGENTS"):"USE MENU OR KEYBOARD");
 }
-
-function render() {
-  const content = contentForScreen();
-  const menu = menuForScreen();
-  $("#screen-label").textContent = content.label;
-  $("#kicker").textContent = content.kicker;
-  $("#screen-title").textContent = content.title;
-  $("#screen-copy").textContent = content.copy;
-  $("#details").innerHTML = detailsForScreen();
-  $("#score").textContent = String(state.score).padStart(4, "0");
-  $("#run-readout").textContent = state.running ? "LIVE" : state.runLog.length ? "DONE" : "IDLE";
-  $("#brain-readout").textContent = (providers.find(p => p.id === state.provider)?.name || "Demo").split(" ")[0].toUpperCase();
-  $("#progress").textContent = `BRAIN: ${state.provider.toUpperCase()} · APP: ${state.appText ? "SET" : "--"} · DATA: ${state.data ? "READY" : "--"} · AGENTS: ${state.agents.length || "--"} · RUN: ${state.runLog.length ? "DONE" : "--"}`;
-  $("#menu").innerHTML = menu.map(([label,,hint], i) => `<button class="menu-item ${i===state.cursor?'active':''}" type="button" data-i="${i}"><span>${i===state.cursor?'▶':' '}</span><strong>${label}</strong>${hint?`<small>${escapeHtml(hint)}</small>`:''}</button>`).join("");
-  $("#menu").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { state.cursor = Number(b.dataset.i); select(); }));
-  setStatus(state.screen === "run" ? (state.running ? "AGENTS ARE WORKING" : "READY TO PLAY AGENTS") : "USE MENU OR KEYBOARD");
-}
-function select() { const item = menuForScreen()[state.cursor]; if (item) item[1](); }
-function back() { const idx = flow.indexOf(state.screen); if (idx > 0) setScreen(flow[idx - 1]); }
-
-document.addEventListener("keydown", (e) => {
-  const menu = menuForScreen();
-  if (["ArrowDown","ArrowUp","Enter"," ","Escape"].includes(e.key)) e.preventDefault();
-  if (e.key === "ArrowDown") { state.cursor = (state.cursor + 1) % menu.length; render(); }
-  if (e.key === "ArrowUp") { state.cursor = (state.cursor - 1 + menu.length) % menu.length; render(); }
-  if (e.key === "Enter" || e.key === " ") select();
-  if (e.key === "Escape") back();
-  if (/^[1-9]$/.test(e.key) && menu[Number(e.key)-1]) { state.cursor = Number(e.key)-1; select(); }
-});
-
-const canvas = $("#arena");
-const ctx = canvas.getContext("2d");
-let tick = 0;
-function drawAgent(x,y,label,emoji,active){
-  ctx.fillStyle = active ? "#fff3a7" : "#ffffff";
-  ctx.strokeStyle = active ? "#ff7a59" : "#58b6ff";
-  ctx.lineWidth = 5;
-  ctx.fillRect(x-54,y-38,108,76); ctx.strokeRect(x-54,y-38,108,76);
-  ctx.font = "28px serif"; ctx.textAlign="center"; ctx.fillText(emoji,x,y-4);
-  ctx.fillStyle="#274060"; ctx.font="12px monospace"; ctx.fillText(label,x,y+22);
-}
-function draw(){
-  tick++;
-  const w=canvas.width,h=canvas.height;
-  ctx.fillStyle="#fff7df"; ctx.fillRect(0,0,w,h);
-  ctx.strokeStyle="rgba(88,182,255,.28)"; ctx.lineWidth=2;
-  for(let x=0;x<w;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
-  for(let y=0;y<h;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-  ctx.fillStyle="rgba(255,212,92,.35)"; ctx.fillRect(0,360,w,180);
-  const agents = state.agents.length ? state.agents : currentTemplate().agents;
-  agents.slice(0,4).forEach((a,i)=>drawAgent(170+i*205,170+(i%2)*105,a.name,a.icon,state.screen==="run" && state.runLog[i]));
-  ctx.strokeStyle="#ff7a59"; ctx.lineWidth=6; ctx.setLineDash([14,12]);
-  ctx.beginPath(); ctx.moveTo(224,170); ctx.lineTo(733,275); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle="#6ee7b7"; ctx.beginPath(); ctx.arc(480+Math.sin(tick/20)*18,430+Math.cos(tick/25)*8,36,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle="#274060"; ctx.lineWidth=5; ctx.stroke();
-  ctx.fillStyle="#274060"; ctx.font="18px monospace"; ctx.textAlign="center"; ctx.fillText("BYTE",480,436);
-  requestAnimationFrame(draw);
-}
-
+function select(){ const item=menuForScreen()[state.cursor]; if(item) item[1](); }
+function back(){ const idx=flow.indexOf(state.screen); if(idx>0 && !state.running) setScreen(flow[idx-1]); }
+document.addEventListener("keydown",e=>{ const menu=menuForScreen(); if(["ArrowDown","ArrowUp","Enter"," ","Escape"].includes(e.key)) e.preventDefault(); if(menu.length&&e.key==="ArrowDown"){state.cursor=(state.cursor+1)%menu.length;render();} if(menu.length&&e.key==="ArrowUp"){state.cursor=(state.cursor-1+menu.length)%menu.length;render();} if(e.key==="Enter"||e.key===" ") select(); if(e.key==="Escape") back(); if(/^[1-9]$/.test(e.key)&&menu[Number(e.key)-1]){state.cursor=Number(e.key)-1;select();} });
+const canvas=$("#arena"), ctx=canvas.getContext("2d"); let tick=0;
+function drawAgent(x,y,label,emoji,active){ ctx.fillStyle=active?"#fff3a7":"#ffffff"; ctx.strokeStyle=active?"#ff7a59":"#58b6ff"; ctx.lineWidth=5; ctx.fillRect(x-54,y-38,108,76); ctx.strokeRect(x-54,y-38,108,76); ctx.font="28px serif"; ctx.textAlign="center"; ctx.fillText(emoji,x,y-4); ctx.fillStyle="#274060"; ctx.font="12px monospace"; ctx.fillText(label,x,y+22); }
+function draw(){ tick++; const w=canvas.width,h=canvas.height; ctx.fillStyle="#fff7df"; ctx.fillRect(0,0,w,h); ctx.strokeStyle="rgba(88,182,255,.28)"; ctx.lineWidth=2; for(let x=0;x<w;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();} for(let y=0;y<h;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();} ctx.fillStyle="rgba(255,212,92,.35)"; ctx.fillRect(0,360,w,180); const agents=state.agents.length?state.agents:currentTemplate().agents; agents.slice(0,4).forEach((a,i)=>drawAgent(170+i*205,170+(i%2)*105,a.name,a.icon,state.screen==="run"&&state.activeAgent===i)); ctx.strokeStyle="#ff7a59"; ctx.lineWidth=6; ctx.setLineDash([14,12]); ctx.beginPath(); ctx.moveTo(224,170); ctx.lineTo(733,275); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle="#6ee7b7"; ctx.beginPath(); ctx.arc(480+Math.sin(tick/20)*18,430+Math.cos(tick/25)*8,36,0,Math.PI*2); ctx.fill(); ctx.strokeStyle="#274060"; ctx.lineWidth=5; ctx.stroke(); ctx.fillStyle="#274060"; ctx.font="18px monospace"; ctx.textAlign="center"; ctx.fillText("BYTE",480,436); requestAnimationFrame(draw); }
 render(); draw();
