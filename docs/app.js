@@ -51,7 +51,7 @@ const state = {
   screen: "title", cursor: 0, provider: "mock", apiKey: "",
   appText: "I want to organize all the information from conversations and meetings. Show decisions, action items, risks, follow-ups, and what needs human approval.",
   template: "conversations", data: "", agents: [], runLog: [], chat: [],
-  activeAgent: -1, packetFrom: -1, running: false, score: 0,
+  activeAgent: -1, packetFrom: -1, runPhase: "idle", running: false, score: 0,
 };
 const flow = ["title", "brain", "define", "data", "agents", "run", "export"];
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -71,16 +71,16 @@ function mockAgentOutput(agent,input,i){
 async function callServerAgent(agent,input,index){ const res=await fetch("/api/run-agent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider:state.provider,apiKey:state.apiKey,agent,input,appText:state.appText,index})}); if(!res.ok) throw new Error(await res.text()); return (await res.json()).output; }
 async function runAgents(){
   if(!state.agents.length) generateFromDefinition();
-  state.running=true; state.runLog=[]; state.chat=[{who:"Byte",text:"The work is on the table. Fake data only. Watch each helper touch it and pass it forward."}]; state.activeAgent=-1; state.packetFrom=-1; setScreen("run");
+  state.running=true; state.runLog=[]; state.chat=[{who:"Byte",text:"Raw work starts in the input tray. Each agent receives it, works at a desk, then passes a new packet forward."}]; state.activeAgent=-1; state.packetFrom=-1; state.runPhase="idle"; setScreen("run");
   for(let i=0;i<state.agents.length;i++){
-    const agent=state.agents[i]; state.activeAgent=i; state.packetFrom=i-1; state.chat.push({who:agent.name,text:`${agent.icon} walks to the table and picks up the current work packet.`}); render(); await sleep(650);
-    const input=agentInput(i); const step={icon:agent.icon,name:agent.name,role:agent.role,prompt:agent.prompt,input,call:state.provider==="mock"?"Demo Brain local simulation":`${providers.find(p=>p.id===state.provider)?.name} via local /api/run-agent`,doing:"Reading input, applying its profile, producing output for the next helper...",output:"working..."};
-    state.runLog.push(step); state.chat.push({who:agent.name,text:`Prompt loaded: ${agent.prompt}`}); state.chat.push({who:agent.name,text:`Input received from ${i===0?"the work table":state.agents[i-1].name}.`}); render(); await sleep(900);
-    try{ step.output = state.provider==="mock" || !state.apiKey ? mockAgentOutput(agent,input,i) : await callServerAgent(agent,input,i); state.chat.push({who:agent.name,text:"Done. Output packet passed forward."}); }
-    catch(err){ step.output=`Server/API failed, demo mode continued.\nReason: ${err.message}\n\n${mockAgentOutput(agent,input,i)}`; state.chat.push({who:agent.name,text:"Real call failed, so demo mode kept the lesson moving."}); }
-    addScore(250); render(); await sleep(750);
+    const agent=state.agents[i]; state.activeAgent=i; state.packetFrom=i-1; state.runPhase="receive"; state.chat.push({who:agent.name,text:`${agent.icon} walks to ${agent.name}'s desk and receives the packet from ${i===0?'Input Tray':state.agents[i-1].name}.`}); render(); await sleep(950);
+    const input=agentInput(i); const step={icon:agent.icon,name:agent.name,role:agent.role,prompt:agent.prompt,input,call:state.provider==="mock"?"Demo Brain local simulation":`${providers.find(p=>p.id===state.provider)?.name} via local /api/run-agent`,doing:"Working at its desk: reading input, using the approved prompt, and preparing output for the next station...",output:"working..."};
+    state.runLog.push(step); state.runPhase="work"; state.chat.push({who:agent.name,text:`IN: reads ${i===0?'raw notes':`output from ${state.agents[i-1].name}`}.`}); state.chat.push({who:agent.name,text:`DO: ${agent.prompt}`}); render(); await sleep(1300);
+    try{ step.output = state.provider==="mock" || !state.apiKey ? mockAgentOutput(agent,input,i) : await callServerAgent(agent,input,i); state.runPhase="handoff"; state.chat.push({who:agent.name,text:`OUT: created a packet for ${state.agents[i+1]?.name || 'the Output Tray'}.`}); }
+    catch(err){ step.output=`Server/API failed, demo mode continued.\nReason: ${err.message}\n\n${mockAgentOutput(agent,input,i)}`; state.runPhase="handoff"; state.chat.push({who:agent.name,text:"Real call failed, so demo mode kept the lesson moving and passed a demo packet forward."}); }
+    addScore(250); render(); await sleep(950);
   }
-  state.activeAgent=-1; state.packetFrom=state.agents.length-1; state.chat.push({who:"Byte",text:"Orchestration complete. The human review package is ready."}); state.running=false; addScore(500); render();
+  state.activeAgent=-1; state.packetFrom=state.agents.length-1; state.runPhase="complete"; state.chat.push({who:"Byte",text:"The final output packet is in the review tray. A human can inspect it before anything real happens."}); state.running=false; addScore(500); render();
 }
 function makeMarkdownSpec(){ return `# AgentWorks Quest Agent Team\n\n## Application\n${state.appText}\n\n## Fake Data\n${state.data}\n\n## Agents\n${state.agents.map(a=>`### ${a.name}\n- Role: ${a.role}\n- Prompt: ${a.prompt}`).join("\n\n")}\n\n## Run Log\n${state.runLog.map(s=>`### ${s.name}\nPrompt: ${s.prompt}\n\nInput:\n${s.input}\n\nCall:\n${s.call}\n\nOutput:\n${s.output}`).join("\n\n")}`; }
 function makeLangGraph(){ return `from typing import TypedDict\nfrom langgraph.graph import StateGraph, START, END\n\nclass AgentState(TypedDict):\n    text: str\n    log: list[str]\n\ndef call_agent(name, prompt, text):\n    return f"{name} processed: {text[:200]}"\n\n${state.agents.map(a=>`def ${a.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")}(state: AgentState):\n    out = call_agent(${JSON.stringify(a.name)}, ${JSON.stringify(a.prompt)}, state["text"])\n    return {"text": out, "log": state["log"] + [out]}\n`).join("\n")}\ngraph = StateGraph(AgentState)\n${state.agents.map(a=>`graph.add_node("${a.name}", ${a.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")})`).join("\n")}\ngraph.add_edge(START, "${state.agents[0]?.name||"Agent"}")\n${state.agents.slice(0,-1).map((a,i)=>`graph.add_edge("${a.name}", "${state.agents[i+1].name}")`).join("\n")}\ngraph.add_edge("${state.agents.at(-1)?.name||"Agent"}", END)\napp = graph.compile()\nprint(app.invoke({"text": ${JSON.stringify(state.data)}, "log": []}))`; }
@@ -107,27 +107,30 @@ function detailsForScreen(){
   if(state.screen==="data") return `<label class="field"><span>${esc(currentTemplate().dataLabel)}</span><textarea id="fake-data">${esc(state.data||currentTemplate().fakeData)}</textarea></label><p class="friendly-note">Users see the fake conversations, meetings, or documents before agents touch anything real.</p>`;
   if(state.screen==="agents") return `<div class="agent-grid">${state.agents.map((a,i)=>`<article class="agent-card"><div class="avatar">${a.icon}</div><h3>${esc(a.name)}</h3><label>Profile<input id="agent-role-${i}" value="${esc(a.role)}" /></label><label>Prompt<textarea id="agent-prompt-${i}">${esc(a.prompt)}</textarea></label></article>`).join("")}</div>`;
   if(state.screen==="run") {
-    const homes = [[12,68],[28,68],[44,68],[60,68]];
-    const targets = [[22,32],[38,32],[54,32],[70,32]];
     const active = state.activeAgent;
-    return `<div class="office-run">
-      <div class="office-floor" aria-label="Small agents walking in the office">
-        <div class="office-zone zone-source"><span>📄</span><b>Work table</b><small>${esc(currentTemplate().dataLabel)}</small></div>
-        <div class="office-zone zone-scan"><span>🔎</span><b>Scout desk</b></div>
-        <div class="office-zone zone-build"><span>🧩</span><b>Build desk</b></div>
-        <div class="office-zone zone-check"><span>✅</span><b>Check desk</b></div>
-        <div class="office-zone zone-out"><span>📦</span><b>Output tray</b></div>
-        <div class="path-line path-a"></div><div class="path-line path-b"></div><div class="path-line path-c"></div>
-        ${state.agents.map((a,i)=>{ const h=homes[i]||[15+i*12,68], t=targets[i]||[24+i*12,32]; const done=state.runLog[i]&&state.runLog[i].output!=='working...'; return `<div class="mini-agent ${active===i?'walking':''} ${done?'done':''}" style="--home-x:${h[0]}%;--home-y:${h[1]}%;--target-x:${t[0]}%;--target-y:${t[1]}%;--delay:${i*.12}s">
-          <div class="agent-bubble">${esc(a.name)}${active===i?' is working':''}</div>
+    const xs = [9, 26, 43, 60, 77, 93];
+    const deskNames = ["Input Tray", ...state.agents.map(a => a.name), "Output Tray"];
+    const phaseText = state.runPhase === "receive" ? "RECEIVE INPUT" : state.runPhase === "work" ? "WORK AT DESK" : state.runPhase === "handoff" ? "PASS OUTPUT" : state.runPhase === "complete" ? "READY FOR HUMAN REVIEW" : "READY";
+    const packetIndex = state.runPhase === "complete" ? state.agents.length + 1 : active < 0 ? 0 : state.runPhase === "handoff" ? active + 2 : active + 1;
+    return `<div class="office-run chain-run">
+      <div class="office-floor chain-floor" aria-label="Agent office chain from input to output">
+        <div class="chain-path"></div>
+        ${deskNames.map((name,i)=>`<div class="chain-desk ${i===0?'input-desk':''} ${i===deskNames.length-1?'output-desk':''} ${i===active+1?'active-desk':''} ${i>0&&i<=state.runLog.length?'done-desk':''}" style="--x:${xs[i]}%">
+          <span>${i===0?'📥':i===deskNames.length-1?'📤':state.agents[i-1]?.icon}</span>
+          <b>${esc(name)}</b>
+          <small>${i===0?'raw notes':i===deskNames.length-1?'review package':i===active+1?phaseText:i<=state.runLog.length?'output sent':'waiting'}</small>
+          <em>${i>0&&i<deskNames.length-1 ? 'IN → DO → OUT' : i===0 ? 'INPUT' : 'OUTPUT'}</em>
+        </div>`).join("")}
+        ${state.agents.map((a,i)=>{ const done=state.runLog[i]&&state.runLog[i].output!=='working...'; const x=xs[i+1]; return `<div class="mini-agent chain-agent ${active===i?'walking':''} ${done?'done':''}" style="--home-x:${x}%;--home-y:62%;--target-x:${x}%;--target-y:${state.runPhase==='work'?50:56}%;--delay:${i*.1}s">
+          <div class="agent-bubble">${active===i?phaseText:a.name}</div>
           <div class="agent-head">${a.icon}</div><div class="agent-body"></div><div class="agent-legs"></div>
         </div>`;}).join("")}
-        <div class="data-packet ${active>=0?'moving':''}" style="--packet-x:${active>=0 ? (targets[active]||[50,35])[0] : 78}%;--packet-y:${active>=0 ? (targets[active]||[50,35])[1]+10 : 28}%">DATA</div>
-        <div class="office-caption">${active>=0?`${esc(state.agents[active].name)} is walking, reading, and preparing the next packet.`:state.runLog.length?'Human review package is ready in the output tray.':'Press Play to watch the office start.'}</div>
+        <div class="data-packet chain-packet ${state.running||state.runPhase==='complete'?'moving':''}" style="--packet-x:${xs[packetIndex]||93}%;--packet-y:${state.runPhase==='work'?37:45}%">${state.runPhase==='handoff'?'OUT':'DATA'}</div>
+        <div class="chain-caption"><strong>${phaseText}</strong><span>${active>=0?`${esc(state.agents[active].name)} receives input, works at the desk, then shares output to the next desk.`:state.runLog.length?'The output chain is complete. Human review comes next.':'Press Play to watch data move through the office chain.'}</span></div>
       </div>
-      <aside class="office-side">
-        <div class="mini-focus">${active>=0?`<h3>${state.agents[active].icon} ${esc(state.agents[active].name)}</h3><p>${esc(state.runLog[active]?.doing||'Walking to the work table...')}</p><small>Input: ${esc((state.runLog[active]?.input||state.data)).slice(0,190)}...</small>`:`<h3>${state.runLog.length?'✅ Done':'Ready'}</h3><p>${state.runLog.length?'The agents finished. Export or play again.':'The agents will move around the office one at a time.'}</p>`}</div>
-        <div class="auto-log office-log" id="auto-log">${state.chat.slice(-7).map(m=>`<p><b>${esc(m.who)}:</b> ${esc(m.text)}</p>`).join("")}</div>
+      <aside class="office-side chain-side">
+        <div class="mini-focus">${active>=0?`<h3>${state.agents[active].icon} ${esc(state.agents[active].name)} · ${phaseText}</h3><p>${esc(state.runLog[active]?.doing||'Walking to the desk to receive input...')}</p><small><b>Input from:</b> ${active===0?'Input Tray':esc(state.agents[active-1]?.name||'Previous agent')} · <b>Output to:</b> ${esc(state.agents[active+1]?.name||'Output Tray')}</small>`:`<h3>${state.runLog.length?'✅ Output ready':'Ready'}</h3><p>${state.runLog.length?'The chain finished. Export or play again.':'The agents will pass the packet desk by desk.'}</p>`}</div>
+        <div class="auto-log office-log" id="auto-log">${state.chat.slice(-6).map(m=>`<p><b>${esc(m.who)}:</b> ${esc(m.text)}</p>`).join("")}</div>
         ${!state.running?`<div class="stage-actions"><button id="stage-play">${state.runLog.length?'Play Again':'Play Agents'}</button>${state.runLog.length?'<button id="stage-export">Export Run</button>':''}<button id="stage-edit">Edit Agents</button></div>`:''}
       </aside>
     </div>`;
