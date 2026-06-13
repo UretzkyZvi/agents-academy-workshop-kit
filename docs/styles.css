@@ -271,7 +271,7 @@ body.play-mode .details { overflow: hidden; padding: 0; }
   font-weight: 900;
   color: var(--ink);
 }
-.office-side { min-height: 0; display: grid; grid-template-rows: minmax(92px, auto) minmax(0,1fr) auto; gap: .65rem; }
+.office-side { min-height: 0; display: grid; grid-template-rows: minmax(104px, auto) minmax(0, 1fr) auto; gap: .65rem; }
 .office-side .auto-log, .office-side .stage-actions { grid-area: auto; }
 .office-side .stage-actions { justify-content: center; flex-wrap: wrap; padding: .65rem; }
 .mini-focus, .office-log, .stage-actions { border: 3px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.92); box-shadow: 5px 5px 0 rgba(39,50,74,.12); }
@@ -279,8 +279,12 @@ body.play-mode .details { overflow: hidden; padding: 0; }
 .mini-focus h3 { margin: 0 0 .35rem; }
 .mini-focus p { font-size: .92rem; }
 .mini-focus small { display: block; margin-top: .45rem; color: var(--soft-ink); font-weight: 900; line-height: 1.3; }
-.office-log { padding: .6rem; gap: .35rem; }
-.office-log p { font-size: .78rem; padding: .42rem .5rem; }
+.office-log { padding: .65rem; gap: .45rem; overflow-y: auto; align-content: start; }
+.teaching-log { display: block !important; justify-content: initial !important; overflow-y: auto !important; }
+.office-log p { font-size: .78rem; padding: .55rem .6rem; margin-bottom: .45rem; }
+.teaching-log p { display: grid; gap: .25rem; }
+.teaching-log p b { color: var(--orange); }
+.teaching-log p span { white-space: pre-wrap; line-height: 1.35; }
 @keyframes walkBob { to { transform: translate(-50%, -55%) rotate(-1.2deg); } }
 @keyframes legWiggle { to { transform: translateX(3px); } }
 @keyframes packetPulse { to { transform: translate(-50%, -58%) scale(1.08); } }
@@ -345,6 +349,14 @@ body.play-mode .details { overflow: hidden; padding: 0; }
 .chain-caption strong { font-family: 'Press Start 2P', monospace; color: var(--orange); font-size: .62rem; }
 .chain-caption span { font-weight: 900; }
 .chain-side .mini-focus h3 { color: var(--orange); }
+.pixel-actor {
+  width: 76px;
+  height: 104px;
+  overflow: visible;
+  image-rendering: pixelated;
+  filter: drop-shadow(4px 7px 0 rgba(39,50,74,.15));
+}
+.chain-agent.walking .pixel-actor { animation: spriteWalk .42s steps(2) infinite alternate; }
 .pixel-person {
   --shirt: #45e5d9;
   --hair: #3a2d45;
