@@ -82,25 +82,56 @@ function inferTemplate(text){ const t=text.toLowerCase(); if(t.includes("documen
 function generateFromDefinition(){ state.template = inferTemplate(state.appText); const t=currentTemplate(); state.data=t.fakeData; state.agents=JSON.parse(JSON.stringify(t.agents)); addScore(300); }
 function agentInput(i){ return i===0 ? state.data : (state.runLog[i-1]?.output || state.data); }
 function mockAgentOutput(agent,input,i){
-  if(i===0) return `Found the work type: ${currentTemplate().title}.\nImportant pieces: meetings/chats/docs, people, decisions, risks, follow-ups, missing approvals.`;
-  if(i===1) return `Structured packet:\n- Decisions: start with fake examples; show handoffs clearly.\n- Action items: collect examples; approve profiles; run the chain.\n- Open questions: which real system connects later?\n- Missing info: approval owner and success criteria.`;
-  if(i===2) return `Safety check:\n- Do not send messages automatically.\n- Do not update tools yet.\n- Sensitive details need review before real runs.\n- Human approval required.`;
-  return `Human-ready summary:\nThe agent team organized the messy information into decisions, action items, risks, and follow-ups.\nNext step: human reviews, edits, then approves export or another test.`;
+  if(i===0) return `Found from the actual input:\n- Work type: ${currentTemplate().title}\n- Source items: meeting notes, chat follow-up, and ops sync\n- People named: Avery, Morgan, Riley, Dana\n- Raw facts to carry forward: Friday draft, data export owner, missing approval owner, fake-notes-first decision`;
+  if(i===1) return `Structured from the previous output:\n- Decisions: start with fake notes first; show handoffs clearly\n- Action items: Morgan owns data export; draft follow-up by Friday; collect 5 safe examples\n- Risks: client-sensitive details in tests; automatic sending is not approved\n- Missing info: who approves the final email; success criteria; real system to connect later`;
+  if(i===2) return `Checked against the structured packet:\n- Safe to do now: summarize, draft, organize, create review checklist\n- Needs human approval: final email, CRM updates, any real client data use\n- Uncertain or missing: approval owner and success criteria\n- Recommendation: keep this as a copy/paste review workflow before automation`;
+  return `Final human-review package created from the safety check:\nSummary: the agent team turned messy notes into decisions, actions, risks, missing approvals, and safe next steps.\nHuman checklist:\n1. Confirm the facts are correct.\n2. Name the approval owner.\n3. Remove sensitive client details.\n4. Approve or edit the draft before sending anything.\nNext safe step: run this with 5 fake examples before connecting real tools.`;
+}
+function chatIntro(){
+  return {type:"intro", who:"Byte", title:"Watch the data, not magic", note:"Each card below shows the actual text packet an agent receives and the actual text packet it creates. The output from one agent becomes the input for the next."};
+}
+function chatReceive(agent, fromName, input){
+  return {type:"receive", who:agent.name, title:"ACTUAL INPUT RECEIVED", from:fromName, input, note:"This is the exact packet on the agent's desk before it does anything."};
+}
+function chatWork(agent, input){
+  return {type:"work", who:agent.name, title:"PROMPT + SAME INPUT", prompt:agent.prompt, input, note:"The prompt tells the agent what transformation to make. The input below is still unchanged at this moment."};
+}
+function chatOutput(agent, toName, input, output){
+  return {type:"output", who:agent.name, title:"ACTUAL OUTPUT PRODUCED", to:toName, input, output, note:"Compare input vs output. This new output is the exact packet passed forward."};
+}
+function chatError(agent, output){
+  return {type:"output", who:agent.name, title:"DEMO OUTPUT AFTER API ERROR", output, note:"The real call failed, so the demo produced a safe local packet to keep the lesson moving."};
+}
+function chatFinal(output){
+  return {type:"final", who:"Byte", title:"FINAL OUTPUT FOR HUMAN REVIEW", output, note:"This is the last packet. A human reviews it before anything real is sent or changed."};
+}
+function renderChatEntry(m){
+  if(!m || !m.type) return `<p><b>${esc(m?.who || 'Byte')}:</b><span>${esc(m?.text || '')}</span></p>`;
+  return `<article class="chat-card chat-${esc(m.type)}">
+    <header><b>${esc(m.who)}</b><strong>${esc(m.title)}</strong></header>
+    ${m.from?`<div class="route-label">From: ${esc(m.from)}</div>`:''}
+    ${m.to?`<div class="route-label">To: ${esc(m.to)}</div>`:''}
+    ${m.prompt?`<section><h4>PROMPT USED</h4><pre>${esc(m.prompt)}</pre></section>`:''}
+    ${m.input?`<section><h4>ACTUAL INPUT DATA</h4><pre>${esc(m.input)}</pre></section>`:''}
+    ${m.output?`<section><h4>ACTUAL OUTPUT DATA</h4><pre>${esc(m.output)}</pre></section>`:''}
+    ${m.note?`<small>${esc(m.note)}</small>`:''}
+  </article>`;
 }
 async function callServerAgent(agent,input,index){ const res=await fetch("/api/run-agent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider:state.provider,apiKey:state.apiKey,agent,input,appText:state.appText,index})}); if(!res.ok) throw new Error(await res.text()); return (await res.json()).output; }
 async function runAgents(){
   if(!state.agents.length) generateFromDefinition();
-  state.running=true; state.runLog=[]; state.chat=[{who:"Byte",text:"Lesson: watch the exact data packet move through the office. Each agent receives text, uses its prompt, creates new text, then passes that new text forward."}]; state.activeAgent=-1; state.packetFrom=-1; state.runPhase="idle"; setScreen("run");
+  state.running=true; state.runLog=[]; state.chat=[chatIntro()]; state.activeAgent=-1; state.packetFrom=-1; state.runPhase="idle"; setScreen("run");
   for(let i=0;i<state.agents.length;i++){
     const agent=state.agents[i]; const fromName=i===0?'Input Tray':state.agents[i-1].name; const toName=state.agents[i+1]?.name || 'Output Tray';
-    state.activeAgent=i; state.packetFrom=i-1; state.runPhase="receive"; state.chat.push({who:agent.name,text:`RECEIVE INPUT\nFrom: ${fromName}\n\n${agentInput(i)}`}); render(); await sleep(2200);
-    const input=agentInput(i); const step={icon:agent.icon,name:agent.name,role:agent.role,prompt:agent.prompt,input,call:state.provider==="mock"?"Demo Brain local simulation":`${providers.find(p=>p.id===state.provider)?.name} via local /api/run-agent`,doing:"Working at its desk: reading input, using the approved prompt, and preparing output for the next station...",output:"working..."};
-    state.runLog.push(step); state.runPhase="work"; state.chat.push({who:agent.name,text:`WORK AT DESK\nPrompt/instruction:\n${agent.prompt}\n\nWhat the user should notice: the agent can only work from the packet it received. It should not invent new facts.`}); render(); await sleep(3200);
-    try{ step.output = state.provider==="mock" || !state.apiKey ? mockAgentOutput(agent,input,i) : await callServerAgent(agent,input,i); state.runPhase="handoff"; state.chat.push({who:agent.name,text:`PASS OUTPUT\nTo: ${toName}\n\n${step.output}\n\nThis exact output becomes the next agent's input.`}); }
-    catch(err){ step.output=`Server/API failed, demo mode continued.\nReason: ${err.message}\n\n${mockAgentOutput(agent,input,i)}`; state.runPhase="handoff"; state.chat.push({who:agent.name,text:`PASS OUTPUT\nReal call failed, so demo mode kept the lesson moving.\n\n${step.output}`}); }
-    addScore(250); render(); await sleep(2400);
+    const input=agentInput(i);
+    state.activeAgent=i; state.packetFrom=i-1; state.runPhase="receive"; state.chat.push(chatReceive(agent, fromName, input)); render(); await sleep(2400);
+    const step={icon:agent.icon,name:agent.name,role:agent.role,prompt:agent.prompt,input,call:state.provider==="mock"?"Demo Brain local simulation":`${providers.find(p=>p.id===state.provider)?.name} via local /api/run-agent`,doing:"Compare the actual input packet with the output packet this agent creates.",output:"working..."};
+    state.runLog.push(step); state.runPhase="work"; state.chat.push(chatWork(agent, input)); render(); await sleep(3400);
+    try{ step.output = state.provider==="mock" || !state.apiKey ? mockAgentOutput(agent,input,i) : await callServerAgent(agent,input,i); state.runPhase="handoff"; state.chat.push(chatOutput(agent, toName, input, step.output)); }
+    catch(err){ step.output=`Server/API failed, demo mode continued.\nReason: ${err.message}\n\n${mockAgentOutput(agent,input,i)}`; state.runPhase="handoff"; state.chat.push(chatError(agent, step.output)); }
+    addScore(250); render(); await sleep(2800);
   }
-  state.activeAgent=-1; state.packetFrom=state.agents.length-1; state.runPhase="complete"; state.chat.push({who:"Byte",text:`FINAL REVIEW\nThe final output packet is in the review tray. A human should inspect it before anything real happens.\n\n${state.runLog.at(-1)?.output || ''}`}); state.running=false; addScore(500); render();
+  state.activeAgent=-1; state.packetFrom=state.agents.length-1; state.runPhase="complete"; state.chat.push(chatFinal(state.runLog.at(-1)?.output || '')); state.running=false; addScore(500); render();
 }
 function makeMarkdownSpec(){ return `# AgentWorks Quest Agent Team\n\n## Application\n${state.appText}\n\n## Fake Data\n${state.data}\n\n## Agents\n${state.agents.map(a=>`### ${a.name}\n- Role: ${a.role}\n- Prompt: ${a.prompt}`).join("\n\n")}\n\n## Run Log\n${state.runLog.map(s=>`### ${s.name}\nPrompt: ${s.prompt}\n\nInput:\n${s.input}\n\nCall:\n${s.call}\n\nOutput:\n${s.output}`).join("\n\n")}`; }
 function makeLangGraph(){ return `from typing import TypedDict\nfrom langgraph.graph import StateGraph, START, END\n\nclass AgentState(TypedDict):\n    text: str\n    log: list[str]\n\ndef call_agent(name, prompt, text):\n    return f"{name} processed: {text[:200]}"\n\n${state.agents.map(a=>`def ${a.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")}(state: AgentState):\n    out = call_agent(${JSON.stringify(a.name)}, ${JSON.stringify(a.prompt)}, state["text"])\n    return {"text": out, "log": state["log"] + [out]}\n`).join("\n")}\ngraph = StateGraph(AgentState)\n${state.agents.map(a=>`graph.add_node("${a.name}", ${a.name.toLowerCase().replace(/[^a-z0-9]+/g,"_")})`).join("\n")}\ngraph.add_edge(START, "${state.agents[0]?.name||"Agent"}")\n${state.agents.slice(0,-1).map((a,i)=>`graph.add_edge("${a.name}", "${state.agents[i+1].name}")`).join("\n")}\ngraph.add_edge("${state.agents.at(-1)?.name||"Agent"}", END)\napp = graph.compile()\nprint(app.invoke({"text": ${JSON.stringify(state.data)}, "log": []}))`; }
@@ -154,7 +185,7 @@ function detailsForScreen(){
       </div>
       <aside class="office-side chain-side">
         <div class="mini-focus packet-teacher">${active>=0?`<h3>${state.agents[active].icon} ${esc(state.agents[active].name)} · ${phaseText}</h3><p>${esc(state.runLog[active]?.doing||'Walking to the desk to receive input...')}</p><small><b>Input from:</b> ${active===0?'Input Tray':esc(state.agents[active-1]?.name||'Previous agent')} · <b>Output to:</b> ${esc(state.agents[active+1]?.name||'Output Tray')}</small>`:`<h3>${state.runLog.length?'✅ Output ready':'Ready'}</h3><p>${state.runLog.length?'The full receive → prompt → output chain is in the teaching chat below. Scroll there to inspect every packet.':'The agents will pass the packet desk by desk. The chat will fill with the exact text each agent receives and creates.'}</p>`}</div>
-        <div class="auto-log office-log teaching-log" id="auto-log">${state.chat.map(m=>`<p><b>${esc(m.who)}:</b><span>${esc(m.text)}</span></p>`).join("")}</div>
+        <div class="auto-log office-log teaching-log" id="auto-log">${state.chat.map(renderChatEntry).join("")}</div>
         ${!state.running?`<div class="stage-actions"><button id="stage-play">${state.runLog.length?'Play Again':'Play Agents'}</button>${state.runLog.length?'<button id="stage-export">Export Run</button>':''}<button id="stage-edit">Edit Agents</button></div>`:''}
       </aside>
     </div>`;
