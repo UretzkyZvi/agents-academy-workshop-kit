@@ -3,323 +3,161 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Find your first AI assistant idea</title>
-    <meta
-      name="description"
-      content="A beginner-friendly guided flow for creating one safe copy/paste AI test before connecting tools or using real data."
-    />
+    <title>AgentWorks Quest — train your first AI helper</title>
+    <meta name="description" content="A gamified, fake-data-first way to train, test, and export your first AI agent helper." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800;950&family=Press+Start+2P&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="#top" aria-label="AgentWorks Academy home">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="AgentWorks Quest home">
         <span class="brand-mark">AW</span>
-        <span>
-          <strong>AgentWorks Academy</strong>
-          <small>safe copy/paste test</small>
-        </span>
+        <span><strong>AgentWorks Quest</strong><small>Train helpers. Lock risks. Export agents.</small></span>
       </a>
-      <nav aria-label="Primary navigation">
-        <a href="#agent-quest">Play</a>
-        <a href="#guided-flow">Start</a>
-        <a href="#examples">Examples</a>
-        <a href="#safe-testing">Safe testing</a>
-        <a href="#workshop-kit">Next steps</a>
+      <nav aria-label="Quest navigation">
+        <a href="#brain-room">Brain</a>
+        <a href="#mission-room">Mission</a>
+        <a href="#team-room">Team</a>
+        <a href="#test-lab">Test</a>
+        <a href="#export-portal">Export</a>
       </nav>
     </header>
 
     <main id="top">
-      <section class="hero">
+      <section class="hero arcade-room">
         <div class="hero-copy">
-          <p class="eyebrow">For people who are curious but not technical</p>
-          <h1>Pick one annoying task. Get a safe copy/paste test.</h1>
-          <p class="hero-text">
-            Play a tiny 8-bit lesson, or skip straight to a copy/paste test. You will get a message for an AI chat, plus fake examples to practice with. No accounts, tools, coding, or real client data needed.
-          </p>
+          <p class="eyebrow">A tiny game for real agent design</p>
+          <h1>Build agents by training tiny helpers.</h1>
+          <p class="hero-text">Choose Byte's brain, pick a mission, train a little team, test on fake work, and export the setup. No scary automation. No real data needed for the first run.</p>
           <div class="hero-actions">
-            <a class="button primary" href="#agent-quest">Play Agent Quest</a>
-            <a class="button secondary" href="#guided-flow">Skip to copy/paste test</a>
+            <a class="button primary" href="#brain-room">Start the quest</a>
+            <button class="button secondary" type="button" data-scroll-export>Skip to export demo</button>
           </div>
         </div>
-        <aside class="promise-card" aria-label="What happens here">
-          <p class="mini-label">What this does</p>
-          <h2>Your first test should be tiny.</h2>
-          <ul>
-            <li>Pick one repeated task</li>
-            <li>Generate five fake examples</li>
-            <li>Let the assistant draft only</li>
-            <li>A human approves everything</li>
-          </ul>
-        </aside>
-      </section>
-
-      <section class="plain-explainer compact" aria-label="Plain English explanation">
-        <p><strong>Plain English:</strong> an AI assistant has one job, reads a small example, follows rules, and waits for human review.</p>
-      </section>
-
-
-      <section class="agent-quest-section" id="agent-quest" aria-labelledby="agent-quest-title">
-        <div class="section-heading quest-heading">
-          <p class="eyebrow">8-bit lesson</p>
-          <h2 id="agent-quest-title">Train Byte on one safe task.</h2>
-          <p>Guide a tiny AI helper through a fake work request. Byte can draft and check, but a human stays in charge.</p>
+        <div class="game-cabinet" aria-label="Pixel scene of Byte entering AgentWorks Quest">
+          <div class="screen-grid"></div>
+          <div class="pixel-sun"></div>
+          <div class="pixel-cloud one"></div>
+          <div class="pixel-cloud two"></div>
+          <div class="byte hero-byte"><span></span><i></i></div>
+          <div class="hero-door"><strong>QUEST</strong></div>
+          <div class="speech">Hi. I’m Byte. Train me safely.</div>
         </div>
+      </section>
 
-        <div class="quest-shell" data-quest-step="0">
-          <div class="quest-stage" aria-label="Agent Quest pixel scene">
-            <div class="pixel-skyline" aria-hidden="true">
-              <span></span><span></span><span></span><span></span><span></span>
-            </div>
-            <div class="quest-path" aria-hidden="true"></div>
-            <div class="quest-station station-instruction is-active" data-station="0"><span class="station-icon">📜</span><strong>Instruction</strong></div>
-            <div class="quest-station station-data" data-station="1"><span class="station-icon">📦</span><strong>Fake examples</strong></div>
-            <div class="quest-station station-desk" data-station="2"><span class="station-icon">✍️</span><strong>Draft desk</strong></div>
-            <div class="quest-station station-gate" data-station="3"><span class="station-icon">🛑</span><strong>Approval gate</strong></div>
-            <div class="quest-station station-output" data-station="4"><span class="station-icon">✅</span><strong>Copy/paste test</strong></div>
-            <div class="byte-sprite" aria-label="Byte the tiny AI helper"><span class="byte-eye left"></span><span class="byte-eye right"></span><span class="byte-mouth"></span></div>
+      <section class="trust-ladder" aria-label="Trust ladder">
+        <div><strong>Level 0</strong><span>Mock mode</span></div>
+        <div><strong>Level 1</strong><span>Fake examples</span></div>
+        <div><strong>Level 2</strong><span>Sanitized real examples</span></div>
+        <div><strong>Level 3</strong><span>Read-only data</span></div>
+        <div><strong>Level 4</strong><span>Human-approved actions</span></div>
+      </section>
+
+      <section class="quest-room" id="brain-room">
+        <div class="room-heading">
+          <p class="eyebrow">Room 1</p>
+          <h2>Choose Byte’s brain.</h2>
+          <p>Mock mode works now. Bring-your-own-key options are staged as a safe MVP interface. Keys stay in the browser session for this prototype.</p>
+        </div>
+        <div class="provider-grid" id="provider-grid" aria-live="polite"></div>
+        <div class="key-console" id="key-console" hidden>
+          <label>
+            <span id="key-label">API key</span>
+            <input id="api-key" type="password" autocomplete="off" placeholder="Paste key for this browser session" />
+          </label>
+          <p>Prototype rule: use mock mode by default. If a key is entered later, do not store it unless the user explicitly asks.</p>
+        </div>
+      </section>
+
+      <section class="quest-room" id="mission-room">
+        <div class="room-heading">
+          <p class="eyebrow">Room 2</p>
+          <h2>Pick the problem Byte should learn.</h2>
+          <p>Start with one annoying task. The game turns it into a mission with helper roles, safety locks, fake examples, and exports.</p>
+        </div>
+        <div class="mission-grid" id="mission-grid"></div>
+        <div class="custom-mission">
+          <label>
+            <span>Or type your own mission</span>
+            <textarea id="custom-mission" placeholder="Example: I spend too much time reading intake emails and figuring out what info is missing."></textarea>
+          </label>
+          <button class="button primary" type="button" id="build-custom">Generate mock mission</button>
+        </div>
+      </section>
+
+      <section class="quest-room quest-board" id="team-room">
+        <div class="room-heading">
+          <p class="eyebrow">Room 3</p>
+          <h2 id="mission-title">Mission: Intake Cleanup</h2>
+          <p id="mission-summary">Byte will train a tiny team that summarizes new requests, finds missing information, drafts a reply, and stops at human approval.</p>
+        </div>
+        <div class="world-map" aria-label="Agent training map">
+          <div class="map-line"></div>
+          <div class="map-station active" data-map="0"><span>📥</span><strong>Input Crate</strong></div>
+          <div class="map-station" data-map="1"><span>🧭</span><strong>Scout</strong></div>
+          <div class="map-station" data-map="2"><span>🔍</span><strong>Checker</strong></div>
+          <div class="map-station" data-map="3"><span>✍️</span><strong>Writer</strong></div>
+          <div class="map-station locked" data-map="4"><span>🛡️</span><strong>Gatekeeper</strong></div>
+          <div class="byte map-byte"><span></span><i></i></div>
+        </div>
+        <div class="agent-cards" id="agent-cards"></div>
+      </section>
+
+      <section class="quest-room" id="training-room">
+        <div class="room-heading">
+          <p class="eyebrow">Room 4</p>
+          <h2>Train the safety locks.</h2>
+          <p>Every useful helper needs boundaries. Lock risky powers before the test lab opens.</p>
+        </div>
+        <div class="lock-grid" id="lock-grid"></div>
+      </section>
+
+      <section class="quest-room lab" id="test-lab">
+        <div class="room-heading">
+          <p class="eyebrow">Room 5</p>
+          <h2>Run the fake-data test.</h2>
+          <p>Byte practices on made-up work first. You can approve, reject, or export the trained setup.</p>
+        </div>
+        <div class="lab-layout">
+          <div class="sample-card">
+            <p class="mini-label">Fake input</p>
+            <h3 id="sample-title">Avery Chen</h3>
+            <p id="sample-body">Needs help setting up a workshop but did not include date, audience size, or budget.</p>
+            <button class="button secondary" type="button" id="next-sample">Next fake card</button>
           </div>
-
-          <div class="quest-panel">
-            <p class="mini-label">Agent Quest</p>
-            <h3 id="quest-title">Byte found a messy request.</h3>
-            <p id="quest-story" class="quest-story">A client wrote: “Can you help us with the workshop thing next month?” Byte needs one narrow job before doing anything.</p>
-            <div id="quest-feedback" class="quest-feedback">Choose the safest instruction.</div>
-            <div id="quest-choices" class="quest-choices" aria-live="polite"></div>
+          <div class="run-panel">
+            <button class="big-run" type="button" id="run-test">Run Byte’s team</button>
+            <pre id="test-output">Press Run Byte’s team to see the mock output.</pre>
+            <div class="approval-row">
+              <button type="button" class="pill approve" data-approve>Looks good</button>
+              <button type="button" class="pill warn" data-reject>Too broad</button>
+              <button type="button" class="pill danger" data-unsafe>Unsafe</button>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="guided-section" id="guided-flow">
-        <div class="section-heading narrow">
-          <p class="eyebrow">Guided flow</p>
-          <h2>Start here. Pick the closest annoyance.</h2>
-          <p>Do not design the whole system. Just choose one thing that wastes time or gets missed.</p>
+      <section class="quest-room export-room" id="export-portal">
+        <div class="room-heading">
+          <p class="eyebrow">Final room</p>
+          <h2>Export the agent package.</h2>
+          <p>This MVP exports portable artifacts first. True one-click imports need platform-specific research, but these files can already be pasted or imported manually.</p>
         </div>
-
-        <div class="wizard-shell" aria-live="polite">
-          <div class="progress-row" aria-label="Flow progress">
-            <span class="progress-pill active" data-progress="1">1. Pick task</span>
-            <span class="progress-pill" data-progress="2">2. See starter idea</span>
-            <span class="progress-pill" data-progress="3">3. Optional edits</span>
-            <span class="progress-pill" data-progress="4">4. Copy + test</span>
-          </div>
-
-          <section class="wizard-step active" data-step="1">
-            <p class="mini-label">One click</p>
-            <h3>What feels most annoying right now?</h3>
-            <p class="step-help">Pick the closest one. You can change it later.</p>
-            <div class="choice-grid" id="pain-choices">
-              <button class="choice-card" type="button" data-pain="followups">
-                <span class="emoji">⏰</span>
-                <strong>Follow-ups get missed</strong>
-                <small>Leads, clients, renewals, or tasks need checking.</small>
-              </button>
-              <button class="choice-card" type="button" data-pain="intake">
-                <span class="emoji">📥</span>
-                <strong>New requests are messy</strong>
-                <small>Emails or forms arrive and someone has to sort them out.</small>
-              </button>
-              <button class="choice-card" type="button" data-pain="documents">
-                <span class="emoji">📄</span>
-                <strong>Documents pile up</strong>
-                <small>Someone has to summarize, classify, or check them.</small>
-              </button>
-              <button class="choice-card" type="button" data-pain="meetings">
-                <span class="emoji">🗓️</span>
-                <strong>Meetings create loose ends</strong>
-                <small>Notes, decisions, and next steps get scattered.</small>
-              </button>
-              <button class="choice-card" type="button" data-pain="research">
-                <span class="emoji">🔎</span>
-                <strong>Research repeats</strong>
-                <small>You keep looking up similar people, companies, or topics.</small>
-              </button>
-              <button class="choice-card" type="button" data-pain="unsure">
-                <span class="emoji">🤷</span>
-                <strong>I am not sure yet</strong>
-                <small>I want help finding a safe first idea.</small>
-              </button>
-            </div>
-          </section>
-
-          <section class="wizard-step" data-step="2">
-            <p class="mini-label">Plain-English example</p>
-            <div id="example-output" class="example-output"></div>
-            <div class="wizard-actions">
-              <button class="button secondary" type="button" data-back="1">Choose a different task</button>
-              <button class="button primary" type="button" id="quick-plan">Create starter plan</button>
-              <button class="button secondary" type="button" data-next="3">Customize first</button>
-            </div>
-          </section>
-
-          <section class="wizard-step" data-step="3">
-            <p class="mini-label">Optional edits</p>
-            <h3>Want to tweak it? Edit what you know. Leave the rest alone.</h3>
-            <p class="step-help">The fields are already filled in from your choice. You do not need perfect answers.</p>
-            <form class="question-form" id="idea-form">
-              <label>
-                <span>Where are the examples?</span>
-                <small>Inbox, notes, spreadsheet, folder, CRM view, or anywhere you can copy five examples from.</small>
-                <input name="source" placeholder="Spreadsheet of open follow-ups" />
-              </label>
-              <label>
-                <span>What should the assistant make?</span>
-                <small>Keep the first version to a draft, checklist, summary, or flag.</small>
-                <textarea name="assistantJob" placeholder="Flag stale items and draft a follow-up message."></textarea>
-              </label>
-              <label>
-                <span>What must stay human?</span>
-                <small>Default rule: no sending, deleting, updating, scheduling, or final decisions.</small>
-                <textarea name="limits" placeholder="Do not send messages or update records without approval."></textarea>
-              </label>
-              <label>
-                <span>How do you know it helped?</span>
-                <small>One simple win is enough.</small>
-                <input name="success" placeholder="Fewer missed follow-ups and 30 minutes saved each week" />
-              </label>
-            </form>
-            <div class="wizard-actions">
-              <button class="button secondary" type="button" data-back="2">Back</button>
-              <button class="button primary" type="button" id="make-plan">Create my plan</button>
-            </div>
-          </section>
-
-          <section class="wizard-step" data-step="4">
-            <p class="mini-label">Result</p>
-            <h3>Your safe test is ready.</h3>
-            <p class="step-help">Do not connect accounts. Do not use real client data. Just copy, paste, and see if the assistant gives a useful draft.</p>
-
-            <div class="quick-test-card" aria-label="Copy and paste test instructions">
-              <div>
-                <p class="mini-label">Do this first</p>
-                <ol class="simple-steps">
-                  <li>Copy the starter prompt.</li>
-                  <li>Paste it into ChatGPT, Claude, Gemini, or another AI chat.</li>
-                  <li>Copy the fake examples.</li>
-                  <li>Paste them under the prompt in the same chat.</li>
-                  <li>Ask for a draft, check, or summary only.</li>
-                </ol>
-              </div>
-              <div class="big-copy-actions">
-                <button class="button primary" type="button" data-copy="starter-prompt-output">Copy starter prompt</button>
-                <button class="button secondary" type="button" data-copy="mock-data-output">Copy fake examples</button>
-              </div>
-            </div>
-
-            <div class="safety-strip">No sending. No deleting. No updating. A human approves everything.</div>
-
-            <div class="prompt-panel">
-              <div>
-                <p class="mini-label">Starter prompt</p>
-                <h4>Paste this first</h4>
-                <p class="micro-help">A prompt is just the message you paste into an AI chat.</p>
-              </div>
-              <pre id="starter-prompt-output">Choose a task to create a starter prompt.</pre>
-            </div>
-
-            <div class="mock-data-panel" id="mock-data-guide">
-              <div>
-                <p class="mini-label">Fake examples</p>
-                <h4>Paste this under the prompt</h4>
-                <p>You do not need to read every row. Just copy these fake examples and paste them under the prompt.</p>
-                <p>No real attachment needed. For the first test, “attach” just means paste these fake rows in the same chat.</p>
-              </div>
-              <pre id="mock-data-output">Choose a task to generate fake examples.</pre>
-              <div class="result-toolbar compact-toolbar secondary-actions">
-                <button class="small-button" type="button" id="refresh-mock-data">Refresh fake examples</button>
-                <button class="small-button quiet" type="button" id="download-mock-data">Save fake examples</button>
-              </div>
-            </div>
-
-            <details class="full-plan-details">
-              <summary>Show full plan</summary>
-              <div class="result-toolbar secondary-actions">
-                <button class="small-button" type="button" data-copy="plan-output">Copy full plan</button>
-                <button class="small-button quiet" type="button" id="download-plan">Save full plan</button>
-                <button class="small-button quiet" type="button" data-back="3">Edit answers</button>
-                <button class="small-button quiet" type="button" id="start-over">Start over</button>
-              </div>
-              <pre id="plan-output">Create a plan to see the result.</pre>
-            </details>
-          </section>
+        <div class="export-grid">
+          <button class="export-card" type="button" data-export="prompt"><strong>Copy starter prompt</strong><span>Use in ChatGPT, Claude, Gemini, OpenRouter, or Hermes.</span></button>
+          <button class="export-card" type="button" data-export="spec"><strong>Download agent-spec.md</strong><span>Human-readable workflow, roles, locks, tests.</span></button>
+          <button class="export-card" type="button" data-export="json"><strong>Download agentworks-agent.json</strong><span>Universal manifest for future imports.</span></button>
+          <button class="export-card" type="button" data-export="hermes"><strong>Download Hermes SKILL.md</strong><span>Turn the trained helper into a Hermes-style reusable skill.</span></button>
+          <button class="export-card" type="button" data-export="instructions"><strong>Download AI instructions.md</strong><span>Paste into Claude Projects, GPT builder, or another AI workspace.</span></button>
         </div>
-      </section>
-
-      <section class="section" id="examples">
-        <div class="section-heading">
-          <p class="eyebrow">Examples first</p>
-          <h2>What could an assistant actually do?</h2>
-          <p>It should not “run your business.” Start with a draft, checklist, summary, or flag that a human reviews.</p>
-        </div>
-        <div class="example-grid">
-          <article>
-            <h3>Intake helper</h3>
-            <p><strong>Before:</strong> New requests arrive. Someone reads them and figures out what is missing.</p>
-            <p><strong>Assistant helps:</strong> summarize the request, list missing info, draft a reply.</p>
-            <p><strong>Human still does:</strong> approve and send.</p>
-          </article>
-          <article>
-            <h3>Follow-up helper</h3>
-            <p><strong>Before:</strong> Leads or clients go stale because nobody checks every open item.</p>
-            <p><strong>Assistant helps:</strong> flag stale items and draft follow-ups.</p>
-            <p><strong>Human still does:</strong> decide priority and approve messages.</p>
-          </article>
-          <article>
-            <h3>Meeting cleanup helper</h3>
-            <p><strong>Before:</strong> Notes are messy and action items get lost.</p>
-            <p><strong>Assistant helps:</strong> summarize decisions, action items, and a follow-up note.</p>
-            <p><strong>Human still does:</strong> check accuracy.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="safe-section" id="safe-testing">
-        <div class="section-heading">
-          <p class="eyebrow">Safe testing</p>
-          <h2>Before connecting tools, test with five examples.</h2>
-          <p>Most people get stuck when they start with Gmail, Calendar, CRM, OAuth, permissions, and APIs. Do this instead.</p>
-        </div>
-        <div class="safe-flow">
-          <div><span>1</span><strong>Generate fake examples</strong><small>Use made-up data based on the selected use case.</small></div>
-          <div><span>2</span><strong>Paste fake examples under the prompt</strong><small>No upload or account connection needed.</small></div>
-          <div><span>3</span><strong>Ask for a draft/check</strong><small>No sending. No updating.</small></div>
-          <div><span>4</span><strong>Try sanitized real examples</strong><small>Remove private details before testing.</small></div>
-          <div><span>5</span><strong>Then consider read-only access</strong><small>Only if the fake and manual tests are useful.</small></div>
-        </div>
-      </section>
-
-      <section class="section mock-explain-section" id="mock-data-guide-info">
-        <div class="section-heading">
-          <p class="eyebrow">Fake examples</p>
-          <h2>The examples should match the task.</h2>
-          <p>Follow-up helpers need fake open leads. Intake helpers need fake requests. Document helpers need fake document rows. Meeting helpers need fake notes. Research helpers need fake targets. The generator changes the data based on the task so the test feels real without using private information.</p>
-        </div>
-        <div class="mock-explain-grid">
-          <article><strong>Why fake data first?</strong><p>It lets people learn the workflow without risking private emails, client files, CRM records, or calendar data.</p></article>
-          <article><strong>What does “attach” mean?</strong><p>For the first test, it just means paste the fake examples below the starter prompt in the same chat. No upload is needed.</p></article>
-          <article><strong>When to use real data?</strong><p>Only after the fake-data test makes sense. Start with copied examples where names, emails, amounts, and sensitive details are removed.</p></article>
-        </div>
-      </section>
-
-      <section class="section kit-section" id="workshop-kit">
-        <div class="section-heading">
-          <p class="eyebrow">Next steps</p>
-          <h2>Use the deeper files after your first test works.</h2>
-          <p>The website helps you get unstuck. The workshop kit helps you teach it, map it, and hand it to a builder.</p>
-        </div>
-        <div class="resource-list">
-          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/start-here.md">Start Here</a>
-          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/templates/workflow-map.md">Workflow map</a>
-          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/templates/agent-spec.md">Agent spec template</a>
-          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/resources/signal-points-integration-guide.md">Signal points guide</a>
-          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit/blob/main/scripts/README.md">Technical scripts</a>
-          <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit">GitHub repo</a>
-        </div>
+        <pre id="export-preview">Choose a mission to generate an export preview.</pre>
       </section>
     </main>
 
-    <footer class="site-footer">
-      <p>Start with one pain. Test manually. Keep humans in control.</p>
+    <footer>
+      <p>AgentWorks Quest MVP. Fake-data-first. Human-approved. Exportable.</p>
       <a href="https://github.com/UretzkyZvi/agents-academy-workshop-kit">View source</a>
     </footer>
 

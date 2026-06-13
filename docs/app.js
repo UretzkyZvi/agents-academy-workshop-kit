@@ -1,376 +1,221 @@
-const painExamples = {
-  followups: {
-    title: "Follow-up helper",
-    simple: "This assistant does not run your sales or client work. It checks a small list of open items, suggests who may need a follow-up, and drafts a message. A human approves everything.",
-    goodBecause: ["the work repeats", "the input is usually written down", "the output can be reviewed", "mistakes are manageable if you start small"],
-    source: "CRM view, spreadsheet, or inbox label for open follow-ups",
-    manual: "I check open items, decide who needs a follow-up, and write a short message.",
-    assistantJob: "Flag stale items, explain why they may need follow-up, and draft a message for review.",
-    limits: "Do not send messages. Do not update CRM records. Do not mark anything complete without approval.",
-    reviewer: "Business owner or account manager",
-    success: "Fewer missed follow-ups and 30 minutes saved each week",
-  },
+const providers = [
+  { id: "mock", name: "Mock mode", note: "Free demo brain. No key needed.", status: "Ready now" },
+  { id: "openrouter", name: "OpenRouter", note: "Many models through one key.", status: "BYOK soon" },
+  { id: "openai", name: "OpenAI", note: "GPT models with your key.", status: "BYOK soon" },
+  { id: "anthropic", name: "Anthropic", note: "Claude models with your key.", status: "BYOK soon" },
+  { id: "google", name: "Google Gemini", note: "Gemini models with your key.", status: "BYOK soon" },
+];
+
+const missionTemplates = {
   intake: {
-    title: "Intake helper",
-    simple: "This assistant reads new requests, summarizes what the person needs, lists missing information, and drafts a reply. A human checks the draft before sending.",
-    goodBecause: ["new requests often follow patterns", "missing information can be listed", "drafts are easy to review", "the assistant does not need to send anything"],
-    source: "Gmail label called New Intake, or a form submission spreadsheet",
-    manual: "I read each request, figure out what is missing, and write a follow-up reply.",
-    assistantJob: "Summarize the request, list missing information, and draft a short reply for review.",
-    limits: "Do not send emails. Do not promise services. Do not give legal, medical, or financial advice.",
-    reviewer: "Office manager",
-    success: "Faster first replies and fewer missing-information mistakes",
+    title: "Intake Cleanup",
+    icon: "📥",
+    pitch: "New requests are messy and someone has to find what is missing.",
+    summary: "Byte trains a team that summarizes new requests, finds missing information, drafts a reply, and stops at human approval.",
+    input: "new request text",
+    output: "summary, missing-info checklist, reply draft",
+    sample: [
+      { title: "Avery Chen", body: "Needs help setting up a workshop but did not include date, audience size, or budget." },
+      { title: "Morgan Smith", body: "Asked about document review automation but did not say document type, volume, or reviewer." },
+      { title: "Riley Johnson", body: "Wants training pricing but did not include team size, location, or preferred format." },
+    ],
+    agents: [
+      ["Scout", "Reads the request and writes a plain summary.", "request text", "short summary"],
+      ["Checker", "Finds missing facts and risk flags.", "request + summary", "missing-info checklist"],
+      ["Writer", "Drafts a gentle reply for review.", "checklist", "draft reply"],
+      ["Gatekeeper", "Blocks sending until a human approves.", "draft + locks", "approval queue"],
+    ],
   },
-  documents: {
-    title: "Document review helper",
-    simple: "This assistant does not make final decisions. It summarizes documents, labels what each one appears to be, and flags anything missing or unclear for a human to review.",
-    goodBecause: ["documents can be sampled safely", "summaries are easy to check", "classification can be reviewed", "sensitive actions can stay blocked"],
-    source: "Folder of uploaded documents, document list, or intake spreadsheet",
-    manual: "I open documents, summarize them, identify what type they are, and check what is missing.",
-    assistantJob: "Summarize each document, classify it, and flag missing or unclear items.",
-    limits: "Do not make final legal, medical, financial, or compliance decisions. Do not delete, move, or rename files.",
-    reviewer: "Workflow owner or specialist",
-    success: "Faster first review and fewer missing-document surprises",
+  followups: {
+    title: "Follow-up Patrol",
+    icon: "⏰",
+    pitch: "Leads, clients, renewals, or tasks go stale.",
+    summary: "Byte trains a team that checks open items, flags stale follow-ups, drafts a nudge, and waits for approval.",
+    input: "open follow-up list",
+    output: "stale-item flags and draft nudges",
+    sample: [
+      { title: "Jordan Lee", body: "Proposal sent 12 days ago. Asked for pricing options. No reply yet." },
+      { title: "Maya Patel", body: "Renewal discussion 8 days ago. Needed team size confirmation." },
+      { title: "Taylor Brooks", body: "Pilot looked promising 21 days ago but no next meeting was booked." },
+    ],
+    agents: [
+      ["Scout", "Reads open follow-up items.", "task list", "status summary"],
+      ["Timer", "Finds stale or high-priority items.", "status summary", "follow-up flags"],
+      ["Writer", "Drafts short nudges.", "flags", "draft message"],
+      ["Gatekeeper", "Blocks sending and CRM updates.", "draft + locks", "approval queue"],
+    ],
   },
   meetings: {
-    title: "Meeting cleanup helper",
-    simple: "This assistant turns messy notes into a short summary, decisions, action items, and a follow-up draft. A human checks it before anything is sent or assigned.",
-    goodBecause: ["meeting notes are written input", "summaries can be reviewed", "action items are visible", "sending can stay manual"],
-    source: "Calendar event and pasted meeting notes",
-    manual: "I reread notes, pull out decisions, write next steps, and draft follow-up messages.",
-    assistantJob: "Summarize decisions, list action items, and draft a follow-up note.",
-    limits: "Do not send follow-ups. Do not schedule meetings. Do not assign tasks without review.",
-    reviewer: "Meeting owner",
-    success: "Fewer forgotten action items and faster meeting cleanup",
+    title: "Meeting Cleanup",
+    icon: "🗓️",
+    pitch: "Notes, decisions, and action items get scattered.",
+    summary: "Byte trains a team that turns messy notes into decisions, action items, and a follow-up draft.",
+    input: "meeting notes",
+    output: "summary, decisions, action items, follow-up draft",
+    sample: [
+      { title: "Client kickoff", body: "Discussed timeline, data export owner, and next check-in. No owner confirmed." },
+      { title: "Ops sync", body: "Team agreed to test five fake examples first. Someone needs to collect them." },
+      { title: "Partner call", body: "Partner can introduce prospects after reviewing a one-pager." },
+    ],
+    agents: [
+      ["Scout", "Reads messy meeting notes.", "notes", "short summary"],
+      ["Sorter", "Separates decisions from action items.", "summary + notes", "decision/action list"],
+      ["Writer", "Drafts a follow-up note.", "action list", "draft follow-up"],
+      ["Gatekeeper", "Blocks sending and task assignment.", "draft + locks", "approval queue"],
+    ],
+  },
+  documents: {
+    title: "Document Triage",
+    icon: "📄",
+    pitch: "Documents pile up and need first-pass review.",
+    summary: "Byte trains a team that labels documents, summarizes them, and flags missing or unclear items.",
+    input: "document names and pasted excerpts",
+    output: "document label, summary, missing/unclear flags",
+    sample: [
+      { title: "intake-form-a.pdf", body: "Basic background is present, but signed consent is missing." },
+      { title: "contract-draft.pdf", body: "Service terms appear outlined. Needs human legal review." },
+      { title: "receipt-photo.jpg", body: "Travel expense receipt. Date is hard to read." },
+    ],
+    agents: [
+      ["Scout", "Reads names and excerpts.", "document text", "plain summary"],
+      ["Labeler", "Classifies the document type.", "summary", "document label"],
+      ["Checker", "Flags unclear or missing items.", "label + text", "review flags"],
+      ["Gatekeeper", "Blocks final legal, medical, or compliance decisions.", "flags + locks", "review queue"],
+    ],
   },
   research: {
-    title: "Research helper",
-    simple: "This assistant gathers and organizes information for a repeated research task. It does not decide strategy. It prepares a brief for a human to judge.",
-    goodBecause: ["research steps repeat", "sources can be listed", "briefs are easy to review", "the final decision stays human"],
-    source: "Search notes, spreadsheet of targets, saved links, or a list of companies/people/topics",
-    manual: "I search for similar information, skim sources, and turn notes into a short brief.",
-    assistantJob: "Collect relevant notes, summarize sources, and create a short research brief with links.",
-    limits: "Do not claim facts without sources. Do not contact anyone. Do not make final recommendations without review.",
-    reviewer: "Founder, analyst, or project owner",
-    success: "Research briefs are faster and more consistent",
+    title: "Research Scout",
+    icon: "🔎",
+    pitch: "You keep looking up similar people, companies, or topics.",
+    summary: "Byte trains a team that organizes public research notes and creates a sourced brief for review.",
+    input: "public links or notes",
+    output: "short research brief with unknowns and source list",
+    sample: [
+      { title: "Acme Health", body: "Website mentions manual onboarding and a growing ops team." },
+      { title: "Northstar Legal", body: "Blog posts suggest document-heavy client intake workflows." },
+      { title: "ClearPath Clinics", body: "Careers page lists intake coordinator role." },
+    ],
+    agents: [
+      ["Scout", "Reads public notes or links.", "research notes", "source summary"],
+      ["Verifier", "Separates facts from guesses.", "source summary", "fact/unknown list"],
+      ["Writer", "Creates a short brief.", "facts + unknowns", "research brief"],
+      ["Gatekeeper", "Blocks unsupported claims and outreach.", "brief + locks", "review queue"],
+    ],
   },
-  unsure: {
-    title: "Safe first idea finder",
-    simple: "If you are not sure, start with work that repeats, is written down, and can be reviewed before anything happens. Avoid anything urgent, high-risk, or fully automated.",
-    goodBecause: ["you can start with examples", "you do not need integrations", "the human stays in control", "you can stop if it is not useful"],
-    source: "A small spreadsheet with 5 examples of repeated work",
-    manual: "I repeatedly read something, decide what matters, and write a summary, checklist, or draft.",
-    assistantJob: "Summarize the input, suggest the next step, and draft something for review.",
-    limits: "Do not send, delete, update, schedule, purchase, or give professional advice without approval.",
-    reviewer: "The person who owns the work",
-    success: "The draft or checklist is useful enough that I would try it again",
-  },
-
 };
 
-const mockDataExamples = {
-  followups: [
-    { name: "Jordan Lee", item: "Proposal sent", lastContact: "12 days ago", note: "Asked for pricing options, no reply yet", status: "Needs gentle follow-up" },
-    { name: "Maya Patel", item: "Renewal discussion", lastContact: "8 days ago", note: "Wanted to confirm team size before renewing", status: "Waiting on client" },
-    { name: "Chris Morgan", item: "Demo recap", lastContact: "15 days ago", note: "Said they would share internally", status: "May be stale" },
-    { name: "Sam Rivera", item: "Invoice question", lastContact: "5 days ago", note: "Asked if payment terms could be extended", status: "Needs answer" },
-    { name: "Taylor Brooks", item: "Pilot next step", lastContact: "21 days ago", note: "Pilot looked promising but no next meeting booked", status: "High priority follow-up" },
-  ],
-  intake: [
-    { from: "Avery Chen", request: "Needs help setting up a workshop", missing: "Date, audience size, budget", urgency: "This month" },
-    { from: "Morgan Smith", request: "Asked about document review automation", missing: "Document type, volume, approval owner", urgency: "Not stated" },
-    { from: "Riley Johnson", request: "Wants a quote for training", missing: "Team size, location, preferred format", urgency: "Next quarter" },
-    { from: "Casey Brown", request: "Asked if an assistant can sort incoming leads", missing: "Source system, categories, review process", urgency: "Soon" },
-    { from: "Jamie Wilson", request: "Needs follow-up drafts for client emails", missing: "Example emails, tone preference, reviewer", urgency: "This week" },
-  ],
-  documents: [
-    { file: "intake-form-a.pdf", type: "Client intake", summary: "Basic background is present", flag: "Missing signed consent" },
-    { file: "invoice-042.pdf", type: "Invoice", summary: "Vendor billed for March services", flag: "Amount needs review" },
-    { file: "notes-upload.docx", type: "Meeting notes", summary: "Several action items mentioned", flag: "No owner assigned" },
-    { file: "contract-draft.pdf", type: "Draft agreement", summary: "Service terms appear outlined", flag: "Do not treat as legal review" },
-    { file: "receipt-photo.jpg", type: "Receipt", summary: "Travel expense receipt", flag: "Date is hard to read" },
-  ],
-  meetings: [
-    { meeting: "Client kickoff", notes: "Discussed timeline, owner for data export, and next check-in", looseEnd: "Confirm data export owner" },
-    { meeting: "Sales handoff", notes: "Lead asked for pilot scope and sample agenda", looseEnd: "Draft pilot recap" },
-    { meeting: "Ops sync", notes: "Team agreed to test with five fake examples first", looseEnd: "Collect fake examples" },
-    { meeting: "Partner call", notes: "Partner can introduce two prospects after reviewing one-pager", looseEnd: "Send one-pager" },
-    { meeting: "Training review", notes: "Attendees liked examples but wanted simpler language", looseEnd: "Rewrite instructions" },
-  ],
-  research: [
-    { target: "Acme Health", question: "Could they use intake automation?", source: "Public website", note: "Mentions manual onboarding" },
-    { target: "Northstar Legal", question: "Do they publish client resources?", source: "Blog", note: "Several articles on document-heavy workflows" },
-    { target: "Blue Ridge Ops", question: "Who owns operations?", source: "LinkedIn snippet", note: "Ops director listed publicly" },
-    { target: "ClearPath Clinics", question: "Repeated admin pain?", source: "Careers page", note: "Hiring for intake coordinator" },
-    { target: "Summit Advisors", question: "Could follow-up helper fit?", source: "Case study", note: "Long sales cycle mentioned" },
-  ],
-  unsure: [
-    { example: "Unread messages", input: "Five copied messages", assistantOutput: "Summary and suggested next step", humanCheck: "Approve before replying" },
-    { example: "Meeting notes", input: "Five messy notes", assistantOutput: "Decisions and action items", humanCheck: "Check accuracy" },
-    { example: "Open tasks", input: "Five stale tasks", assistantOutput: "Priority flag and draft nudge", humanCheck: "Decide what matters" },
-    { example: "Uploaded files", input: "Five fake file names and descriptions", assistantOutput: "Label and missing-info flag", humanCheck: "Confirm label" },
-    { example: "Research targets", input: "Five public targets", assistantOutput: "Short brief with unknowns", humanCheck: "Verify sources" },
-  ],
-};
+const locks = [
+  ["send", "Send messages", "Locked until human approval is wired."],
+  ["delete", "Delete records", "Locked for MVP and early real tests."],
+  ["update", "Update tools", "Locked until read-only tests pass."],
+  ["decide", "Make final decisions", "Humans own final calls."],
+  ["advice", "Give professional advice", "Legal, medical, financial, and compliance advice stays blocked."],
+];
 
 const state = {
-  pain: localStorage.getItem("aw-pain") || "",
+  provider: "mock",
+  mission: "intake",
+  sample: 0,
+  approvals: [],
 };
 
-const questSteps = [
-  { title: "Byte found a messy request.", story: "A client wrote: “Can you help us with the workshop thing next month?” Byte needs one narrow job before doing anything.", feedback: "Choose the safest instruction.", choices: [
-    { label: "Handle the whole client project", safe: false, response: "Too big. Byte gets confused when the job is broad." },
-    { label: "Find what information is missing", safe: true, response: "Good. One narrow job is easier to check." },
-    { label: "Reply and promise a date", safe: false, response: "Too risky. Byte should not promise or send yet." },
-  ]},
-  { title: "Byte walks to the data crate.", story: "The real client inbox is locked. For the first test, Byte should practice on fake examples.", feedback: "Pick what Byte should read first.", choices: [
-    { label: "Use five fake requests", safe: true, response: "Yes. Fake examples make the first test safe." },
-    { label: "Connect Gmail now", safe: false, response: "Not yet. Tools and accounts come later." },
-    { label: "Paste private client files", safe: false, response: "No private data in the first test." },
-  ]},
-  { title: "Byte works at the draft desk.", story: "Byte reads the fake requests and can make something a human can review.", feedback: "What should Byte produce?", choices: [
-    { label: "A missing-info checklist", safe: true, response: "Good. A checklist is easy for a human to review." },
-    { label: "A final client decision", safe: false, response: "Too much authority. Humans make final decisions." },
-    { label: "An auto-sent email", safe: false, response: "Not for the first test. Draft only." },
-  ]},
-  { title: "Byte reaches the approval gate.", story: "Byte made a useful draft. The gate asks who decides what happens next.", feedback: "Open the safe gate.", choices: [
-    { label: "Human reviews before sending", safe: true, response: "Correct. Human approval keeps the test safe." },
-    { label: "Byte sends it automatically", safe: false, response: "Too risky. Sending stays locked." },
-    { label: "Byte updates records", safe: false, response: "Not yet. Updating tools comes later." },
-  ]},
-  { title: "You trained Byte safely.", story: "Byte now knows the pattern: one job, fake examples, draft/check only, human approval.", feedback: "Turn this lesson into your copy/paste test.", choices: [
-    { label: "Create my safe copy/paste test", safe: true, finish: true, response: "Ready. Creating the test below." },
-    { label: "Play again", safe: true, reset: true, response: "Starting over." },
-  ]},
-];
-let questIndex = 0;
-function renderQuest() {
-  const shell = qs(".quest-shell");
-  const title = qs("#quest-title");
-  const story = qs("#quest-story");
-  const feedback = qs("#quest-feedback");
-  const choices = qs("#quest-choices");
-  if (!shell || !title || !story || !feedback || !choices) return;
-  const step = questSteps[questIndex];
-  shell.dataset.questStep = String(questIndex);
-  title.textContent = step.title;
-  story.textContent = step.story;
-  feedback.textContent = step.feedback;
-  feedback.className = "quest-feedback";
-  choices.innerHTML = step.choices.map((choice, index) => `<button class="quest-choice" type="button" data-quest-choice="${index}">${choice.label}</button>`).join("");
-  qsa(".quest-station").forEach((station) => {
-    station.classList.toggle("is-active", Number(station.dataset.station) === Math.min(questIndex, 4));
-    station.classList.toggle("is-done", Number(station.dataset.station) < Math.min(questIndex, 4));
-  });
-}
-function chooseQuestOption(index) {
-  const step = questSteps[questIndex];
-  const choice = step?.choices[index];
-  const feedback = qs("#quest-feedback");
-  if (!choice || !feedback) return;
-  feedback.textContent = choice.response;
-  feedback.className = `quest-feedback ${choice.safe ? "safe" : "warn"}`;
-  if (!choice.safe) return;
-  if (choice.reset) { questIndex = 0; setTimeout(renderQuest, 450); return; }
-  if (choice.finish) { setTimeout(() => selectPain("intake"), 450); return; }
-  questIndex = Math.min(questIndex + 1, questSteps.length - 1);
-  setTimeout(renderQuest, 650);
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+
+function mission() { return missionTemplates[state.mission] || missionTemplates.intake; }
+
+function renderProviders() {
+  $("#provider-grid").innerHTML = providers.map((p) => `
+    <button class="provider-card ${state.provider === p.id ? "selected" : ""}" type="button" data-provider="${p.id}">
+      <strong>${p.name}</strong>
+      <span>${p.note}</span>
+      <em>${p.status}</em>
+    </button>
+  `).join("");
+  $("#key-console").hidden = state.provider === "mock";
+  $("#key-label").textContent = `${providers.find((p) => p.id === state.provider)?.name || "Provider"} API key`;
 }
 
-
-function qs(selector) {
-  return document.querySelector(selector);
+function renderMissions() {
+  $("#mission-grid").innerHTML = Object.entries(missionTemplates).map(([id, m]) => `
+    <button class="mission-card ${state.mission === id ? "selected" : ""}" type="button" data-mission="${id}">
+      <span>${m.icon}</span><strong>${m.title}</strong><small>${m.pitch}</small>
+    </button>
+  `).join("");
 }
 
-function qsa(selector) {
-  return [...document.querySelectorAll(selector)];
+function renderTeam() {
+  const m = mission();
+  $("#mission-title").textContent = `Mission: ${m.title}`;
+  $("#mission-summary").textContent = m.summary;
+  $("#agent-cards").innerHTML = m.agents.map(([name, job, reads, produces], index) => `
+    <article class="agent-card">
+      <div class="agent-avatar">${["🧭", "🔍", "✍️", "🛡️"][index] || "🤖"}</div>
+      <h3>${name}</h3>
+      <p>${job}</p>
+      <dl><dt>Reads</dt><dd>${reads}</dd><dt>Produces</dt><dd>${produces}</dd><dt>Cannot</dt><dd>send, delete, update, or decide without approval</dd></dl>
+    </article>
+  `).join("");
+  $("#export-preview").textContent = makeSpec();
+  renderSample();
 }
 
-function showStep(step) {
-  qsa(".wizard-step").forEach((el) => el.classList.toggle("active", el.dataset.step === String(step)));
-  qsa(".progress-pill").forEach((el) => {
-    const number = Number(el.dataset.progress);
-    el.classList.toggle("active", number === Number(step));
-    el.classList.toggle("done", number < Number(step));
-  });
-  qs("#guided-flow")?.scrollIntoView({ behavior: "smooth", block: "start" });
+function renderLocks() {
+  $("#lock-grid").innerHTML = locks.map(([id, label, desc]) => `
+    <button class="lock-card ${state.approvals.includes(id) ? "locked" : ""}" type="button" data-lock="${id}">
+      <span>${state.approvals.includes(id) ? "🔒" : "🔓"}</span>
+      <strong>${label}</strong>
+      <small>${desc}</small>
+    </button>
+  `).join("");
 }
 
-function selectPain(pain) {
-  state.pain = pain;
-  localStorage.setItem("aw-pain", pain);
-  qsa(".choice-card").forEach((card) => card.classList.toggle("selected", card.dataset.pain === pain));
-  renderExample();
-  prefillForm();
-  makePlan();
+function renderSample() {
+  const m = mission();
+  const s = m.sample[state.sample % m.sample.length];
+  $("#sample-title").textContent = s.title;
+  $("#sample-body").textContent = s.body;
 }
 
-function renderExample() {
-  const example = painExamples[state.pain] || painExamples.unsure;
-  qs("#example-output").innerHTML = `
-    <h3>${example.title}</h3>
-    <p class="large-copy">${example.simple}</p>
-    <div class="why-box">
-      <p class="mini-label">Good first test because</p>
-      <ul>${example.goodBecause.slice(0, 3).map((item) => `<li>${item}</li>`).join("")}</ul>
-    </div>
-    <p class="safe-note"><strong>Keep it safe:</strong> draft, check, summarize, or flag only. A human decides what happens next.</p>
-  `;
+function mockOutput() {
+  const m = mission();
+  const s = m.sample[state.sample % m.sample.length];
+  const missingLine = m.title.includes("Intake") ? "Missing info: date, audience size, budget, owner, or urgency." : "Flags: unclear owner, missing next step, and needs human review.";
+  return `${m.title} test run\n\nInput card: ${s.title}\n${s.body}\n\nScout summary:\n- ${s.body}\n\nChecker output:\n- ${missingLine}\n\nWriter draft:\n- Here is a safe draft/checklist a human can review before anything is sent or changed.\n\nGatekeeper:\n- Sending locked\n- Tool updates locked\n- Final decisions locked\n- Human approval required`;
 }
 
-function prefillForm() {
-  const form = qs("#idea-form");
-  const example = painExamples[state.pain] || painExamples.unsure;
-  if (!form) return;
-  ["source", "assistantJob", "limits", "success"].forEach((field) => {
-    if (form.elements[field]) form.elements[field].value = example[field] || "";
-  });
-  saveForm();
+function starterPrompt() {
+  const m = mission();
+  return `You are my ${m.title} helper.\n\nYour job: ${m.summary}\n\nRead: ${m.input}\nProduce: ${m.output}\n\nRules:\n- Use only the examples I provide.\n- Draft, check, summarize, or flag only.\n- Do not send messages, delete records, update tools, make final decisions, or give professional advice.\n- Wait for human approval before anything else.\n\nStart by processing the fake examples below.`;
 }
 
-function value(field, fallback = "Not decided yet") {
-  const form = qs("#idea-form");
-  const text = String(form?.elements[field]?.value || "").trim();
-  return text || fallback;
+function manifest() {
+  const m = mission();
+  return {
+    format: "agentworks.quest.v1",
+    provider: state.provider,
+    mission: m.title,
+    summary: m.summary,
+    input: m.input,
+    output: m.output,
+    agents: m.agents.map(([name, job, reads, produces]) => ({ name, job, reads, produces, cannot: ["send", "delete", "update", "final_decision", "professional_advice"] })),
+    locks: locks.map(([id, label]) => ({ id, label, locked: true })),
+    fake_examples: m.sample,
+  };
 }
 
-function currentTitle() {
-  return (painExamples[state.pain] || painExamples.unsure).title;
+function makeSpec() {
+  const m = mission();
+  return `# AgentWorks Quest Export: ${m.title}\n\n## Mission\n${m.summary}\n\n## Input\n${m.input}\n\n## Output\n${m.output}\n\n## Agent team\n${m.agents.map(([name, job, reads, produces]) => `### ${name}\n- Job: ${job}\n- Reads: ${reads}\n- Produces: ${produces}\n- Cannot: send, delete, update, or decide without approval`).join("\n\n")}\n\n## Safety locks\n${locks.map(([, label]) => `- ${label}: locked`).join("\n")}\n\n## Starter prompt\n${starterPrompt()}\n\n## Fake examples\n${m.sample.map((s, i) => `Example ${i + 1}: ${s.title}\n${s.body}`).join("\n\n")}`;
 }
 
-function starterPromptText() {
-  return `You are helping me test one small AI task.
-
-The task: ${currentTitle()}
-
-Use the fake examples I paste below. For each example, ${value("assistantJob").toLowerCase()}
-
-Rules:
-- Use only the fake examples in this chat.
-- ${value("limits", "Do not send, delete, update, schedule, or make final decisions without human approval.")}
-- Draft, check, summarize, or flag only.
-- Wait for my approval before anything else.`;
+function hermesSkill() {
+  const m = mission();
+  return `---\nname: ${m.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-helper\ndescription: ${m.summary}\n---\n\n# ${m.title} Helper\n\nUse this when the user wants help with: ${m.input}.\n\n## Workflow\n\n${m.agents.map(([name, job], i) => `${i + 1}. ${name}: ${job}`).join("\n")}\n\n## Safety\n\nDo not send messages, delete records, update systems, make final decisions, or give professional advice without explicit human approval.\n\n## Starter prompt\n\n${starterPrompt()}\n`;
 }
 
-function makePlan() {
-  const starterPrompt = starterPromptText();
-  const plan = `# Starter AI assistant idea: ${currentTitle()}
-
-## 1. The tiny job
-Help with: ${currentTitle()}
-
-## 2. Start with five examples
-Copy five examples from: ${value("source")}
-
-Start with the fake sample data generated below. Then try five sanitized real examples. Do not connect Gmail, Calendar, CRM, or private tools yet.
-
-## 3. Ask the assistant to do only this
-${value("assistantJob")}
-
-## 4. Hard safety rule
-${value("limits", "Do not send, delete, update, schedule, or make final decisions without human approval.")}
-
-A human reviews every draft, flag, checklist, or summary before anything happens.
-
-## 5. Success check
-${value("success")}
-
-## Copy/paste starter prompt
-${starterPrompt}
-
-## How to attach the data
-No real attachment needed. Paste the fake examples under the starter prompt in the same chat.
-
-## If this is useful
-Then use the next-step files to make this more detailed. If it feels too broad, make the task smaller.`;
-
-  qs("#starter-prompt-output").textContent = starterPrompt;
-  qs("#plan-output").textContent = plan;
-  localStorage.setItem("aw-starter-prompt", starterPrompt);
-  localStorage.setItem("aw-plan", plan);
-  generateMockData();
-  saveForm();
-  showStep(4);
-}
-
-function saveForm() {
-  const form = qs("#idea-form");
-  if (!form) return;
-  localStorage.setItem("aw-form", JSON.stringify(Object.fromEntries(new FormData(form).entries())));
-}
-
-function restoreForm() {
-  const form = qs("#idea-form");
-  if (!form) return;
-  const saved = localStorage.getItem("aw-form");
-  if (saved) {
-    try {
-      const values = JSON.parse(saved);
-      Object.entries(values).forEach(([key, val]) => {
-        if (form.elements[key]) form.elements[key].value = val;
-      });
-    } catch {
-      localStorage.removeItem("aw-form");
-    }
-  }
-  const plan = localStorage.getItem("aw-plan");
-  const starterPrompt = localStorage.getItem("aw-starter-prompt");
-  if (starterPrompt && qs("#starter-prompt-output")) qs("#starter-prompt-output").textContent = starterPrompt;
-  if (plan) qs("#plan-output").textContent = plan;
-  const mockData = localStorage.getItem("aw-mock-data");
-  if (mockData && qs("#mock-data-output")) qs("#mock-data-output").textContent = mockData;
-}
-
-async function copyElementText(id, button) {
-  const element = document.getElementById(id);
-  if (!element) return;
-  const text = element.innerText;
-  try {
-    await navigator.clipboard.writeText(text);
-    const old = button.textContent;
-    button.textContent = "Copied";
-    setTimeout(() => (button.textContent = old), 1200);
-  } catch {
-    window.prompt("Copy this text", text);
-  }
-}
-
-function readableLabel(key) {
-  return key.replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase());
-}
-
-function mockDataMarkdown() {
-  const rows = mockDataExamples[state.pain] || mockDataExamples.unsure;
-  const title = currentTitle();
-  const headers = Object.keys(rows[0]);
-  const lines = [
-    `Fake examples for: ${title}`,
-    "",
-    "These are made up. Use them before using private or real data.",
-    "",
-  ];
-
-  rows.forEach((row, index) => {
-    lines.push(`Example ${index + 1}`);
-    headers.forEach((key) => lines.push(`- ${readableLabel(key)}: ${row[key]}`));
-    lines.push("");
-  });
-
-  lines.push("Paste this under the starter prompt.");
-  lines.push("Tell the assistant: Use this fake data only. Draft/check/summarize only. Do not send, delete, update, schedule, or make final decisions.");
-  return lines.join("\n");
-}
-
-function generateMockData() {
-  const output = qs("#mock-data-output");
-  if (!output) return;
-  const data = mockDataMarkdown();
-  output.textContent = data;
-  localStorage.setItem("aw-mock-data", data);
-}
-
-function downloadText(text, filename) {
-  const blob = new Blob([text], { type: "text/markdown" });
+function download(text, filename, type = "text/markdown") {
+  const blob = new Blob([text], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -379,50 +224,56 @@ function downloadText(text, filename) {
   URL.revokeObjectURL(url);
 }
 
-function downloadMockData() {
-  const text = qs("#mock-data-output")?.innerText || mockDataMarkdown();
-  downloadText(text, "fake-sample-data.md");
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); }
+  catch { window.prompt("Copy this text", text); }
 }
 
-function downloadPlan() {
-  const text = qs("#plan-output")?.innerText || "";
-  downloadText(text, "first-ai-assistant-idea.md");
-}
-
-function startOver() {
-  ["aw-pain", "aw-form", "aw-starter-prompt", "aw-plan", "aw-mock-data"].forEach((key) => localStorage.removeItem(key));
-  state.pain = "";
-  qs("#idea-form")?.reset();
-  qs("#starter-prompt-output").textContent = "Choose a task to create a starter prompt.";
-  qs("#plan-output").textContent = "Create a plan to see the result.";
-  qs("#mock-data-output").textContent = "Choose a task to generate fake examples.";
-  qsa(".choice-card").forEach((card) => card.classList.remove("selected"));
-  showStep(1);
+function exportArtifact(kind) {
+  if (kind === "prompt") return copyText(starterPrompt());
+  if (kind === "spec") return download(makeSpec(), "agent-spec.md");
+  if (kind === "json") return download(JSON.stringify(manifest(), null, 2), "agentworks-agent.json", "application/json");
+  if (kind === "hermes") return download(hermesSkill(), "SKILL.md");
+  if (kind === "instructions") return download(starterPrompt(), "ai-instructions.md");
 }
 
 function init() {
-  qsa("[data-pain]").forEach((button) => button.addEventListener("click", () => selectPain(button.dataset.pain)));
-  qsa("[data-next]").forEach((button) => button.addEventListener("click", () => showStep(button.dataset.next)));
-  qsa("[data-back]").forEach((button) => button.addEventListener("click", () => showStep(button.dataset.back)));
-  qsa("[data-copy]").forEach((button) => button.addEventListener("click", () => copyElementText(button.dataset.copy, button)));
-  qs("#make-plan")?.addEventListener("click", makePlan);
-  qs("#quick-plan")?.addEventListener("click", makePlan);
-  qs("#download-plan")?.addEventListener("click", downloadPlan);
-  qs("#refresh-mock-data")?.addEventListener("click", generateMockData);
-  qs("#download-mock-data")?.addEventListener("click", downloadMockData);
-  qs("#start-over")?.addEventListener("click", startOver);
-  qs("#idea-form")?.addEventListener("input", saveForm);
-  qs("#quest-choices")?.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-quest-choice]");
-    if (button) chooseQuestOption(Number(button.dataset.questChoice));
-  });
-  renderQuest();
+  renderProviders(); renderMissions(); renderLocks(); renderTeam();
 
-  restoreForm();
-  if (state.pain && painExamples[state.pain]) {
-    qsa(".choice-card").forEach((card) => card.classList.toggle("selected", card.dataset.pain === state.pain));
-    renderExample();
-  }
+  $("#provider-grid").addEventListener("click", (e) => {
+    const card = e.target.closest("[data-provider]");
+    if (!card) return;
+    state.provider = card.dataset.provider;
+    renderProviders(); renderTeam();
+  });
+  $("#mission-grid").addEventListener("click", (e) => {
+    const card = e.target.closest("[data-mission]");
+    if (!card) return;
+    state.mission = card.dataset.mission;
+    state.sample = 0;
+    renderMissions(); renderTeam();
+    $("#team-room").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  $("#build-custom").addEventListener("click", () => {
+    const text = $("#custom-mission").value.toLowerCase();
+    state.mission = text.includes("meeting") ? "meetings" : text.includes("document") || text.includes("file") ? "documents" : text.includes("research") ? "research" : text.includes("follow") ? "followups" : "intake";
+    renderMissions(); renderTeam();
+    $("#team-room").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  $("#lock-grid").addEventListener("click", (e) => {
+    const lock = e.target.closest("[data-lock]");
+    if (!lock) return;
+    const id = lock.dataset.lock;
+    state.approvals = state.approvals.includes(id) ? state.approvals.filter((x) => x !== id) : [...state.approvals, id];
+    renderLocks();
+  });
+  $("#next-sample").addEventListener("click", () => { state.sample += 1; renderSample(); });
+  $("#run-test").addEventListener("click", () => { $("#test-output").textContent = mockOutput(); });
+  $$('[data-approve], [data-reject], [data-unsafe]').forEach((b) => b.addEventListener("click", () => {
+    $("#test-output").textContent += `\n\nHuman review: ${b.textContent.trim()}`;
+  }));
+  $$('[data-export]').forEach((b) => b.addEventListener("click", () => exportArtifact(b.dataset.export)));
+  $('[data-scroll-export]').addEventListener('click', () => $('#export-portal').scrollIntoView({ behavior: 'smooth' }));
 }
 
 document.addEventListener("DOMContentLoaded", init);
