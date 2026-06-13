@@ -62,12 +62,12 @@ const templates = {
 };
 
 const glossary = {
-  "context-window": { title: "Context window", body: "The amount of information a model can keep in view at one time. In this mission, the transcript and every artifact compete for that space.", search: "https://www.youtube.com/results?search_query=AI+context+window+explained" },
-  tokens: { title: "Tokens", body: "Small chunks of text the model reads and writes. Longer files use more tokens and fill the context window faster.", search: "https://www.youtube.com/results?search_query=AI+tokens+explained" },
-  model: { title: "Model", body: "The AI brain assigned to a station. Different models can be faster, cheaper, larger-context, better at reasoning, or better at writing.", search: "https://www.youtube.com/results?search_query=large+language+models+explained" },
-  chunking: { title: "Chunking", body: "Splitting a long file into smaller pieces so the agent can process it without overflowing the context window.", search: "https://www.youtube.com/results?search_query=RAG+chunking+explained" },
-  embeddings: { title: "Embeddings", body: "A way to turn text into searchable meaning. Useful later when an agent needs to find the right chunk from many files.", search: "https://www.youtube.com/results?search_query=embeddings+explained+AI" },
-  artifact: { title: "Artifact", body: "A real output file created by an agent, like scout-notes.json, risk-review.md, or follow-up-email.md.", search: "https://www.youtube.com/results?search_query=AI+agents+workflow+explained" },
+  "context-window": { title: "Context window", body: "The amount of information a model can keep in view at one time. In this mission, the transcript and every artifact compete for that space.", video: "pW0vHyPD_2Y" },
+  tokens: { title: "Tokens", body: "Small chunks of text the model reads and writes. Longer files use more tokens and fill the context window faster.", video: "B6qD2rYgtEM" },
+  model: { title: "Model", body: "The AI brain assigned to a station. Different models can be faster, cheaper, larger-context, better at reasoning, or better at writing.", video: "RhPKBmeYNuI" },
+  chunking: { title: "Chunking", body: "Splitting a long file into smaller pieces so the agent can process it without overflowing the context window.", video: "anDROnsic7k" },
+  embeddings: { title: "Embeddings", body: "A way to turn text into searchable meaning. Useful later when an agent needs to find the right chunk from many files.", video: "wggqEHPSpdM" },
+  artifact: { title: "Artifact", body: "A real output file created by an agent, like scout-notes.json, risk-review.md, or follow-up-email.md.", video: "GFITotKju_k" },
 };
 
 const state = {
@@ -291,7 +291,21 @@ function menuForScreen(){
   if(state.screen==="export") return [["COPY MISSION SPEC",()=>copyText(makeMarkdownSpec())],["DOWNLOAD MISSION SPEC",()=>download(makeMarkdownSpec(),"agentworks-mission.md","text/markdown")],["DOWNLOAD LANGGRAPH PY",()=>download(makeLangGraph(),"agentworks_langgraph.py","text/x-python")],["DOWNLOAD CREWAI PY",()=>download(makeCrewAI(),"agentworks_crewai.py","text/x-python")],["DOWNLOAD RUN JSON",()=>download(JSON.stringify({app:state.appText,data:state.data,agents:state.agents,artifacts:state.artifacts,runLog:state.runLog},null,2),"agentworks-run.json","application/json")],["START OVER",()=>setScreen("title")]];
   return [];
 }
-function helpDrawer(){ const term = state.helpTerm ? glossary[state.helpTerm] : null; return `<aside class="help-drawer ${term?'open':''}" id="help-drawer">${term?`<button id="close-help" aria-label="Close help">×</button><h3>${esc(term.title)}</h3><p>${esc(term.body)}</p><a href="${esc(term.search)}" target="_blank" rel="noreferrer">Watch explainer videos ↗</a>`:''}</aside>`; }
+function helpModal(){
+  const term = state.helpTerm ? glossary[state.helpTerm] : null;
+  if(!term) return "";
+  const src = `https://www.youtube-nocookie.com/embed/${term.video}?rel=0`;
+  return `<div class="help-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <section class="help-modal">
+      <button id="close-help" class="modal-close" aria-label="Close help">×</button>
+      <p class="kicker">QUICK LESSON</p>
+      <h3 id="help-title">${esc(term.title)}</h3>
+      <p>${esc(term.body)}</p>
+      <div class="video-frame"><iframe title="${esc(term.title)} explainer videos" src="${src}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+      <small>Video stays inside the simulator so beginners do not lose their place.</small>
+    </section>
+  </div>`;
+}
 function termButtons(){ return `<div class="term-row">${Object.keys(glossary).map(k=>`<button class="term-help" data-term="${k}">? ${esc(glossary[k].title)}</button>`).join("")}</div>`; }
 function contextMeter(input, agent){ const model = modelFor(agent); const pct = Math.min(100, Math.round((estimateTokens(input)/model.limit)*100)); return `<div class="context-meter"><div><b>Context window</b><button class="term-help tiny-help" data-term="context-window">?</button><span>${estimateTokens(input)} / ${model.limit} teaching tokens</span></div><meter min="0" max="100" value="${pct}"></meter><strong>${pct}% full</strong></div>`; }
 function detailsForScreen(){
@@ -304,27 +318,53 @@ function detailsForScreen(){
   if(state.screen==="export") return `<div class="export-preview"><h3>Export includes</h3><ul><li>Full transcript input</li><li>Model route</li><li>Context notes</li><li>Artifact chain</li><li>LangGraph/CrewAI placeholder scaffolds</li></ul><pre>${esc(makeMarkdownSpec()).slice(0,1400)}...</pre></div>`;
   return `<div class="welcome-card"><div class="big-avatar">🗺️</div><p>Play a mission: a full meeting transcript moves through model-powered agent stations and becomes real output files.</p><p class="friendly-note">The educational part is visible: context limits, model choices, artifact quality, and human approval.</p></div>`;
 }
+function stationLayout(i){
+  return [
+    {x:9, y:50, room:"mailroom", label:"INPUT DOCK"},
+    {x:25, y:28, room:"scout", label:"SCAN DESK"},
+    {x:43, y:62, room:"context", label:"CONTEXT LAB"},
+    {x:58, y:28, room:"structure", label:"BUILD ROOM"},
+    {x:73, y:62, room:"review", label:"REVIEW BAY"},
+    {x:83, y:27, room:"writer", label:"WRITER NOOK"},
+    {x:91, y:52, room:"outcome", label:"OUTCOME VAULT"},
+  ][i] || {x:50, y:50, room:"extra", label:"STATION"};
+}
+function decoObjects(){
+  const items = [
+    ["plant",13,24,"🌿"],["server",34,45,"▦"],["rug",47,43,""],["coffee",63,47,"☕"],["board",70,22,"▤"],["plant",89,73,"🌵"],["crate",19,71,"▣"],["books",53,78,"▤"],["lamp",78,42,"◌"],
+  ];
+  return items.map(([cls,x,y,txt])=>`<span class="map-prop prop-${cls}" style="--x:${x};--y:${y}">${txt}</span>`).join("");
+}
 function runScreen(){
   const active = state.activeAgent;
   const activeAgent = active >= 0 ? state.agents[active] : null;
   const activeInput = active >= 0 ? agentInput(active) : (state.data || currentTemplate().fakeData);
-  const phaseText = state.runPhase === "receive" ? "OPEN FILE" : state.runPhase === "context" ? "CONTEXT CHECK" : state.runPhase === "artifact" ? "CREATE ARTIFACT" : state.runPhase === "complete" ? "OUTCOME ROOM" : "MISSION MAP";
+  const phaseText = state.runPhase === "receive" ? "OPEN FILE" : state.runPhase === "context" ? "CONTEXT CHECK" : state.runPhase === "artifact" ? "CREATE ARTIFACT" : state.runPhase === "complete" ? "OUTCOME VAULT" : "MISSION FLOOR";
   const stations = ["Transcript File", ...state.agents.map(a=>a.name), "Outcome Room"];
   return `<div class="mission-run">
-    <section class="mission-map" aria-label="Gamified mission map">
+    <section class="mission-map topdown-map" aria-label="Top-down mission floor map">
       <div class="map-title"><strong>Messy Meeting Mission</strong><span>${phaseText}</span></div>
-      <div class="map-path"></div>
-      ${stations.map((name,i)=>`<div class="map-node ${i===0?'file-node':''} ${i===stations.length-1?'outcome-node':''} ${i===active+1?'active':''} ${i>0&&i<=state.runLog.length?'done':''}" style="--i:${i};--total:${stations.length-1}"><span>${i===0?'📄':i===stations.length-1?'🏁':state.agents[i-1]?.icon}</span><b>${esc(name)}</b><small>${i===0?'full transcript':i===stations.length-1?'final files':i===active+1?phaseText:i<=state.runLog.length?'artifact made':'waiting'}</small>${i>0&&i<stations.length-1?`<em>${esc(modelFor(state.agents[i-1]).name)}</em>`:''}</div>`).join("")}
-      ${activeAgent?`<div class="map-agent" style="--i:${active+1};--total:${stations.length-1}">${pixelActor(active, activeAgent.name)}<b>${esc(activeAgent.name)}</b></div>`:''}
-      <div class="file-packet ${state.running||state.runPhase==='complete'?'moving':''}" style="--i:${active<0?0:active+1};--total:${stations.length-1}">${state.runPhase==='artifact'?'FILE OUT':'FILE'}</div>
-      <div class="artifact-shelf"><h3>Artifacts created</h3>${state.artifacts.map(a=>`<button class="artifact-chip" title="${esc(a.name)}">${a.kind==='input'?'📄':'🗂️'} ${esc(a.name)}</button>`).join("")}</div>
+      <div class="tile-floor" aria-hidden="true"></div>
+      <div class="map-walls" aria-hidden="true"></div>
+      <div class="map-route" aria-hidden="true"></div>
+      ${decoObjects()}
+      ${stations.map((name,i)=>{ const pos=stationLayout(i); const agent=state.agents[i-1]; return `<div class="map-room room-${pos.room} ${i===0?'file-node':''} ${i===stations.length-1?'outcome-node':''} ${i===active+1?'active':''} ${i>0&&i<=state.runLog.length?'done':''}" style="--x:${pos.x};--y:${pos.y}">
+        <span class="room-sign">${esc(pos.label)}</span>
+        <span class="room-icon">${i===0?'📄':i===stations.length-1?'🏁':agent?.icon}</span>
+        <b>${esc(name)}</b>
+        <small>${i===0?'full transcript':i===stations.length-1?'final files':i===active+1?phaseText:i<=state.runLog.length?'artifact made':'waiting'}</small>
+        ${agent?`<em>${esc(modelFor(agent).name)}</em>`:''}
+      </div>`}).join("")}
+      ${activeAgent?`<div class="map-agent" style="--x:${stationLayout(active+1).x};--y:${stationLayout(active+1).y}">${pixelActor(active, activeAgent.name)}<b>${esc(activeAgent.name)}</b></div>`:''}
+      <div class="file-packet ${state.running||state.runPhase==='complete'?'moving':''}" style="--x:${stationLayout(active<0?0:active+1).x};--y:${stationLayout(active<0?0:active+1).y}">${state.runPhase==='artifact'?'FILE OUT':'FILE'}</div>
+      <div class="artifact-shelf"><h3>Artifact shelf</h3>${state.artifacts.map(a=>`<button class="artifact-chip" title="${esc(a.name)}">${a.kind==='input'?'📄':'🗂️'} ${esc(a.name)}</button>`).join("")}</div>
     </section>
     <aside class="mission-side">
-      <div class="mission-focus">${activeAgent?`<h3>${activeAgent.icon} ${esc(activeAgent.name)}</h3><p>${esc(activeAgent.role)}</p><div class="model-badge"><b>${esc(modelFor(activeAgent).model)}</b><span>${esc(modelFor(activeAgent).strength)} · ${esc(modelFor(activeAgent).cost)}</span><button class="term-help tiny-help" data-term="model">?</button></div>${contextMeter(activeInput, activeAgent)}`:`<h3>${state.runLog.length?'🏁 Outcome ready':'Mission ready'}</h3><p>${state.runLog.length?'Inspect the artifact chain below. The same transcript produced files, not just explanations.':'Press Play to move a full transcript through model-specific agent stations.'}</p>${termButtons()}`}</div>
+      <div class="mission-focus">${activeAgent?`<h3>${activeAgent.icon} ${esc(activeAgent.name)}</h3><p>${esc(activeAgent.role)}</p><div class="model-badge"><b>${esc(modelFor(activeAgent).model)}</b><span>${esc(modelFor(activeAgent).strength)} · ${esc(modelFor(activeAgent).cost)}</span><button class="term-help tiny-help" data-term="model">?</button></div>${contextMeter(activeInput, activeAgent)}`:`<h3>${state.runLog.length?'🏁 Outcome ready':'Mission ready'}</h3><p>${state.runLog.length?'Inspect the artifact chain below. The same transcript produced files, not just explanations.':'Press Play to move a full transcript through model-specific rooms on the mission floor.'}</p>${termButtons()}`}</div>
       <div class="auto-log office-log teaching-log" id="auto-log">${state.chat.map(renderChatEntry).join("")}</div>
       ${!state.running?`<div class="stage-actions"><button id="stage-play">${state.runLog.length?'Play Again':'Play Mission'}</button>${state.runLog.length?'<button id="stage-export">Export Run</button>':''}<button id="stage-edit">Edit Models</button></div>`:''}
     </aside>
-    ${helpDrawer()}
+    ${helpModal()}
   </div>`;
 }
 function contentForScreen(){
@@ -346,13 +386,15 @@ function render(){
   $("#menu").innerHTML=menu.map(([label,,hint],i)=>`<button class="menu-item ${i===state.cursor?'active':''}" type="button" data-i="${i}"><span>${i===state.cursor?'▶':' '}</span><strong>${label}</strong>${hint?`<small>${esc(hint)}</small>`:''}</button>`).join("");
   $("#menu").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{state.cursor=Number(b.dataset.i);select();}));
   $("#stage-play")?.addEventListener("click",runAgents); $("#stage-export")?.addEventListener("click",()=>setScreen("export")); $("#stage-edit")?.addEventListener("click",()=>setScreen("agents"));
-  document.querySelectorAll(".term-help").forEach(b=>b.addEventListener("click",()=>{state.helpTerm=b.dataset.term; render();})); $("#close-help")?.addEventListener("click",()=>{state.helpTerm=null; render();});
+  document.querySelectorAll(".term-help").forEach(b=>b.addEventListener("click",()=>{state.helpTerm=b.dataset.term; render();}));
+  $("#close-help")?.addEventListener("click",()=>{state.helpTerm=null; render();});
+  document.querySelector(".help-modal-backdrop")?.addEventListener("click",(e)=>{ if(e.target.classList.contains("help-modal-backdrop")){ state.helpTerm=null; render(); } });
   const log=$("#auto-log"); if(log) log.scrollTop=log.scrollHeight;
   setStatus(state.screen==="run"?(state.running?"MISSION RUNNING · WATCH FILES MOVE":"READY TO PLAY MISSION"):"USE MENU OR KEYBOARD");
 }
 function select(){ const item=menuForScreen()[state.cursor]; if(item) item[1](); }
 function back(){ const idx=flow.indexOf(state.screen); if(idx>0 && !state.running) setScreen(flow[idx-1]); }
-document.addEventListener("keydown",e=>{ const menu=menuForScreen(); if(["ArrowDown","ArrowUp","Enter"," ","Escape"].includes(e.key)) e.preventDefault(); if(menu.length&&e.key==="ArrowDown"){state.cursor=(state.cursor+1)%menu.length;render();} if(menu.length&&e.key==="ArrowUp"){state.cursor=(state.cursor-1+menu.length)%menu.length;render();} if(e.key==="Enter"||e.key===" ") select(); if(e.key==="Escape") back(); if(/^[1-9]$/.test(e.key)&&menu[Number(e.key)-1]){state.cursor=Number(e.key)-1;select();} });
+document.addEventListener("keydown",e=>{ const menu=menuForScreen(); if(["ArrowDown","ArrowUp","Enter"," ","Escape"].includes(e.key)) e.preventDefault(); if(menu.length&&e.key==="ArrowDown"){state.cursor=(state.cursor+1)%menu.length;render();} if(menu.length&&e.key==="ArrowUp"){state.cursor=(state.cursor-1+menu.length)%menu.length;render();} if(e.key==="Enter"||e.key===" ") select(); if(e.key==="Escape"){ if(state.helpTerm){ state.helpTerm=null; render(); } else back(); } if(/^[1-9]$/.test(e.key)&&menu[Number(e.key)-1]){state.cursor=Number(e.key)-1;select();} });
 const canvas=$("#arena"), ctx=canvas.getContext("2d"); let tick=0;
 function draw(){ tick++; const w=canvas.width,h=canvas.height; ctx.fillStyle="#fff7df"; ctx.fillRect(0,0,w,h); ctx.strokeStyle="rgba(88,182,255,.22)"; ctx.lineWidth=2; for(let x=0;x<w;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();} for(let y=0;y<h;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();} ctx.fillStyle="rgba(255,212,92,.32)"; ctx.fillRect(0,360,w,180); ctx.fillStyle="#6ee7b7"; ctx.beginPath(); ctx.arc(480+Math.sin(tick/20)*18,430+Math.cos(tick/25)*8,36,0,Math.PI*2); ctx.fill(); ctx.strokeStyle="#274060"; ctx.lineWidth=5; ctx.stroke(); ctx.fillStyle="#274060"; ctx.font="18px monospace"; ctx.textAlign="center"; ctx.fillText("QUEST",480,436); requestAnimationFrame(draw); }
 generateFromDefinition(); render(); draw();
