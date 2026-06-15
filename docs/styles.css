@@ -1144,3 +1144,367 @@ body.play-mode .terminal-body { gap: .9rem; padding: clamp(.55rem, 1.2vw, 1rem);
 .reflection-list li { margin-bottom: .42rem; }
 .reflection-list code { background: #fff0a6; padding: 0 .25rem; border-radius: 4px; font-size: .76rem; }
 .reflection-next { margin: .35rem 0 0; padding: .42rem .55rem; background: #fff0a6; border: 2px dashed var(--line); border-radius: 10px; font-size: .82rem; }
+
+/* === Mobile pass (phones 360-700px). Flatten arcade cabinet into vertical lesson app. === */
+@media (max-width: 700px) {
+  html, body { overflow: auto; height: auto; }
+  body { font-size: 15px; }
+
+  .cabinet {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 100dvh;
+    padding: .35rem;
+  }
+  .bezel {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+    border-width: 4px;
+    border-radius: 16px;
+  }
+
+  /* HUD — drop player/score, keep run/brain + logo */
+  .hud {
+    grid-template-columns: 1fr 1fr;
+    padding: .5rem .55rem;
+    gap: .4rem;
+    border-bottom-width: 3px;
+  }
+  .hud > div:nth-child(1), .hud > div:nth-child(2) { display: none; }
+  .hud > div:not(.logo) {
+    padding: .35rem .5rem;
+    border-radius: 10px;
+    box-shadow: 2px 2px 0 rgba(39,50,74,.2);
+    border-width: 2px;
+  }
+  .hud strong { font-size: .58rem; }
+  .tiny { font-size: .58rem; }
+  .logo { grid-column: 1 / -1; grid-row: 1; font-size: .82rem; text-shadow: 1px 1px 0 white; }
+
+  /* CRT becomes a normal scroll container — drop the arcade screen */
+  .crt {
+    position: static;
+    min-height: auto;
+    margin: .45rem;
+    border-width: 3px;
+    border-radius: 14px;
+    overflow: visible;
+    box-shadow: none;
+  }
+  #arena, .scanlines { display: none; }
+
+  /* Terminal: static, not absolute overlay */
+  .terminal {
+    position: static;
+    inset: auto;
+    display: block;
+    border-width: 3px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.88);
+    box-shadow: 4px 4px 0 rgba(39,50,74,.18);
+    backdrop-filter: none;
+  }
+  .terminal-head {
+    flex-wrap: wrap;
+    gap: .35rem;
+    padding: .45rem .6rem;
+    font-size: .48rem;
+    border-bottom-width: 3px;
+  }
+  .terminal-head span:last-child { display: none; }
+
+  .terminal-body {
+    display: block;
+    padding: .65rem;
+    gap: 0;
+  }
+  .story-panel {
+    display: block;
+    grid-template-rows: none;
+  }
+  .story-panel > * + * { margin-top: .55rem; }
+  .kicker { font-size: .62rem; }
+  h1 { max-width: none; font-size: 1.15rem; line-height: 1.2; text-shadow: 2px 2px 0 #fff0a6; }
+  p { font-size: .92rem; }
+  .details { min-height: 0; max-height: none; overflow: visible; padding-right: 0; }
+
+  .menu {
+    margin-top: .7rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    overflow: visible;
+    padding-right: 0;
+  }
+  .menu-item {
+    padding: .6rem;
+    grid-template-columns: 1.3rem 1fr;
+    gap: .45rem;
+    box-shadow: 3px 3px 0 rgba(39,50,74,.16);
+    border-width: 2px;
+  }
+  .menu-item span, .menu-item strong { font-size: .58rem; line-height: 1.3; }
+  .menu-item small { font-size: .78rem; }
+  .menu-item.active { transform: translateX(-2px); box-shadow: 4px 4px 0 rgba(39,50,74,.22); }
+
+  .statusbar {
+    grid-template-columns: 1fr;
+    gap: .25rem;
+    padding: .55rem .65rem;
+    font-size: .42rem;
+    border-top-width: 3px;
+  }
+  #progress { display: none; }
+
+  /* Forms */
+  .choice-grid, .agent-grid, .run-lane, .actor-row {
+    grid-template-columns: 1fr;
+    gap: .55rem;
+  }
+  textarea { min-height: 96px; padding: .6rem; }
+  .agent-card textarea { min-height: 72px; }
+  .transcript-editor { min-height: 240px; }
+  input, textarea, select { padding: .6rem; border-width: 2px; }
+  .chip, .agent-card, .welcome-card, .play-pad, .export-preview, .run-card {
+    padding: .6rem;
+    border-width: 2px;
+    box-shadow: 3px 3px 0 rgba(39,50,74,.16);
+  }
+
+  /* === Play / run mode === */
+  body.play-mode .crt { margin: .35rem; min-height: auto; }
+  body.play-mode .terminal-body { padding: .5rem; }
+
+  /* Mission run: stack vertically */
+  .mission-run {
+    display: block;
+    height: auto;
+    gap: 0;
+  }
+  .mission-map {
+    position: relative;
+    height: 420px;
+    margin-bottom: .65rem;
+    border-width: 3px;
+    border-radius: 16px;
+    box-shadow: inset 0 0 22px rgba(88,182,255,.2), 4px 4px 0 rgba(39,50,74,.14);
+  }
+  .topdown-map { height: 420px; }
+  .topdown-map .map-walls { inset: 12% 3% 22% 3%; border-width: 5px; }
+
+  .map-title {
+    left: 2.5%; right: 2.5%; top: 2.5%;
+    padding: .35rem .5rem;
+    gap: .35rem;
+  }
+  .map-title strong, .map-title span { font-size: .5rem; }
+
+  .map-room {
+    width: min(72px, 19%);
+    min-height: 72px;
+    padding: .25rem;
+    border-width: 2px;
+    border-radius: 7px;
+    box-shadow: 0 4px 0 rgba(39,50,74,.2), inset 0 0 0 2px rgba(255,255,255,.4);
+  }
+  .map-room::before { height: 9px; inset: -7px -4px auto -4px; border-width: 2px; }
+  .room-sign { font-size: .35rem; padding: .06rem .22rem; }
+  .room-icon { font-size: 1.05rem; }
+  .map-room b { font-size: .54rem; line-height: 1.05; }
+  .map-room small { display: none; }
+  .map-room em { font-size: .42rem; padding: .06rem .2rem; }
+
+  .map-prop { width: 22px; height: 22px; font-size: .65rem; border-width: 2px; }
+  .prop-rug { width: 64px; height: 28px; }
+  .prop-board { width: 30px; }
+
+  .map-agent {
+    transform: translate(-50%, -55%) scale(.78);
+    transform-origin: center bottom;
+  }
+  .map-agent b { font-size: .56rem; padding: .14rem .32rem; }
+
+  .file-packet { padding: .28rem .35rem; font-size: .42rem; }
+
+  /* Artifact shelf — horizontal scroll strip */
+  .artifact-shelf,
+  .topdown-map .artifact-shelf {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    min-height: auto;
+    padding: .4rem .55rem .5rem;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: .35rem;
+    align-items: center;
+    -webkit-overflow-scrolling: touch;
+  }
+  .artifact-shelf h3,
+  .topdown-map .artifact-shelf h3 {
+    flex: none;
+    margin: 0;
+    padding: .12rem .42rem;
+    font-size: .42rem;
+    white-space: nowrap;
+  }
+  .artifact-chip {
+    flex: none;
+    margin: 0;
+    padding: .3rem .55rem .3rem .35rem;
+    font-size: .72rem;
+    box-shadow: 2px 2px 0 rgba(39,50,74,.18);
+  }
+
+  /* Mission console (side panel) */
+  .mission-side {
+    display: block;
+    min-height: auto;
+    padding: .15rem .1rem 0;
+    grid-template-rows: none;
+  }
+  .mission-side::before {
+    margin-bottom: .4rem;
+    font-size: .46rem;
+    padding: .1rem .5rem;
+  }
+  .mission-focus { padding: .45rem .15rem .55rem; }
+  .mission-focus h3 { font-size: .6rem; }
+  .mission-focus p { font-size: .85rem; }
+  .model-badge, .context-meter { padding: .4rem; font-size: .76rem; }
+  .context-meter meter { height: 14px; }
+  .term-row { gap: .3rem; margin-top: .45rem; }
+  .term-help { font-size: .76rem; padding: .24rem .42rem; }
+
+  .office-log {
+    padding: .45rem .1rem;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  .office-log p { font-size: .8rem; padding: .45rem .55rem; }
+  .chat-card { padding: .55rem; }
+  .chat-card pre { font-size: .74rem; padding: .42rem; }
+
+  .stage-actions,
+  .mission-side .stage-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: .35rem;
+    padding: .55rem 0 .2rem;
+    margin-top: .25rem;
+  }
+  .stage-actions button {
+    padding: .5rem .6rem;
+    font-size: .82rem;
+    flex: 0 0 auto;
+    box-shadow: 2px 2px 0 rgba(39,50,74,.18);
+  }
+  .run-controls .run-state-tag { font-size: .46rem; padding: .2rem .42rem; }
+
+  /* Office run + chain run: same stacked treatment */
+  .office-run, .chain-run {
+    display: block;
+    height: auto;
+    grid-template-columns: 1fr;
+  }
+  .office-floor, .chain-floor {
+    height: 420px;
+    min-height: 0;
+    margin-bottom: .65rem;
+  }
+  .office-side, .chain-side {
+    display: block;
+    min-height: auto;
+    grid-template-rows: none;
+  }
+  .office-side .mini-focus, .chain-side .mini-focus { padding: .55rem; margin-bottom: .5rem; }
+  .auto-log { min-height: auto; max-height: 50vh; }
+
+  /* Orchestration stage stack */
+  .orchestration-stage {
+    grid-template-columns: 1fr;
+    grid-template-areas: "table" "actors" "handoff" "focus" "log" "actions";
+    grid-template-rows: none;
+    height: auto;
+  }
+  .actor-row { grid-template-columns: repeat(2, 1fr); }
+  .actor { min-height: 110px; padding: .55rem; }
+  .actor-body { width: 48px; height: 48px; font-size: 1.4rem; border-width: 3px; }
+
+  /* Chain desks — too tightly packed for phone; let them wrap into a flex strip */
+  .chain-desk {
+    position: relative;
+    left: auto; top: auto;
+    transform: none;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    margin-bottom: .4rem;
+  }
+
+  /* Modals — near full screen, scrollable */
+  .help-modal-backdrop, .artifact-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    padding: .5rem;
+  }
+  .help-modal, .artifact-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 1rem);
+    height: auto;
+    padding: .85rem;
+    border-width: 3px;
+    border-radius: 14px;
+    box-shadow: 6px 6px 0 rgba(0,0,0,.24);
+  }
+  .help-modal h3, .artifact-modal h3 {
+    margin: .15rem 2.4rem .4rem 0;
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+  .help-modal p, .artifact-modal p { font-size: .92rem; }
+  .modal-close {
+    width: 38px; height: 38px;
+    right: .45rem; top: .45rem;
+    font-size: 1.1rem;
+  }
+  .artifact-modal pre {
+    max-height: calc(100dvh - 14rem);
+    font-size: .78rem;
+    padding: .6rem;
+    border-width: 2px;
+  }
+  .artifact-modal-actions { gap: .4rem; margin-top: .55rem; }
+  .video-frame { margin-top: .6rem; border-width: 3px; }
+
+  /* Sidebar help drawer */
+  .help-drawer {
+    position: fixed;
+    left: .5rem;
+    right: .5rem;
+    top: .5rem;
+    width: auto;
+    z-index: 60;
+    border-width: 3px;
+    padding: .75rem;
+  }
+}
+
+/* Tablet refinements — keep desktop two-column but stop forcing 780px CRT and let mission run stack if cramped. */
+@media (max-width: 980px) and (min-width: 701px) {
+  .crt { min-height: 620px; }
+  .mission-run { grid-template-columns: 1fr; }
+  .mission-map { min-height: 460px; }
+  .artifact-shelf, .topdown-map .artifact-shelf {
+    display: flex; flex-wrap: nowrap; overflow-x: auto; align-items: center; gap: .4rem;
+  }
+  .artifact-chip { flex: none; }
+}
