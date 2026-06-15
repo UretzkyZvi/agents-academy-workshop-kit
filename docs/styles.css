@@ -895,17 +895,21 @@ select { width: 100%; border: 3px solid var(--line); border-radius: 12px; backgr
 }
 .video-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
 
-/* Reduce nested-board feeling: fewer heavy boxes, more map/game surface. */
-body.play-mode .terminal { background: rgba(255,255,255,.5); box-shadow: none; }
-body.play-mode .terminal-body { gap: .55rem; }
-.topdown-map { border-width: 3px; box-shadow: inset 0 0 28px rgba(88,182,255,.18); }
+/* === run view: less board, more game world === */
+body.play-mode .terminal { background: transparent; box-shadow: none; border: 0; backdrop-filter: none; }
+body.play-mode .terminal-body { gap: .9rem; padding: clamp(.55rem, 1.2vw, 1rem); }
+.mission-run { gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(320px, .5fr); }
+
+/* map — strong outline reserved for the world frame */
+.topdown-map { border-width: 3px; box-shadow: inset 0 0 32px rgba(88,182,255,.2), 6px 6px 0 rgba(39,50,74,.14); }
 .topdown-map .map-title {
-  left: 4%; right: 4%; top: 3.5%;
+  left: 4%; right: 4%; top: 3.2%;
   border: 0;
   border-radius: 999px;
-  background: rgba(255,254,244,.72);
+  background: rgba(255,254,244,.78);
   box-shadow: none;
   backdrop-filter: blur(2px);
+  padding: .5rem .85rem;
 }
 .topdown-map .map-room {
   border-width: 2px;
@@ -913,32 +917,137 @@ body.play-mode .terminal-body { gap: .55rem; }
   background-blend-mode: soft-light, soft-light, normal;
 }
 .topdown-map .map-room::before { border-width: 2px; height: 11px; inset: -8px -5px auto -5px; }
-.topdown-map .room-sign { border: 0; background: rgba(255,254,244,.75); }
-.topdown-map .map-prop { border-width: 2px; box-shadow: 2px 3px 0 rgba(39,50,74,.12); opacity: .85; }
+.topdown-map .room-sign { border: 0; background: rgba(255,254,244,.78); }
+.topdown-map .map-prop { border-width: 2px; box-shadow: 2px 3px 0 rgba(39,50,74,.12); opacity: .82; }
+
+/* artifact shelf: floor-strip ribbon, not a board */
 .topdown-map .artifact-shelf {
-  left: 4%; right: 4%; bottom: 3.5%;
-  min-height: 78px;
+  left: 0; right: 0; bottom: 0;
+  min-height: 92px;
+  padding: .65rem 1.1rem .85rem;
   border: 0;
-  border-radius: 14px;
-  background: rgba(255,254,244,.72);
-  box-shadow: 0 -2px 0 rgba(39,50,74,.16) inset;
+  border-top: 3px dashed rgba(39,50,74,.4);
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, rgba(255,254,244,.0), rgba(255,234,168,.62)),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.18) 0 12px, rgba(255,212,92,.18) 12px 24px);
+  box-shadow: inset 0 5px 0 rgba(255,255,255,.45);
   backdrop-filter: blur(2px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .45rem;
 }
-.topdown-map .artifact-shelf h3 { margin-bottom: .35rem; font-size: .52rem; }
-.artifact-chip { cursor: pointer; transition: transform .15s ease, background .15s ease; }
-.artifact-chip:hover { transform: translateY(-2px); background: #dcfff2; }
-.mission-focus, .office-log, .stage-actions {
+.topdown-map .artifact-shelf h3 {
+  margin: 0 .6rem 0 0;
+  padding: .15rem .55rem;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: #fffef4;
+  color: var(--ink);
+  font-size: .5rem;
+  letter-spacing: .08em;
+}
+
+/* artifact chip — file tab affordance */
+.artifact-chip {
+  cursor: pointer;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: .42rem;
+  padding: .38rem .65rem .38rem .42rem;
+  border: 2px solid var(--line);
+  border-radius: 4px 12px 12px 4px;
+  background: linear-gradient(180deg, #fffaea 0 38%, #fff7d3 38% 100%);
+  box-shadow: 3px 3px 0 rgba(39,50,74,.18);
+  font-weight: 900;
+  font-size: .78rem;
+  color: var(--ink);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.artifact-chip::before {
+  content: "";
+  width: 13px;
+  height: 14px;
+  border: 2px solid var(--line);
+  border-radius: 2px 5px 2px 2px;
+  background: #fff;
+  box-shadow: inset 0 3px 0 var(--orange);
+  flex: none;
+}
+.artifact-chip.is-input::before { box-shadow: inset 0 3px 0 var(--blue); }
+.artifact-chip.is-output::before { box-shadow: inset 0 3px 0 var(--green); }
+.artifact-chip:hover {
+  transform: translate(-1px, -3px);
+  box-shadow: 5px 6px 0 rgba(39,50,74,.22);
+  background: linear-gradient(180deg, #fffaea 0 38%, #dcfff2 38% 100%);
+}
+.artifact-chip:active { transform: translate(0, -1px); box-shadow: 2px 2px 0 rgba(39,50,74,.18); }
+.artifact-chip:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+
+/* mission console — one cohesive panel, dashed dividers not boxes */
+.mission-side {
   border: 0;
-  border-radius: 12px;
+  background: transparent;
   box-shadow: none;
-  background: rgba(255,255,255,.5);
+  padding: .25rem .35rem 0;
+  gap: .2rem;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
 }
-.mission-focus { padding: .65rem; }
-.office-log { background: rgba(255,255,255,.7); }
-.stage-actions { background: rgba(255,255,255,.7); }
-.model-badge, .context-meter { border-width: 1px; }
-.chat-card { border-width: 2px; box-shadow: none; }
-.chat-card pre { border-width: 1px; }
+.mission-side::before {
+  content: "MISSION CONSOLE";
+  display: block;
+  margin-bottom: .25rem;
+  padding: .12rem .55rem;
+  align-self: start;
+  justify-self: start;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255,254,244,.85);
+  color: var(--ink);
+  font-family: 'Press Start 2P', monospace;
+  font-size: .48rem;
+  letter-spacing: .1em;
+}
+.mission-focus {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: .15rem .15rem .7rem;
+  border-bottom: 2px dashed rgba(39,50,74,.2);
+}
+.mission-focus h3 { margin: 0 0 .4rem; color: var(--orange); font-family: 'Press Start 2P', monospace; font-size: .68rem; letter-spacing: .02em; }
+.office-log {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: .55rem .15rem;
+  min-height: 0;
+}
+.stage-actions {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: .4rem 0 .15rem;
+  margin-top: .25rem;
+  border-top: 2px dashed rgba(39,50,74,.2);
+}
+.stage-actions button { box-shadow: 3px 3px 0 rgba(39,50,74,.18); }
+.model-badge, .context-meter { border-width: 1px; background: rgba(255,255,255,.6); }
+.chat-card {
+  border: 0;
+  border-left: 3px solid rgba(255,122,89,.55);
+  border-radius: 0 12px 12px 0;
+  background: rgba(255,255,255,.55);
+  box-shadow: none;
+}
+.chat-card:last-child { background: rgba(255,240,166,.72); border-left-color: var(--orange); }
+.chat-card pre { border-width: 1px; background: rgba(255,247,211,.7); }
+.chat-output pre:last-child, .chat-final pre { background: rgba(220,255,242,.85); }
 .help-modal-backdrop, .artifact-modal-backdrop {
   position: absolute;
   inset: 0;
