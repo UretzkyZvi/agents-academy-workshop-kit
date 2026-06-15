@@ -1117,3 +1117,30 @@ body.play-mode .terminal-body { gap: .9rem; padding: clamp(.55rem, 1.2vw, 1rem);
   .terminal-body { padding: .6rem; }
   textarea { min-height: 82px; }
 }
+
+/* Pause/Step run controls */
+.run-controls { gap: .4rem; align-items: center; }
+.run-controls .run-state-tag {
+  display: inline-block;
+  padding: .22rem .5rem;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: #fff0a6;
+  color: var(--ink);
+  font-family: 'Press Start 2P', monospace;
+  font-size: .5rem;
+  letter-spacing: .04em;
+}
+.run-controls button[disabled] { opacity: .45; cursor: not-allowed; box-shadow: none; }
+
+/* Baseline (solo chatbot) and reflection cards */
+.chat-baseline { background: #ffe6e6; border-color: #c45656; }
+.chat-baseline header b { color: #c45656; }
+.chat-baseline pre { background: #fff2f2; }
+.chat-reflection { background: #e6f6ff; border-color: #2a7ab0; }
+.chat-reflection header b { color: #2a7ab0; }
+.reflection-body { font-size: .82rem; line-height: 1.4; }
+.reflection-list { margin: .35rem 0 .5rem; padding-left: 1.1rem; }
+.reflection-list li { margin-bottom: .42rem; }
+.reflection-list code { background: #fff0a6; padding: 0 .25rem; border-radius: 4px; font-size: .76rem; }
+.reflection-next { margin: .35rem 0 0; padding: .42rem .55rem; background: #fff0a6; border: 2px dashed var(--line); border-radius: 10px; font-size: .82rem; }

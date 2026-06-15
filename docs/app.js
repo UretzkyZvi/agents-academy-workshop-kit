@@ -75,6 +75,7 @@ const state = {
   appText: "Turn a full messy meeting transcript into a client-ready follow-up while showing context windows, model choices, and artifacts.",
   template: "meeting", data: "", agents: [], runLog: [], chat: [], artifacts: [],
   activeAgent: -1, runPhase: "idle", running: false, score: 0, helpTerm: null, activeArtifact: null,
+  paused: false, stepRequested: false,
 };
 const flow = ["title", "brain", "define", "data", "agents", "run", "export"];
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -103,18 +104,111 @@ function pixelActor(i, label){
 function setScreen(screen){ state.screen = screen; state.cursor = 0; render(); }
 function generateFromDefinition(){ const t=currentTemplate(); state.template="meeting"; state.data=t.fakeData; state.agents=JSON.parse(JSON.stringify(t.agents)); addScore(300); }
 function agentInput(i){ return i===0 ? state.data : (state.runLog[i-1]?.output || state.data); }
-function outputForAgent(agent, input, i){
-  if(agent.id === "scout") return `{
+function soloChatbotDraft(){
+  return `# solo-chatbot-draft.md
+(One general chatbot tried to read the transcript and do every job at once.)
+
+Quick summary attempt:
+- The team talked about a workshop demo with agents.
+- Greg seems to be leading. A few others chimed in.
+- They might want to ship something soon — not fully sure.
+
+Decisions (mixed with my guesses):
+- Use a mission map (I think this was agreed).
+- Maybe show some model comparison? Unclear.
+- Something about uploads — I'm not sure who decided what.
+
+Action items (incomplete owners):
+- Build the map — owner: ???
+- Add help cards — owner: ??? (maybe Aster?)
+- Decide on uploads — owner: not sure
+
+What I likely missed:
+- Specific approval rules near the end of the meeting.
+- Subtle warnings about context window and model size.
+- Exact quotes I could not hold in mind all at once.
+
+Note from this chatbot:
+I'm one model trying to scan, decide, structure, review, and write the email in one shot.
+That is why this draft is shallow and uncertain. Splitting the work across specialized agents
+(scout, context manager, structure builder, risk reviewer, writer) catches more — and each
+agent leaves a named file you can open and check.`;
+}
+
+function scoutNotesFor(agent){
+  const key = agent.modelKey;
+  const route = `${modelFor(agent).name} (${modelFor(agent).model})`;
+  if(key === "fast"){
+    return `{
   "file": "scout-notes.json",
   "source": "meeting-transcript-full.txt",
+  "model_route": "${route}",
+  "speakers_caught": ["Greg", "Aster", "Dana", "Morgan"],
+  "speakers_likely_missed": ["Riley", "Avery"],
+  "important_quotes": [
+    "I want them to see the file.",
+    "Show scout-notes.json, context-plan.md..."
+  ],
+  "decisions_found": [
+    "Use a mission map instead of polishing cards.",
+    "Start with a full fake transcript file."
+  ],
+  "action_candidates": [
+    "Build Transcript File station",
+    "Add artifact files moving through stations"
+  ],
+  "missing_or_unclear": [
+    "did not catch every speaker",
+    "skipped subtle approval and context details late in the transcript",
+    "did not flag the warning about model being too small for the file"
+  ],
+  "scout_self_check": "Fast Scout: I scanned quickly and likely missed nuance. Use a larger or reasoning model if accuracy matters."
+}`;
+  }
+  if(key === "long" || key === "reasoning"){
+    return `{
+  "file": "scout-notes.json",
+  "source": "meeting-transcript-full.txt",
+  "model_route": "${route}",
   "speakers": ["Greg", "Aster", "Dana", "Morgan", "Riley", "Avery"],
   "important_quotes": [
     "I want them to see the file.",
     "If the context window is too small, the agent loses details.",
-    "Show scout-notes.json, context-plan.md, action-items.json, risk-review.md, follow-up-email.md."
+    "Show scout-notes.json, context-plan.md, action-items.json, risk-review.md, follow-up-email.md.",
+    "Add a warning when an agent is using a model that is too small for the file.",
+    "Final email is a draft for human review."
   ],
   "decisions_found": [
     "Use a mission map instead of polishing office cards.",
+    "Start with a full fake transcript file.",
+    "Make terminology optional through help cards.",
+    "Show model choice as a gameplay consequence.",
+    "Outputs should be inspectable artifact files, not summaries.",
+    "Final email is a draft for human review, not auto-send."
+  ],
+  "action_candidates": [
+    "Build Transcript File station",
+    "Add Context Window meter",
+    "Show artifact files moving through stations",
+    "Create final follow-up email and run comparison",
+    "Add glossary/help cards next to terminology",
+    "Add a warning when model is too small for the input"
+  ],
+  "missing_or_unclear": ["exact approval owner", "which real model menu ships first", "whether user can upload their own transcript in v1"],
+  "scout_self_check": "${modelFor(agent).name}: held the full transcript in view. High confidence on coverage."
+}`;
+  }
+  return `{
+  "file": "scout-notes.json",
+  "source": "meeting-transcript-full.txt",
+  "model_route": "${route}",
+  "speakers": ["Greg", "Aster", "Dana", "Morgan", "Riley"],
+  "important_quotes": [
+    "I want them to see the file.",
+    "Show scout-notes.json, context-plan.md, action-items.json, risk-review.md, follow-up-email.md."
+  ],
+  "decisions_found": [
+    "Use a mission map instead of polishing cards.",
     "Start with a full fake transcript file.",
     "Make terminology optional through help cards.",
     "Show model choice as a gameplay consequence."
@@ -123,10 +217,70 @@ function outputForAgent(agent, input, i){
     "Build Transcript File station",
     "Add Context Window meter",
     "Show artifact files moving through stations",
-    "Create final follow-up email and run comparison"
+    "Create final follow-up email"
   ],
-  "missing_or_unclear": ["exact approval owner", "which real model menu ships first", "whether user can upload their own transcript in v1"]
+  "missing_or_unclear": ["exact approval owner", "subtle details about the model menu"],
+  "scout_self_check": "${modelFor(agent).name} is not tuned for scout work. Try Fast Scout for cheap scanning or Long Context for full coverage."
 }`;
+}
+
+function riskReviewFor(agent){
+  if(agent.modelKey === "reasoning"){
+    return `# risk-review.md
+
+Reviewer model: ${modelFor(agent).name} (reasoning model — recommended for this job)
+
+Safe to show:
+- Fake transcript file
+- Model badges and cost/quality tradeoffs
+- Context overflow meter
+- Draft follow-up artifacts
+
+Needs human approval:
+- Any real client transcript upload
+- Any automatic sending of follow-up emails
+- Any claims about exact model pricing or benchmark quality
+
+Uncertainty flags:
+- The current run is simulated, not using real provider APIs unless a local key/server is connected.
+- Context token counts are estimates for teaching, not provider-exact billing.
+- YouTube links are educational search links until curated videos are selected.
+
+Things this reviewer specifically caught:
+- Action items missing a real owner (multiple tasks default to Aster).
+- Open questions in action-items.json hint at unresolved scope not surfaced in the draft email.
+- No named human reviewer for the final follow-up before it leaves the system.
+
+Recommendation:
+Hold the email for human approval. Confirm owners before anything is sent.`;
+  }
+  return `# risk-review.md
+
+Reviewer model: ${modelFor(agent).name} (NOT a reasoning model — this review is shallow)
+
+> SHALLOW REVIEW WARNING
+> The Risk Reviewer station is running on a model that is fine at other jobs
+> but is not tuned for careful judgment. Many real risks below are surface-level
+> or missed entirely. Switch the Risk Reviewer to "Careful Judge" and replay
+> to get a proper review.
+
+Quick scan:
+- Looks roughly fine.
+- Some unknowns noted.
+- Email seems okay to me.
+
+Things this reviewer probably missed:
+- Approval ownership (who signs off before the email goes out).
+- Risky automation paths (anything that could send without a human).
+- Uncertainty about which decisions are final vs still being debated.
+
+Recommendation:
+Do not rely on this review alone. Reassign the Risk Reviewer to a reasoning model and re-run.`;
+}
+
+function outputForAgent(agent, input, i){
+  if(agent.id === "scout") return scoutNotesFor(agent);
+  if(agent.id === "review") return riskReviewFor(agent);
   if(agent.id === "context") return `# context-plan.md
 
 Input files in context:
@@ -163,26 +317,6 @@ The next agent should not receive a vague summary. It receives this context plan
   "open_questions": ["Should users upload files in this prototype?", "Which educational videos should be curated instead of search links?"],
   "risks": ["too much terminology during play", "outputs still feeling summarized instead of file-like", "map feeling static instead of game-like"]
 }`;
-  if(agent.id === "review") return `# risk-review.md
-
-Safe to show:
-- Fake transcript file
-- Model badges and cost/quality tradeoffs
-- Context overflow meter
-- Draft follow-up artifacts
-
-Needs human approval:
-- Any real client transcript upload
-- Any automatic sending of follow-up emails
-- Any claims about exact model pricing or benchmark quality
-
-Uncertainty flags:
-- The current run is simulated, not using real provider APIs unless a local key/server is connected.
-- Context token counts are estimates for teaching, not provider-exact billing.
-- YouTube links are educational search links until curated videos are selected.
-
-Recommendation:
-Ship the simulator as a visual learning layer first. Keep real integrations behind a later safe mode.`;
   return `# follow-up-email.md
 
 Subject: Follow-up from the AgentWorks mission simulator meeting
@@ -212,6 +346,28 @@ Needs approval:
 Please review before anything is sent or connected to real tools.`;
 }
 function chatIntro(){ return {type:"intro", who:"Byte", title:"Mission started", note:"A real-looking transcript file will move through the map. Each station creates an artifact file, and the context window meter shows why model choice matters."}; }
+function chatBaseline(draft){ return {type:"baseline", who:"Byte", title:"BEFORE: ONE CHATBOT TRIED ALONE", output:draft, note:"One general chatbot read the whole transcript and tried to do every job in one shot. The draft above misses owners, mixes guesses with decisions, and admits it may have missed risks. That is why we split the work across specialized agents — each one focuses on a single job and leaves a named file you can inspect."}; }
+function chatReflection(){
+  const scout = state.agents.find(a=>a.id==='scout');
+  const review = state.agents.find(a=>a.id==='review');
+  const scoutName = scout ? modelFor(scout).name : "your scout";
+  const reviewName = review ? modelFor(review).name : "your reviewer";
+  const reviewWarn = review && review.modelKey !== 'reasoning' ? " (a non-reasoning model, so the risk review is shallow)" : "";
+  const body = `<ol class="reflection-list">
+    <li><b>Why agents, not one chatbot.</b> The cold-open <code>solo-chatbot-draft.md</code> tried to do everything alone and missed owners and approvals. The agent run produced separate, named files you can open and check.</li>
+    <li><b>Why model and context choices matter.</b> Your Scout ran on <b>${esc(scoutName)}</b> and your Risk Reviewer ran on <b>${esc(reviewName)}</b>${esc(reviewWarn)}. A smaller scout misses subtle decisions; a non-reasoning reviewer skips approval risks. Open <code>scout-notes.json</code> and <code>risk-review.md</code> to see the difference.</li>
+    <li><b>Why humans inspect artifacts.</b> Every file in the FILES shelf is a draft, not a sent message. A person should open <code>risk-review.md</code> and <code>follow-up-email.md</code> before acting on them.</li>
+  </ol>
+  <p class="reflection-next"><b>Next:</b> tap <em>Edit Models</em>, change the Scout model (try Fast Scout vs Long Context), and Play Again. Watch <code>scout-notes.json</code> and <code>model-comparison.md</code> change.</p>`;
+  return {type:"reflection", who:"Byte", title:"MISSION DEBRIEF · 3 TAKEAWAYS", body, note:"Plain-language wrap-up. Use the artifact shelf above to compare runs."};
+}
+async function pauseGate(){
+  if(!state.paused) return;
+  setStatus("PAUSED · STEP to advance one phase");
+  while(state.paused && !state.stepRequested){ await sleep(120); }
+  state.stepRequested = false;
+  if(state.paused) setStatus("PAUSED · STEP to advance one phase");
+}
 function chatReceive(agent, fromName, input){ return {type:"receive", who:agent.name, title:`OPENED INPUT FROM ${fromName}`, input, note:`Model loaded: ${modelFor(agent).model}. This station is reading a real packet, not just a summary.`}; }
 function chatWork(agent, input){ const model=modelFor(agent); return {type:"work", who:agent.name, title:"MODEL + CONTEXT CHECK", prompt:agent.prompt, input, note:`${model.name}: ${model.strength}. Context use: ${Math.min(100, Math.round((estimateTokens(input)/model.limit)*100))}% of this model's teaching limit.`}; }
 function chatOutput(agent, toName, input, output){ return {type:"output", who:agent.name, title:`CREATED ${artifactNameFor(agent)}`, to:toName, input, output, note:`This artifact file is passed to the next station.`}; }
@@ -224,53 +380,87 @@ function renderChatEntry(m){
     ${m.prompt?`<section><h4>PROMPT USED</h4><pre>${esc(m.prompt)}</pre></section>`:''}
     ${m.input?`<section><h4>INPUT FILE / ARTIFACT</h4><pre>${esc(m.input)}</pre></section>`:''}
     ${m.output?`<section><h4>OUTPUT ARTIFACT</h4><pre>${esc(m.output)}</pre></section>`:''}
+    ${m.body?`<section class="reflection-body">${m.body}</section>`:''}
     ${m.note?`<small>${esc(m.note)}</small>`:''}
   </article>`;
 }
 async function callServerAgent(agent,input,index){ const res=await fetch("/api/run-agent",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider:state.provider,apiKey:state.apiKey,agent,input,appText:state.appText,index})}); if(!res.ok) throw new Error(await res.text()); return (await res.json()).output; }
 function modelComparisonArtifact(){
+  const scoutAgent = state.agents.find(a=>a.id==='scout');
+  const reviewAgent = state.agents.find(a=>a.id==='review');
   const route = state.agents.map(a => `${a.name}: ${modelFor(a).name}`).join("\n- ");
+  const scoutKey = scoutAgent?.modelKey;
+  const reviewKey = reviewAgent?.modelKey;
+  const scoutConsequence = scoutKey === 'fast'
+    ? `Fast Scout caught the main decisions cheaply, but scout-notes.json shows it likely missed two speakers and skipped subtle approval/context details. Good for first-pass, risky as the only scout.`
+    : (scoutKey === 'long' || scoutKey === 'reasoning')
+      ? `${modelFor(scoutAgent).name} held the full transcript and produced complete scout notes (all six speakers, more decisions, more quotes). Higher cost, but stronger recall.`
+      : `${modelFor(scoutAgent).name} is not a scouting specialist. Coverage was partial. Try Fast Scout (cheap scan) or Long Context (full coverage).`;
+  const reviewConsequence = reviewKey === 'reasoning'
+    ? `Careful Judge produced a real risk review, flagging missing owners and approval gaps.`
+    : `${modelFor(reviewAgent).name} produced a SHALLOW review (see warning in risk-review.md). Switch the Risk Reviewer to "Careful Judge" for a proper review.`;
   return `# model-comparison.md
 
-Current model route:
+## Your current route
 - ${route}
 
-Run A: all cheap/fast models
-- Cost: low
-- Speed: high
-- Likely outcome: misses subtle decisions, approval risks, and long-transcript details.
-- Teaching point: cheap models are useful scouts, but risky for final review.
+## What your route actually produced
+- Scout: ${scoutConsequence}
+- Risk Review: ${reviewConsequence}
 
-Run B: mixed specialist route, used here
-- Cost: medium
-- Speed: medium
-- Likely outcome: better artifact quality because each station uses a model suited to its task.
-- Teaching point: agent teams can route work instead of using one model for everything.
+## General tradeoffs (for comparison)
+Run A — all cheap/fast models
+- Cost: low, Speed: high
+- Misses subtle decisions, approval risks, long-transcript details.
 
-Run C: one huge model for every station
-- Cost: high
-- Speed: lower
-- Likely outcome: strong quality, but wasteful for simple scanning and formatting.
-- Teaching point: bigger is not always better. Match the model to the job.
+Run B — mixed specialist route
+- Cost: medium, Speed: medium
+- Better artifact quality — each station uses a model suited to its task.
 
-Context lesson:
-The transcript is large enough to make context visible. If the model cannot hold enough of the file, the workflow must chunk, compress, retrieve, or use a larger-context model.`;
+Run C — one huge model for every station
+- Cost: high, Speed: lower
+- Strong quality, but wasteful for simple scanning and formatting.
+
+## Try this
+Tap Edit Models, change the Scout model from "${modelFor(scoutAgent).name}" to a different option, and Play Again.
+Open scout-notes.json each time and compare what changes.`;
 }
 async function runAgents(){
   if(!state.agents.length) generateFromDefinition();
-  state.running=true; state.runLog=[]; state.chat=[chatIntro()]; state.artifacts=[{name:"meeting-transcript-full.txt", kind:"input", text:state.data}]; state.activeAgent=-1; state.runPhase="file"; setScreen("run");
-  await sleep(1600);
+  state.running=true; state.paused=false; state.stepRequested=false;
+  state.runLog=[]; state.chat=[chatIntro()];
+  state.artifacts=[{name:"meeting-transcript-full.txt", kind:"input", text:state.data}];
+  state.activeAgent=-1; state.runPhase="file"; setScreen("run");
+  await sleep(1200);
+
+  // Cold open: one solo chatbot tries to do everything alone, badly.
+  const soloDraft = soloChatbotDraft();
+  state.artifacts.push({name:"solo-chatbot-draft.md", kind:"output", text:soloDraft, agent:"Solo Chatbot"});
+  state.runPhase="baseline"; state.chat.push(chatBaseline(soloDraft)); render();
+  await sleep(2400); await pauseGate();
+
   for(let i=0;i<state.agents.length;i++){
     const agent=state.agents[i]; const fromName=i===0?'Transcript File':state.agents[i-1].name; const toName=state.agents[i+1]?.name || 'Outcome Room'; const input=agentInput(i);
+    await pauseGate();
     state.activeAgent=i; state.runPhase="receive"; state.chat.push(chatReceive(agent, fromName, input)); render(); await sleep(1800);
+    await pauseGate();
     const step={icon:agent.icon,id:agent.id,name:agent.name,role:agent.role,prompt:agent.prompt,model:modelFor(agent),input,call:state.provider==="mock"?`${modelFor(agent).model} simulation`:`${providers.find(p=>p.id===state.provider)?.name} via local /api/run-agent`,doing:"Reading the input file, checking context size, and creating a named artifact.",artifact:artifactNameFor(agent),output:"working..."};
     state.runLog.push(step); state.runPhase="context"; state.chat.push(chatWork(agent, input)); render(); await sleep(2300);
     try{ step.output = state.provider==="mock" || !state.apiKey ? outputForAgent(agent,input,i) : await callServerAgent(agent,input,i); }
     catch(err){ step.output=`# ${artifactNameFor(agent)}\n\nReal call failed, so demo mode continued.\nReason: ${err.message}\n\n${outputForAgent(agent,input,i)}`; }
     state.artifacts.push({name:step.artifact, kind:"output", text:step.output, agent:agent.name});
+    await pauseGate();
     state.runPhase="artifact"; state.chat.push(chatOutput(agent, toName, input, step.output)); addScore(250); render(); await sleep(2200);
   }
-  state.activeAgent=-1; state.runPhase="complete"; const comparison = modelComparisonArtifact(); state.artifacts.push({name:"model-comparison.md", kind:"output", text:comparison, agent:"Outcome Room"}); const final = `${state.runLog.at(-1)?.output || ''}\n\n---\n\n${comparison}`; state.chat.push(chatFinal(final)); state.running=false; addScore(500); render();
+  await pauseGate();
+  state.activeAgent=-1; state.runPhase="complete";
+  const comparison = modelComparisonArtifact();
+  state.artifacts.push({name:"model-comparison.md", kind:"output", text:comparison, agent:"Outcome Room"});
+  const final = `${state.runLog.at(-1)?.output || ''}\n\n---\n\n${comparison}`;
+  state.chat.push(chatFinal(final));
+  state.chat.push(chatReflection());
+  state.running=false; state.paused=false; state.stepRequested=false;
+  addScore(500); render();
 }
 
 function makeMarkdownSpec(){ return `# AgentWorks Quest Mission Run\n\n## Application\n${state.appText}\n\n## Input File\n${state.data}\n\n## Agents\n${state.agents.map(a=>`### ${a.name}\n- Role: ${a.role}\n- Model: ${modelFor(a).model}\n- Prompt: ${a.prompt}`).join("\n\n")}\n\n## Artifacts\n${state.artifacts.map(a=>`### ${a.name}\nCreated by: ${a.agent || 'Input'}\n\n${a.text}`).join("\n\n")}`; }
@@ -379,7 +569,9 @@ function runScreen(){
     <aside class="mission-side">
       <div class="mission-focus">${activeAgent?`<h3>${activeAgent.icon} ${esc(activeAgent.name)}</h3><p>${esc(activeAgent.role)}</p><div class="model-badge"><b>${esc(modelFor(activeAgent).model)}</b><span>${esc(modelFor(activeAgent).strength)} · ${esc(modelFor(activeAgent).cost)}</span><button class="term-help tiny-help" data-term="model">?</button></div>${contextMeter(activeInput, activeAgent)}`:`<h3>${state.runLog.length?'🏁 Outcome ready':'Mission ready'}</h3><p>${state.runLog.length?'Inspect the artifact chain below. The same transcript produced files, not just explanations.':'Press Play to move a full transcript through model-specific rooms on the mission floor.'}</p>${termButtons()}`}</div>
       <div class="auto-log office-log teaching-log" id="auto-log">${state.chat.map(renderChatEntry).join("")}</div>
-      ${!state.running?`<div class="stage-actions"><button id="stage-play">${state.runLog.length?'Play Again':'Play Mission'}</button>${state.runLog.length?'<button id="stage-export">Export Run</button>':''}<button id="stage-edit">Edit Models</button></div>`:''}
+      ${state.running
+        ? `<div class="stage-actions run-controls"><span class="run-state-tag">${state.paused?'PAUSED':'AUTOPLAY'}</span><button id="stage-pause">${state.paused?'Resume':'Pause'}</button><button id="stage-step" ${state.paused?'':'disabled'} title="Advance one phase (Pause first)">Step</button></div>`
+        : `<div class="stage-actions"><button id="stage-play">${state.runLog.length?'Play Again':'Play Mission'}</button>${state.runLog.length?'<button id="stage-export">Export Run</button>':''}<button id="stage-edit">Edit Models</button></div>`}
     </aside>
     ${helpModal()}
     ${artifactModal()}
@@ -404,6 +596,8 @@ function render(){
   $("#menu").innerHTML=menu.map(([label,,hint],i)=>`<button class="menu-item ${i===state.cursor?'active':''}" type="button" data-i="${i}"><span>${i===state.cursor?'▶':' '}</span><strong>${label}</strong>${hint?`<small>${esc(hint)}</small>`:''}</button>`).join("");
   $("#menu").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{state.cursor=Number(b.dataset.i);select();}));
   $("#stage-play")?.addEventListener("click",runAgents); $("#stage-export")?.addEventListener("click",()=>setScreen("export")); $("#stage-edit")?.addEventListener("click",()=>setScreen("agents"));
+  $("#stage-pause")?.addEventListener("click",()=>{ state.paused = !state.paused; if(!state.paused) state.stepRequested = false; render(); });
+  $("#stage-step")?.addEventListener("click",()=>{ if(state.paused){ state.stepRequested = true; } });
   document.querySelectorAll(".term-help").forEach(b=>b.addEventListener("click",()=>{state.helpTerm=b.dataset.term; render();}));
   $("#close-help")?.addEventListener("click",()=>{state.helpTerm=null; render();});
   document.querySelector(".help-modal-backdrop")?.addEventListener("click",(e)=>{ if(e.target.classList.contains("help-modal-backdrop")){ state.helpTerm=null; render(); } });
@@ -413,7 +607,7 @@ function render(){
   $("#copy-artifact")?.addEventListener("click",()=>{ const a=state.artifacts.find(x=>x.name===state.activeArtifact); if(a) copyText(a.text); });
   $("#download-artifact")?.addEventListener("click",()=>{ const a=state.artifacts.find(x=>x.name===state.activeArtifact); if(a) download(a.text,a.name,a.name.endsWith('.json')?'application/json':'text/plain'); });
   const log=$("#auto-log"); if(log) log.scrollTop=log.scrollHeight;
-  setStatus(state.screen==="run"?(state.running?"MISSION RUNNING · WATCH FILES MOVE":"READY TO PLAY MISSION"):"USE MENU OR KEYBOARD");
+  setStatus(state.screen==="run"?(state.running?(state.paused?"PAUSED · STEP to advance one phase":"MISSION RUNNING · WATCH FILES MOVE"):"READY TO PLAY MISSION"):"USE MENU OR KEYBOARD");
 }
 function select(){ const item=menuForScreen()[state.cursor]; if(item) item[1](); }
 function back(){ const idx=flow.indexOf(state.screen); if(idx>0 && !state.running) setScreen(flow[idx-1]); }
